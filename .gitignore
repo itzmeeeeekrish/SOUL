@@ -45,7 +45,7 @@ temp/
 data/raw/
 data/private/
 datasets/raw/
-models/
+/model-artifacts/
 checkpoints/
 *.sqlite3
 *.db
