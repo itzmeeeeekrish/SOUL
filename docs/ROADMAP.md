@@ -13,9 +13,9 @@ A single event can be an incident. Cross-channel correlation is optional context
 
 - [x] Create public GitHub repository.
 - [x] Add initial README.
-- [ ] Add architecture, roadmap and learning documentation.
-- [ ] Add Python/Android ignore rules.
-- [ ] Agree on development workflow and commit conventions.
+- [x] Add architecture, roadmap and learning documentation.
+- [x] Add Python/Android ignore rules.
+- [x] Agree on development workflow and commit conventions.
 
 **Acceptance:** A newcomer can understand the project goal, boundaries, proposed architecture and next milestone from the repository.
 
@@ -145,4 +145,4 @@ Update this section after each meaningful development session.
 
 | Date | Work completed | Tests/evidence | Next step |
 |---|---|---|---|
-| 2026-11-09 | Created repository and initial project documentation plan | Repository created; implementation not started | Complete foundation documentation |
+| 2026-11-09 | Created repository, expanded README, added architecture, roadmap, Hinglish learning notes and ignore rules | Documentation files verified on GitHub; application tests not applicable yet | Begin backend foundation |
