@@ -4,9 +4,9 @@
 
 SOUL is a proposed Android-first assistant intended to help people—especially elderly and less technically confident smartphone users—recognise suspicious digital activity, understand the evidence, and take safer next steps.
 
-> **Project status: Foundation / planning**
+> **Project status: Foundation documentation complete; implementation not started**
 >
-> This repository is being built step by step. The architecture and roadmap describe planned work; they are not claims that the features are already implemented or production-ready.
+> The README, proposed architecture, development roadmap, learning notes and ignore rules are now in place. Application features described below are planned work, not claims that they are already implemented or production-ready.
 
 ## The problem
 
