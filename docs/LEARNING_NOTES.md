@@ -2,7 +2,7 @@
 
 Ye file tumhari revision notebook hai. Har naye module ke baad isme concept, code ka flow, testing aur viva questions add karenge.
 
-> **Current status:** Abhi project foundation/documentation stage par hai. Neeche diye concepts design ko samajhne ke liye hain; inka matlab ye nahi ki code implement ho chuka hai.
+> **Current status:** Project foundation documentation complete hai; application implementation abhi start nahi hui. Neeche diye concepts design ko samajhne ke liye hain; inka matlab ye nahi ki code implement ho chuka hai.
 
 ## 1. SOUL kya banane ki koshish kar raha hai?
 
