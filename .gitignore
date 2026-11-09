@@ -1,0 +1,81 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python packaging/build output
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+service-account*.json
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+
+# Data and model artifacts (do not commit private or large raw data)
+data/raw/
+data/private/
+datasets/raw/
+models/
+checkpoints/
+*.sqlite3
+*.db
+
+# IDEs and editors
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Android / Gradle
+.gradle/
+**/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.jks
+*.keystore
+
+# Kotlin
+.kotlin/
+
+# Test and coverage artifacts
+test-results/
+reports/
