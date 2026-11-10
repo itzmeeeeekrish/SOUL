@@ -40,7 +40,7 @@ Do not accidentally train on `annotation_note`, `scenario`, or other metadata: t
 7. Keep original text and any cleaned/model-ready text in separate fields or derived files. Never silently overwrite the source text.
 8. Do not put real OTPs, passwords, payment credentials, bank account numbers, phone numbers, Aadhaar/PAN details or private conversations in the repository.
 
-## Current starter dataset
+## Validate the starter CSV\n\nFrom the repository root, run `python data/validate_dataset.py`. The script uses only Python's standard library and checks required columns, blank fields, unique IDs, approved labels/languages, synthetic origin and the expected starter class counts. Run this after changing the CSV.\n\n## Current starter dataset
 
 File: `data/synthetic/sms_messages.csv`
 
