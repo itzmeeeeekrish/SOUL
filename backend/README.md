@@ -2,11 +2,11 @@
 
 This folder contains the first small backend increment: a FastAPI app, environment-based settings, and a health endpoint.
 
-> **Status:** Starter code has been added to GitHub. It still needs to be run and tested on a local computer before Milestone 1 can be marked complete.
+> **Status:** Milestone 1's local verification is complete. The API was started successfully, the /health response was checked in a browser, and the automated test passed (1 passed, no warnings).
 
 ## Requirements
 
-- Python 3.13 (the project development environment currently targets Python 3.13)
+- Python 3.13 (verified locally with Python 3.13.0)
 - Git
 - PowerShell on Windows
 
@@ -22,6 +22,8 @@ py -3.13 -m venv .venv
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
+
+The test client dependency is pinned as `httpx2` to match the current Starlette TestClient recommendation and avoid the deprecation warning seen with the older `httpx` client.
 
 The virtual environment keeps SOUL packages separate from other Python projects on your computer. The `.env` file contains local settings and is ignored by Git.
 
@@ -65,7 +67,7 @@ Still inside the `backend` folder:
 python -m pytest -q
 ```
 
-The health test checks the HTTP status and the important response fields. A passing local test run is required before Milestone 1 is complete.
+The health test checks the HTTP status and the important response fields. The local verification recorded on 10 November 2026 completed successfully: 1 passed, no warnings. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
 
 ## 4. Configuration
 
