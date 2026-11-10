@@ -1,6 +1,6 @@
 # SOUL Message Dataset Schema
 
-**Status:** Initial schema for Milestone 2. The starter CSV contains synthetic examples only.
+**Status:** Dataset v2 schema for Milestone 2. The v2 starter CSV contains synthetic examples only.
 
 ## Purpose
 
@@ -10,42 +10,61 @@ Keep every SMS example in a consistent, auditable format so that SOUL can later 
 
 | Field | Type | Required | Meaning |
 |---|---|---:|---|
-| `message_id` | string | Yes | Stable unique ID. Must not contain a phone number, account number or other personal identifier. |
-| `text` | string | Yes | Message text as received/written. Preserve its language and spelling; do not manually remove words that may be useful signals. |
-| `label` | category | Yes | One of `legitimate`, `spam`, or `scam`, assigned using the annotation guide. |
-| `language` | category | Yes | `en` (English), `hi` (Hindi), `hinglish` (Hindi-English code-mixed), or `other`. |
-| `scenario` | string | Yes | Broad context such as `account_alert`, `delivery`, `promotion`, `kyc`, or `upi`. Use a consistent snake_case value. |
-| `campaign_group` | string | Yes | Groups duplicate or near-duplicate/template-related messages. All variants from the same campaign/template family must share one value. Used for leakage-resistant splitting, not as a model feature. |
-| `origin` | category | Yes | Where the row came from. Current starter rows use `synthetic`. Future values must be documented before use. |
-| `annotation_note` | string | Yes | Brief human-readable reason for the assigned label. Audit metadata only; never use it as model input. |
+| `message_id` | string | Yes | Stable unique ID. Must not contain personal identifiers. |
+| `text` | string | Yes | Message text. Preserve its language and spelling. |
+| `label` | category | Yes | One of `legitimate`, `spam`, or `scam`. |
+| `language` | category | Yes | `en`, `hi`, `hinglish`, or `other`. |
+| `scenario` | string | Yes | Broad context such as `account_alert`, `delivery_update`, `kyc_phishing`, or `upi_collect`. |
+| `campaign_group` | string | Yes | Identifies four related synthetic variants from one underlying template family. All variants in a group share one label and one split. Metadata only; never a model input. |
+| `split` | category | Yes | Preassigned `train`, `validation`, or `test` group. Metadata only; never a model input. |
+| `origin` | category | Yes | Current starter rows use `synthetic`. Future values must be documented before use. |
+| `annotation_note` | string | Yes | Brief label rationale. Audit metadata only; never a model input. |
 
 ## Model input and target
 
-For the first baseline:
+For the first baseline, use only `text` as the input feature and `label` as the target.
 
-- **Input feature:** `text` only.
-- **Target:** `label`.
-- **Audit/split metadata:** `message_id`, `language`, `scenario`, `campaign_group`, `origin`, and `annotation_note`.
+Do not train on `annotation_note`, `scenario`, `campaign_group`, `split`, `origin` or `message_id`. These fields are audit/split metadata and would leak information or identifiers into evaluation.
 
-Do not accidentally train on `annotation_note`, `scenario`, or other metadata: those fields can leak the answer into the model and make evaluation misleading.
-
-## Data validation rules
+## Validation rules
 
 1. Every `message_id` must be unique.
 2. Required fields cannot be blank.
-3. `label` must be one of the three approved labels.
-4. `language` and `origin` must use documented values.
-5. Rows from the same `campaign_group` must stay in the same train, validation or test split.
-6. Remove or mask personal data before a row is accepted into a research dataset.
-7. Keep original text and any cleaned/model-ready text in separate fields or derived files. Never silently overwrite the source text.
-8. Do not put real OTPs, passwords, payment credentials, bank account numbers, phone numbers, Aadhaar/PAN details or private conversations in the repository.
+3. Labels, languages and split names must use the documented values.
+4. Every campaign group must contain four variants, one label and one split.
+5. All rows from one `campaign_group` must remain in the same data split.
+6. Remove or mask personal data before accepting any real message into a research dataset.
+7. Keep source text and cleaned/model-ready text separate.
+8. Never commit real OTPs, passwords, payment credentials, bank account numbers, phone numbers, Aadhaar/PAN details or private conversations.
 
-## Validate the starter CSV\n\nFrom the repository root, run `python data/validate_dataset.py`. The script uses only Python's standard library and checks required columns, blank fields, unique IDs, approved labels/languages, synthetic origin and the expected starter class counts. Run this after changing the CSV.\n\n## Current starter dataset
+## Dataset versions
 
-File: `data/synthetic/sms_messages.csv`
+- `data/synthetic/sms_messages.csv`: original 24-row schema smoke-test set; it predates the explicit split field.
+- `data/synthetic/sms_messages_v2.csv`: 84-row synthetic set, 21 campaign groups and group-safe split assignments.
 
-It contains 24 hand-authored synthetic examples: 8 legitimate, 8 spam and 8 scam. This balanced sample is only for checking the schema and future pipeline code. It is far too small and artificial to establish real-world model accuracy.
+## Dataset v2 split design
+
+Each label has seven campaign groups, with four variants per group:
+
+| Split | Groups per label | Rows per label | Total rows | Approx. share |
+|---|---:|---:|---:|---:|
+| Train | 5 | 20 | 60 | 71.4% |
+| Validation | 1 | 4 | 12 | 14.3% |
+| Test | 1 | 4 | 12 | 14.3% |
+| **Total** | **7** | **28** | **84** | **100%** |
+
+All variants from one campaign stay together. This is a teaching/demo partition only. Validation and test sets are very small and synthetic; their model scores cannot support a real-world performance claim.
+
+## Validate Dataset v2
+
+From the repository root, run:
+
+```powershell
+python data/validate_dataset.py
+```
+
+The script checks required columns, blank fields, unique IDs, approved labels/languages/splits, class counts, campaign consistency, four variants per group and group isolation across splits.
 
 ## Future dataset extensions
 
-Before adding a new field, document why it is needed and whether it is safe to retain. Potential additions include source dataset ID, collection date at a coarse granularity, annotation reviewer, second-review result, and URL-presence metadata. Do not add sender phone numbers or user identity fields unless a specific, approved research need exists.
+Document the need and privacy impact before adding fields. Possible audit fields include source dataset ID, coarse collection date, reviewer and second-review result. Do not add sender phone numbers or user identity fields without a specific approved need.
