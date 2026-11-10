@@ -83,6 +83,10 @@ The presence of one indicator should be assessed in context. A risk indicator is
 - When reviewers disagree, record the disagreement and revise the guide; do not silently force a label.
 - Never include unmasked personal or financial information in examples.
 
+## Campaign groups and splits
+
+Dataset v2 has four related synthetic variants in each campaign group. All four must express the same underlying intent and receive the same label and split. Vary wording while preserving intent; do not create four rows that differ only by punctuation. A group is a controlled synthetic template family, not a claim about a real sender or observed fraud campaign.
+
 ## Starter dataset note
 
-The 24 rows in `data/synthetic/sms_messages.csv` are hand-authored educational examples. They are deliberately balanced across the three labels and should not be treated as a representative sample of real incoming messages or used to claim production accuracy.
+The original 24 rows in `data/synthetic/sms_messages.csv` and the 84 rows in `data/synthetic/sms_messages_v2.csv` are hand-authored educational examples. They are deliberately balanced across the three labels and should not be treated as a representative sample of real incoming messages or used to claim production accuracy.
