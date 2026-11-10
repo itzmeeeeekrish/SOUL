@@ -4,9 +4,9 @@
 
 SOUL is a proposed Android-first assistant intended to help people—especially elderly and less technically confident smartphone users—recognise suspicious digital activity, understand the evidence, and take safer next steps.
 
-> **Project status: Milestones 0 and 1 complete; Milestone 2 is next**
+> **Project status: Milestones 0 and 1 complete; Milestone 2 is in progress**
 >
-> The project includes design documentation and a locally verified FastAPI backend foundation. The health endpoint was checked in a browser and the automated test passed (1 passed, no warnings) on 10 November 2026. Detection, financial-integrity, RAG and Android features remain planned work—not implemented or production-ready.
+> The project includes design documentation, a locally verified FastAPI backend foundation, and the first dataset-design increment. The health endpoint and automated test passed (1 passed, no warnings) on 10 November 2026. The starter message dataset is synthetic only; a trained detector and the financial-integrity, RAG and Android features are not implemented yet.
 
 ## The problem
 
@@ -63,7 +63,7 @@ The detection engine decides what signals are suspicious. RAG supplies relevant 
 The intended experience includes simple Hindi/Hinglish explanations, voice output, clear warnings, and optional trusted-family escalation with the user's consent.
 
 
-## Current backend starter
+## Current dataset-design starter\n\nThe first dataset increment defines the message schema, three annotation labels, a public-source review and 24 synthetic SMS examples. See [data/dataset_schema.md](data/dataset_schema.md), [data/annotation_guide.md](data/annotation_guide.md), [data/source_review.md](data/source_review.md) and [data/synthetic/sms_messages.csv](data/synthetic/sms_messages.csv). Third-party datasets have not been imported.\n\n## Current backend starter
 
 The first backend increment includes a FastAPI application, environment-based configuration, a GET /health endpoint, one automated test, pinned direct dependencies and a placeholder .env.example.
 
