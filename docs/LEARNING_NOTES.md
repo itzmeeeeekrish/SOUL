@@ -324,4 +324,33 @@ Public dataset candidates ko `data/source_review.md` mein list kiya hai. Licence
 | Date | Topic | Kya samjha? | Doubts / next revision |
 |---|---|---|---|
 | 2026-11-09 | Project foundation and GitHub basics | Repository, commit, README and project scope | Practise first Git operations |
-| 2026-11-10 | Backend foundation verified | FastAPI, /health, config, venv, dependencies and pytest; local result: 1 passed, no warnings | Start Milestone 2 dataset design |\n| 2026-11-10 | Dataset design starter | Three labels, schema metadata, campaign grouping and synthetic examples | Validate CSV and review an approved public dataset |
+| 2026-11-10 | Backend foundation verified | FastAPI, /health, config, venv, dependencies and pytest; local result: 1 passed, no warnings | Start Milestone 2 dataset design |
+| 2026-11-10 | Dataset design starter | Three labels, schema metadata, campaign grouping and synthetic examples | Validate CSV and review an approved public dataset |
+
+
+## 17. Train/test split aur data leakage
+
+### Dataset ko split kyun karte hain?
+
+Model ko examples se sikhane ke liye training data chahiye. Lekin model ko naye, unseen examples par test karna bhi zaroori hai.
+
+- **Training set:** Is data se model patterns seekhta hai.
+- **Validation set:** Model/settings choose karne ke liye use hota hai.
+- **Test set:** Final evaluation ke liye alag rakha jata hai. Isse baar-baar tuning nahi karni chahiye.
+
+### Data leakage kya hota hai?
+
+Maan lo ek fake KYC campaign ke 5 message variants hain. Agar same campaign ke kuch variants training mein aur kuch test mein chale gaye, toh test result misleading ho sakta hai. Model ne naya scam samajhne ke bajaye usi template ke familiar words yaad kar liye ho sakte hain.
+
+Isliye SOUL ke dataset mein `campaign_group` field hai. Same campaign/template family ke messages ko ek hi split mein rakhna hai.
+
+### Current 24-row dataset ki limitation
+
+Starter dataset mein 24 examples hain aur 24 alag campaign_group values hain. Isse file structure aur validator test hota hai, lekin repeated campaign variants ka leakage properly test nahi hota.
+
+Isliye abhi in 24 rows par model accuracy report nahi karni chahiye. Pehle representative aur reviewed data collect/prepare karna hai, campaign groups ko sahi tarah identify karna hai, phir split strategy select karni hai.
+
+### Important rule
+
+Test data ko model training ya hyperparameter tuning ke dauraan use nahi karna. Evaluation tabhi useful hai jab test examples genuinely unseen hon.
+
