@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector (schema, annotation guide, synthetic starter data and validator committed; local validation pending). Milestones 0 and 1 are complete.  
+**Current stage:** Milestone 2 – Data and baseline communication detector (synthetic v2 dataset and campaign-safe split validated locally; real-source approval pending). Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -44,7 +44,7 @@ A single event can be an incident. Cross-channel correlation is optional context
 - [ ] Build preprocessing and a TF-IDF + Logistic Regression baseline.
 - [ ] Report precision, recall, F1, confusion matrix and false-positive rate.
 
-**Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed locally, but no real-data training or model evaluation has begun. Synthetic v2 structure and group assignments have been checked from the committed CSV; the local validator still needs to be run after pulling.
+**Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed locally on 10 November 2026. No third-party data has been imported and no model training or evaluation has begun.
 
 ## Milestone 3 – Supported evidence processing
 
