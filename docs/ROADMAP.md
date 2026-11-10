@@ -37,14 +37,14 @@ A single event can be an incident. Cross-channel correlation is optional context
 ## Milestone 2 – Data and baseline communication detector
 
 - [x] Define a documented dataset schema in `data/dataset_schema.md`.
-- [ ] Complete approval of permitted, traceable data sources and licensing/usage conditions. Candidate review is documented in `data/source_review.md`; unresolved licences and row-level checks remain open.
+- [ ] Approve/import a permitted, traceable primary dataset after archive inspection, de-duplication, label review and privacy scan. Current source review is in `data/source_review.md`.
 - [x] Create a synthetic starter dataset v1 (24 rows) and a grouped v2 dataset (84 rows) in `data/synthetic/`.
 - [x] Define legitimate, spam and scam labels in `data/annotation_guide.md` and apply them to synthetic examples.
 - [x] Assign synthetic v2 campaign groups to train/validation/test in `data/split_strategy.md`; verify that no campaign crosses splits. Real-source/campaign split still requires approved third-party data.
 - [ ] Build preprocessing and a TF-IDF + Logistic Regression baseline.
 - [ ] Report precision, recall, F1, confusion matrix and false-positive rate.
 
-**Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 structure and group assignments have been checked from the committed CSV; the local validator still needs to be run after pulling.
+**Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed locally, but no real-data training or model evaluation has begun. Synthetic v2 structure and group assignments have been checked from the committed CSV; the local validator still needs to be run after pulling.
 
 ## Milestone 3 – Supported evidence processing
 
@@ -151,4 +151,4 @@ Update this section after each meaningful development session.
 |---|---|---|---|
 | 2026-11-09 | Created repository, expanded README, added architecture, roadmap, Hinglish learning notes and ignore rules | Documentation files verified on GitHub; application tests not applicable yet | Begin backend foundation |
 | 2026-11-10 | Added FastAPI app, /health endpoint, environment configuration, pinned dependencies, test and setup docs; cloned locally, created Python 3.13 venv, started API, verified /health in browser and ran pytest | `python -m pytest -q` → `1 passed in 0.70s`, no warnings; browser health response confirmed | Begin Milestone 2 dataset design |
-| 2026-11-10 | Defined schema/annotation guide; added v1 (24 rows) and v2 (84 rows, 21 campaign groups), fixed campaign-aware train/validation/test assignments and updated the validator | v1 local validator passed: 24 rows, 8 per label. v2 repository CSV inspected: 84 rows, 28 per label; 60/12/12 split; 21 groups with four variants each and no group crossing splits. v2 local validator still pending. No third-party dataset imported | Pull v2 files, run validator, then review/licence-check a candidate public dataset before training |
+| 2026-11-10 | Defined schema/annotation guide; added v1 (24 rows) and v2 (84 rows, 21 campaign groups), fixed campaign-aware train/validation/test assignments and updated the validator | Local v1 validation passed earlier; local v2 validation passed: 84 rows, 28 per class, 60/12/12 split, 21 groups, no campaign crosses splits. No third-party dataset imported | Inspect and approve primary three-class data, then deduplicate and privacy-scan before model training |
