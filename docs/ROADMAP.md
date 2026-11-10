@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 1 – Backend foundation (starter code committed; local verification pending).  
+**Current stage:** Milestone 2 – Data and baseline communication detector. Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -21,7 +21,7 @@ A single event can be an incident. Cross-channel correlation is optional context
 
 ## Milestone 1 – Backend foundation
 
-- [ ] Clone the repository locally and create a Python 3.13 virtual environment.
+- [x] Clone the repository locally and create a Python 3.13 virtual environment.
 - [x] Pin the initial direct dependencies in backend/requirements.txt.
 - [x] Create a minimal FastAPI application.
 - [x] Add a /health endpoint.
@@ -29,10 +29,10 @@ A single event can be an incident. Cross-channel correlation is optional context
 - [x] Add a basic automated health-endpoint test.
 - [x] Add a placeholder-only .env.example.
 - [x] Document setup, run and test commands in backend/README.md.
-- [ ] Install dependencies and start the API on the local computer.
-- [ ] Run the automated tests locally and record the passing result.
+- [x] Install dependencies and start the API on the local computer.
+- [x] Run the automated tests locally and record the passing result (1 passed, no warnings).
 
-**Acceptance:** The API starts locally, the health endpoint returns the expected response, tests pass, and no secrets are committed. The milestone stays open until the local checks are completed.
+**Acceptance met (10 November 2026):** The API started locally, the /health endpoint returned the expected response in a browser, pytest reported 1 passed with no warnings, and the local .env file is ignored by Git. No credentials or actual secrets were added to the repository.
 
 ## Milestone 2 – Data and baseline communication detector
 
@@ -150,4 +150,4 @@ Update this section after each meaningful development session.
 | Date | Work completed | Tests/evidence | Next step |
 |---|---|---|---|
 | 2026-11-09 | Created repository, expanded README, added architecture, roadmap, Hinglish learning notes and ignore rules | Documentation files verified on GitHub; application tests not applicable yet | Begin backend foundation |
-| 2026-11-10 | Added the initial FastAPI app, /health endpoint, environment configuration, pinned direct dependencies, test, .env.example and setup instructions | Files committed and verified on GitHub; local API execution and test run still pending | Clone repo locally, create virtual environment, install packages, run API and tests |
+| 2026-11-10 | Added FastAPI app, /health endpoint, environment configuration, pinned dependencies, test and setup docs; cloned locally, created Python 3.13 venv, started API, verified /health in browser and ran pytest | `python -m pytest -q` → `1 passed in 0.70s`, no warnings; browser health response confirmed | Begin Milestone 2: dataset schema, annotation guide and synthetic starter data |
