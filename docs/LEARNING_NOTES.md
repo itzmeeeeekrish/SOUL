@@ -240,7 +240,7 @@ Example:
 
 ### Automated test kya karta hai?
 
-Test automatically check karta hai ki code expected behaviour de raha hai ya nahi.
+Test automatically check karta hai ki code expected behaviour de raha hai ya nahi. SOUL ke local first run mein 1 test pass hua aur koi warning nahi aayi.
 
 Abhi health test ye check karta hai:
 1. /health request ka status code 200 ho.
@@ -253,7 +253,7 @@ Test run command, backend folder ke andar:
 python -m pytest -q
 ```
 
-**Important:** Code GitHub par add karna aur local test pass hona alag cheezein hain. Milestone 1 tabhi complete hoga jab tumhare computer par API start ho aur tests successfully pass hon.
+**Verification complete (10 November 2026):** API start hua, /health response browser mein check hua aur `python -m pytest -q` ne `1 passed in 0.70s` diya. Isliye Milestone 1 complete mark kiya gaya.
 
 ### Backend viva questions
 
@@ -282,4 +282,4 @@ Usme private configuration ya future API keys ho sakti hain. Isliye safe placeho
 | Date | Topic | Kya samjha? | Doubts / next revision |
 |---|---|---|---|
 | 2026-11-09 | Project foundation and GitHub basics | Repository, commit, README and project scope | Practise first Git operations |
-| 2026-11-10 | Backend starter scaffold | FastAPI, endpoint, config, venv and pytest ka initial flow | Clone repo locally, run API and pass health test |
+| 2026-11-10 | Backend foundation verified | FastAPI, /health, config, venv, dependencies and pytest; local result: 1 passed, no warnings | Start Milestone 2: dataset schema and synthetic labelled data |
