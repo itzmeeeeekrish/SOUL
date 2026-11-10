@@ -317,7 +317,7 @@ Humne 24 manually authored synthetic examples banaye:
 
 Balanced sample se hum code aur data format test kar sakte hain. Ye real-world messages ka representative sample nahi hai aur is par high accuracy claim nahi kar sakte.
 
-Public dataset candidates ko `data/source_review.md` mein list kiya hai. Licence, duplicates, privacy aur labels inspect hone tak third-party raw data import nahi karenge.
+Public dataset candidates ko `data/source_review.md` mein list kiya hai. Licence, duplicates, privacy aur labels inspect hone tak third-party raw data import nahi karenge. CSV validate karne ke liye repository root par `python data/validate_dataset.py` run karo. Ye script required columns, blank values, duplicate IDs, allowed labels/languages aur 8-8-8 starter class count check karti hai.
 
 ## 16. Session log
 
