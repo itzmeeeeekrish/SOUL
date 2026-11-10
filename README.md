@@ -4,9 +4,9 @@
 
 SOUL is a proposed Android-first assistant intended to help people—especially elderly and less technically confident smartphone users—recognise suspicious digital activity, understand the evidence, and take safer next steps.
 
-> **Project status: Repository foundation complete; initial backend scaffold committed; local verification pending**
+> **Project status: Milestones 0 and 1 complete; Milestone 2 is next**
 >
-> The project includes design documentation and a first FastAPI backend increment. The backend has not yet been run or tested on the developer's local computer. Detection, financial-integrity, RAG and Android features remain planned work—not implemented or production-ready.
+> The project includes design documentation and a locally verified FastAPI backend foundation. The health endpoint was checked in a browser and the automated test passed (1 passed, no warnings) on 10 November 2026. Detection, financial-integrity, RAG and Android features remain planned work—not implemented or production-ready.
 
 ## The problem
 
@@ -67,7 +67,7 @@ The intended experience includes simple Hindi/Hinglish explanations, voice outpu
 
 The first backend increment includes a FastAPI application, environment-based configuration, a GET /health endpoint, one automated test, pinned direct dependencies and a placeholder .env.example.
 
-Follow [backend/README.md](backend/README.md) to create the local Python environment, start the API and run tests. **Do not mark Milestone 1 complete until those local checks pass.**
+Follow [backend/README.md](backend/README.md) to recreate the local Python environment, start the API and run tests. The first local verification has passed; repeat these steps on a new setup.
 
 ## Proposed architecture
 
