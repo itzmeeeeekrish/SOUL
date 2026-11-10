@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector (schema and synthetic starter data added; third-party source approval and validation pending). Milestones 0 and 1 are complete.  
+**Current stage:** Milestone 2 – Data and baseline communication detector (schema, annotation guide, synthetic starter data and validator committed; local validation pending). Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -150,4 +150,4 @@ Update this section after each meaningful development session.
 | Date | Work completed | Tests/evidence | Next step |
 |---|---|---|---|
 | 2026-11-09 | Created repository, expanded README, added architecture, roadmap, Hinglish learning notes and ignore rules | Documentation files verified on GitHub; application tests not applicable yet | Begin backend foundation |
-| 2026-11-10 | Added FastAPI app, /health endpoint, environment configuration, pinned dependencies, test and setup docs; cloned locally, created Python 3.13 venv, started API, verified /health in browser and ran pytest | `python -m pytest -q` → `1 passed in 0.70s`, no warnings; browser health response confirmed | Begin Milestone 2 dataset design |\n| 2026-11-10 | Defined message schema and annotation guide; added 24 synthetic examples (8 per label); reviewed candidate public datasets and licence gaps | Schema, guide, source review and CSV committed to GitHub; third-party datasets not imported | Pull changes locally, validate CSV/schema, then inspect/approve source data before training |
+| 2026-11-10 | Added FastAPI app, /health endpoint, environment configuration, pinned dependencies, test and setup docs; cloned locally, created Python 3.13 venv, started API, verified /health in browser and ran pytest | `python -m pytest -q` → `1 passed in 0.70s`, no warnings; browser health response confirmed | Begin Milestone 2 dataset design |\n| 2026-11-10 | Defined message schema and annotation guide; added 24 synthetic examples (8 per label), candidate source/licence review and a standard-library CSV validator | Files committed and verified on GitHub; local CSV validation pending; third-party datasets not imported | Pull changes locally, run `python data/validate_dataset.py`, then inspect/approve source data before training |
