@@ -387,3 +387,24 @@ Expected output:
 - Train 60, validation 12, test 12.
 - Campaign leakage check passed.
 
+
+
+## 19. Dataset v2 local validation and real-data review
+
+10 November 2026 ko local PowerShell se v2 validator successfully run hua:
+- 84 rows, 28 per label.
+- Train: 60 rows / 15 groups.
+- Validation: 12 rows / 3 groups.
+- Test: 12 rows / 3 groups.
+- Campaign leakage check passed.
+- `git status --short` blank tha, yani local working tree clean tha.
+
+Ab real data ke liye humein label meaning samajhna hoga:
+
+- Mendeley 2022 dataset: ham, spam, smishing. Ye hamari 3-class problem ke sabse close hai. Ham → legitimate, spam → spam, smishing → scam mapping candidate hai, lekin raw archive inspect karne ke baad hi use karna hai.
+- Indian Telecom dataset: ham/spam only. Iske spam mein promotion aur fraud dono ho sakte hain. Har spam item ko scam label nahi karna.
+- Hindi dataset: ham/spam only; licence aur label details confirm karni hain.
+
+**Rule:** Raw messages ko GitHub par commit nahi karna. Pehle duplicates, personal-data patterns aur label quality inspect karni hai. Sirf approved and redacted derived data use karenge.
+
+Related project ScamShield (released 10 October 2026) bhi Indian scam SMS dataset, de-duplication aur model evaluation discuss karta hai. Uske results author-reported hain; SOUL ne independently reproduce nahi kiye.
