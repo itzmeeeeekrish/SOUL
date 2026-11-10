@@ -63,7 +63,7 @@ The detection engine decides what signals are suspicious. RAG supplies relevant 
 The intended experience includes simple Hindi/Hinglish explanations, voice output, clear warnings, and optional trusted-family escalation with the user's consent.
 
 
-## Current dataset-design starter\n\nThe first dataset increment defines the message schema, three annotation labels, a public-source review and 24 synthetic SMS examples. See [data/dataset_schema.md](data/dataset_schema.md), [data/annotation_guide.md](data/annotation_guide.md), [data/source_review.md](data/source_review.md) and [data/synthetic/sms_messages.csv](data/synthetic/sms_messages.csv). Third-party datasets have not been imported.\n\n## Current backend starter
+## Current dataset-design starter\n\nThe first dataset increment defines the message schema, three annotation labels, a public-source review, 24 synthetic SMS examples and a CSV validation script. From the repository root, run `python data/validate_dataset.py`. See [data/dataset_schema.md](data/dataset_schema.md), [data/annotation_guide.md](data/annotation_guide.md), [data/source_review.md](data/source_review.md) and [data/synthetic/sms_messages.csv](data/synthetic/sms_messages.csv). Third-party datasets have not been imported.\n\n## Current backend starter
 
 The first backend increment includes a FastAPI application, environment-based configuration, a GET /health endpoint, one automated test, pinned direct dependencies and a placeholder .env.example.
 
