@@ -2,7 +2,7 @@
 
 Ye file tumhari revision notebook hai. Har naye module ke baad isme concept, code ka flow, testing aur viva questions add karenge.
 
-> **Current status:** Repository foundation aur backend foundation complete hain. 10 November 2026 ko local API run hua, /health browser mein verify hua aur pytest mein 1 test bina warning ke pass hua. Detection, financial-integrity, RAG aur Android features abhi planned hain.
+> **Current status:** Repository aur backend foundation complete hain. 10 November 2026 ko local API run hua, /health browser mein verify hua aur pytest mein 1 test bina warning ke pass hua. Milestone 2 mein dataset schema, annotation guide aur 24 synthetic message examples add kiye gaye hain. Real public datasets abhi import nahi hue.
 
 ## 1. SOUL kya banane ki koshish kar raha hai?
 
@@ -277,9 +277,51 @@ Taaki SOUL ke Python packages isolated rahein aur dusre projects ke packages se 
 
 Usme private configuration ya future API keys ho sakti hain. Isliye safe placeholders .env.example mein rakhte hain aur actual .env ko ignore karte hain.
 
-## 15. Session log
+## 15. Dataset design – Milestone 2
+
+### Dataset kya hota hai?
+
+Dataset examples ka organised collection hota hai. SOUL ke first detector ke liye har row mein ek message aur uska correct label hoga.
+
+### Humne 3 labels kyun choose kiye?
+
+- **Legitimate:** Normal ya expected message. Example: payment receipt ya appointment reminder.
+- **Spam:** Unwanted promotion/junk. Example: restaurant discount advertisement. Har spam message fraud nahi hota.
+- **Scam:** Deception ke through money, OTP/PIN, account access ya device control lene ki koshish. Example: fake KYC warning ke saath unverified link.
+
+Agar message ka intent clear nahi hai, toh guess nahi karna. Use review ke liye alag rakhenge.
+
+### Dataset ki important columns
+
+- `message_id`: Har row ka unique ID.
+- `text`: Original message.
+- `label`: legitimate, spam ya scam.
+- `language`: en, hi ya hinglish.
+- `scenario`: Message kis context ka hai.
+- `campaign_group`: Same campaign/template ke related messages ko group karta hai.
+- `origin`: Message synthetic hai ya kisi approved source se aaya hai.
+- `annotation_note`: Label dene ka short reason.
+
+### ML model ka input kya hoga?
+
+First baseline mein model ko sirf `text` diya jayega aur `label` predict karna hoga.
+
+`annotation_note`, `scenario` aur `campaign_group` training features nahi banenge. Ye audit aur fair train/test splitting ke liye metadata hain. Same campaign group ko alag train aur test sets mein nahi baantna, warna model similar messages yaad karke misleading score de sakta hai.
+
+### Synthetic dataset kyun?
+
+Humne 24 manually authored synthetic examples banaye:
+- 8 legitimate
+- 8 spam
+- 8 scam
+
+Balanced sample se hum code aur data format test kar sakte hain. Ye real-world messages ka representative sample nahi hai aur is par high accuracy claim nahi kar sakte.
+
+Public dataset candidates ko `data/source_review.md` mein list kiya hai. Licence, duplicates, privacy aur labels inspect hone tak third-party raw data import nahi karenge.
+
+## 16. Session log
 
 | Date | Topic | Kya samjha? | Doubts / next revision |
 |---|---|---|---|
 | 2026-11-09 | Project foundation and GitHub basics | Repository, commit, README and project scope | Practise first Git operations |
-| 2026-11-10 | Backend foundation verified | FastAPI, /health, config, venv, dependencies and pytest; local result: 1 passed, no warnings | Start Milestone 2: dataset schema and synthetic labelled data |
+| 2026-11-10 | Backend foundation verified | FastAPI, /health, config, venv, dependencies and pytest; local result: 1 passed, no warnings | Start Milestone 2 dataset design |\n| 2026-11-10 | Dataset design starter | Three labels, schema metadata, campaign grouping and synthetic examples | Validate CSV and review an approved public dataset |
