@@ -354,3 +354,36 @@ Isliye abhi in 24 rows par model accuracy report nahi karni chahiye. Pehle repre
 
 Test data ko model training ya hyperparameter tuning ke dauraan use nahi karna. Evaluation tabhi useful hai jab test examples genuinely unseen hon.
 
+
+
+## 18. Dataset v2 – campaign groups and fixed splits
+
+Humne v2 mein 84 synthetic SMS examples banaye:
+- 28 legitimate
+- 28 spam
+- 28 scam
+
+Har campaign group mein 4 similar wording variants hain. Total 21 groups hain: 7 groups per label.
+
+### Split breakdown
+
+- Training: 15 groups, 60 messages (20 per label).
+- Validation: 3 groups, 12 messages (4 per label).
+- Testing: 3 groups, 12 messages (4 per label).
+
+Same campaign ke 4 messages ek hi split mein rahenge. Isse ek template ka variant train aur test dono mein aa kar evaluation ko artificially easy nahi bana sakta.
+
+**Important limitation:** Sirf 1 campaign group per label validation aur test mein hai. Ye splitting logic ka educational demo hai; real-world accuracy estimate nahi. Humein multiple independent, reviewed real-world campaigns chahiye honge.
+
+V2 CSV validate karne ke liye repository root par:
+
+```powershell
+python data/validate_dataset.py
+```
+
+Expected output:
+- 84 rows.
+- 28 per class.
+- Train 60, validation 12, test 12.
+- Campaign leakage check passed.
+
