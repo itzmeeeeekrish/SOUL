@@ -173,3 +173,113 @@ Har learning session ke baad update karo:
 | Date | Topic | Kya samjha? | Doubts / next revision |
 |---|---|---|---|
 | 2026-11-09 | Project foundation and GitHub basics | Repository, commit, README and project scope | Practise first Git operations |
+
+
+## 14. Backend foundation – first practical module
+
+### Backend kya karta hai?
+
+Frontend wo part hai jo user dekhta aur use karta hai. Backend wo part hai jo request receive karta hai, processing karta hai aur response bhejta hai.
+
+SOUL mein Android app future mein backend ko suspicious message bhej sakti hai. Backend us request ko process karke structured result wapas dega.
+
+### FastAPI kya hai?
+
+FastAPI Python ka framework hai jisse hum APIs banate hain. Abhi hum ise sirf ek very small API banane ke liye use kar rahe hain.
+
+### Endpoint kya hota hai?
+
+Endpoint ek URL path hota hai jahan app request bhejti hai.
+
+Abhi humne ek endpoint add kiya hai:
+- Method: GET
+- Path: /health
+- Purpose: Check karna ki backend server chal raha hai ya nahi.
+
+Expected response:
+
+```json
+{
+  "status": "ok",
+  "service": "SOUL API",
+  "version": "0.1.0"
+}
+```
+
+Ye response sirf batata hai ki API process request kar raha hai. Ye abhi database, ML model ya bank integration ko test nahi karta.
+
+### Virtual environment kya hai?
+
+Virtual environment ek project-specific Python space hota hai. Isme SOUL ke packages install honge; dusre Python projects ke packages mix nahi honge.
+
+Windows PowerShell commands:
+
+```powershell
+py -3.13 -m venv .venv
+.\\.venv\\Scripts\\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+Command ka meaning:
+- `py -3.13 -m venv .venv`: Python 3.13 se .venv naam ka environment banao.
+- `Activate.ps1`: us environment ko current terminal mein activate karo.
+- `python -m pip install --upgrade pip`: package installer ko update karo.
+- `python -m pip install -r requirements.txt`: requirements file mein listed pinned packages install karo.
+
+### Environment variables aur .env
+
+Environment variable ek setting hoti hai jo code se bahar rakhi jaati hai.
+
+Example:
+- `SOUL_APP_NAME`: API ka naam.
+- `SOUL_APP_VERSION`: API version.
+- `SOUL_ENV`: development ya another environment.
+
+.env.example ek safe template hai. Iski copy bana kar local .env file use karte hain. .env GitHub par commit nahi karni, kyunki future mein usme private settings ya secrets aa sakte hain.
+
+### Automated test kya karta hai?
+
+Test automatically check karta hai ki code expected behaviour de raha hai ya nahi.
+
+Abhi health test ye check karta hai:
+1. /health request ka status code 200 ho.
+2. Response mein status ki value ok ho.
+3. Service aur version fields present hon.
+
+Test run command, backend folder ke andar:
+
+```powershell
+python -m pytest -q
+```
+
+**Important:** Code GitHub par add karna aur local test pass hona alag cheezein hain. Milestone 1 tabhi complete hoga jab tumhare computer par API start ho aur tests successfully pass hon.
+
+### Backend viva questions
+
+**Q1. Backend kyun use kar rahe hain?**
+
+Backend Android app se requests receive karke processing, model inference aur data management jaise tasks handle karega.
+
+**Q2. FastAPI ka role kya hai?**
+
+FastAPI Python mein API endpoints create karne aur request/response handle karne ka framework hai.
+
+**Q3. Health endpoint kyun banaya?**
+
+Ye sabse basic check hai jisse confirm kar sakte hain ki server start hua hai aur request ka response de raha hai.
+
+**Q4. Virtual environment kyun banaya?**
+
+Taaki SOUL ke Python packages isolated rahein aur dusre projects ke packages se conflict na ho.
+
+**Q5. .env GitHub par kyun nahi daalte?**
+
+Usme private configuration ya future API keys ho sakti hain. Isliye safe placeholders .env.example mein rakhte hain aur actual .env ko ignore karte hain.
+
+## 15. Session log
+
+| Date | Topic | Kya samjha? | Doubts / next revision |
+|---|---|---|---|
+| 2026-11-09 | Project foundation and GitHub basics | Repository, commit, README and project scope | Practise first Git operations |
+| 2026-11-10 | Backend starter scaffold | FastAPI, endpoint, config, venv and pytest ka initial flow | Clone repo locally, run API and pass health test |
