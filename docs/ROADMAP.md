@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector (synthetic v2 split validated locally; Mendeley 2022 archive structurally inspected and first metadata/duplicate audit completed; privacy, conflict review and source approval pending). Milestones 0 and 1 are complete.  
+**Current stage:** Milestone 2 – Data and baseline communication detector (synthetic v2 split validated locally; Mendeley 2022 archive and aggregate privacy audit reviewed; grouped masked-template review queue and tests added but awaiting local execution; label-conflict review and source approval pending). Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -157,3 +157,5 @@ Update this section after each meaningful development session.
 | 2026-11-11 | Generated the local masked privacy review CSV (907 rows: 20 ham, 605 smishing, 282 spam); added a count-only summary helper and made the masked CSV annotation-ready with spreadsheet formula-prefix protection | Candidate counts exactly match the audit's label-wise "ANY" counts. The masked file remains under Git-ignored `data/private/`; no manual classification or summary run yet | Pull and rerun `python data\\create_masked_privacy_review.py`, classify rows locally in the new manual_review_category column, then run `python data\\summarize_privacy_review.py` and share aggregate counts only |
 
 | 2026-11-11 | Added grouped masked-template privacy review queue and four unit tests | Code and test files committed; unit tests and local queue generation have not yet been run | Pull, run `python data\\build_privacy_review_queue.py`, then run the backend pytest suite and share aggregate counts only |
+
+| 2026-11-11 | Added `data/build_privacy_review_queue.py` to group flagged messages by normalised masked template; added four unit tests | Code and test files verified on GitHub; local queue generation and tests are still pending | Pull, run the grouped queue generator and execute the backend tests; inspect one representative per masked template and prioritise label conflicts/ambiguous cases |
