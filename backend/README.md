@@ -108,3 +108,17 @@ python data\\analyze_baseline_errors.py
 ```
 
 This reads only the original validation split and verifies its SHA-256 against the saved baseline metadata. It does not retrain the model or read the initial test partition. Aggregate and message-level reports are saved locally under Git-ignored `data/private/model_artifacts/`. The message-level CSV contains text: inspect it locally and share aggregate counts only. Do not commit or upload it.
+
+
+## 7. Source-label provenance update
+
+The local Mendeley preparation script now preserves the original publisher category in `source_label`. The existing `label` field remains the provisional mapping used by the original frozen baseline. New `soul_label`, `review_status` and `annotation_note` fields are blank/pending until an independent human review. See [data/label_review_protocol.md](../data/label_review_protocol.md).
+
+After pulling this update, run from the repository root:
+
+```powershell
+python data\\prepare_mendeley_dataset.py
+python data\\validate_prepared_dataset.py
+```
+
+Do not rerun `data/create_mendeley_splits.py` or `data/train_text_baseline.py` as part of this step; preserve the existing baseline split and model. Then run the full pytest suite from `backend/`.
