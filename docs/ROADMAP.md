@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector (5,797 prepared records; 68 exact-label-conflict rows quarantined; grouped 70/15/15 split completed; first TF-IDF + Logistic Regression baseline trained and evaluated locally; full test suite: 31 passed. Validation-only error-analysis utility and tests have been added; local execution is pending. Dataset source/privacy approval and external validation remain pending). Milestones 0 and 1 are complete.  
+**Current stage:** Milestone 2 – Data and baseline communication detector (5,797 prepared records; 68 exact-label-conflict rows quarantined; grouped 70/15/15 split completed; first TF-IDF + Logistic Regression baseline trained and evaluated locally; full test suite: 31 passed. Validation-only error-analysis utility has been run locally: 825/856 correct, 31 misclassified; largest error pair is spam → scam (14). Full tests for the new utility and manual local error review remain pending. Dataset source/privacy approval and external validation remain pending). Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -47,11 +47,11 @@ A single event can be an incident. Cross-channel correlation is optional context
 - [x] Create and validate a deterministic grouped train/validation/test split for the prepared Mendeley candidate; keep identical masked text within one partition.
 - [x] Run the fixed text-only TF-IDF + Logistic Regression baseline and record validation/test metrics.
 - [x] Report precision, recall, F1, confusion matrix and false-positive rate.
-- [ ] Run the validation-only error report and inspect masked misclassifications locally; share aggregate counts only.
+- [x] Run the validation-only error report; inspect masked misclassifications locally and share aggregate counts only (manual reason categorisation remains pending).
 
 **Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed on 10 November 2026. The Mendeley candidate exists only as a local ignored derivative; source/privacy approval remains pending. The grouped 70/15/15 split was generated locally and passed integrity checks. The first ML baseline has now been trained and evaluated locally; the complete backend suite reports 31 passed. Metrics and limitations are recorded in `data/model_baseline.md`. Dataset source/privacy approval and external campaign-independent validation remain pending.
 
-| 2026-11-11 | Added a validation-only baseline error-analysis utility and eight tests | Script reads only the original validation split, verifies its saved SHA-256, and writes an aggregate summary plus a local message-level error CSV under Git-ignored `data/private/`. Tests and local execution are pending | Pull, run `python data\\analyze_baseline_errors.py`, inspect the masked error CSV locally, and share aggregate counts only; do not tune on or inspect the initial test split |
+| 2026-11-11 | Added and ran the validation-only baseline error-analysis utility; added eight unit tests | Validation: 856 rows, 825 correct, 31 misclassified (accuracy 0.9638). Error pairs: spam → scam 14; legitimate → spam 7; scam → spam 5; spam → legitimate 5. Script verifies the original validation split hash and did not read the test set. New tests still await local execution; message-level CSV remains local/private | Run the full backend pytest suite, then inspect the 31 masked validation errors locally and share aggregate reason categories only; do not tune on or inspect the initial test split |
 
 ## Milestone 3 – Supported evidence processing
 
