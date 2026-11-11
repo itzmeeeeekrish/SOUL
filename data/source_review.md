@@ -221,3 +221,12 @@ Do not remove all 907 rows. A new local helper, `data/create_masked_privacy_revi
 ### Masked-review helper
 
 Added `data/create_masked_privacy_review.py`. It creates a local CSV in `data/private/` with row number, label, candidate categories and a message body in which recognised candidate patterns are replaced with placeholders. The generated file may still contain personal context missed by regex. It is Git-ignored. The script has not yet been run locally.
+
+
+### Masked privacy-review file generated locally (11 November 2026)
+
+The user ran `data/create_masked_privacy_review.py` successfully. It wrote 907 candidate rows to `data/private/mendeley_privacy_review_masked.csv`, split as ham 20, smishing 605, spam 282. This matches the enhanced aggregate audit's label-wise "at least one candidate" totals.
+
+This validates the selection/count consistency of the generator, not the accuracy of each regex or the presence of actual personal data. The masked file may retain identifying context missed by the patterns. It remains local and Git-ignored; it must not be uploaded, committed, or pasted into chat.
+
+A count-only helper, `data/summarize_privacy_review.py`, has been added. After manual local classification in a `manual_review_category` column, it reports category totals by label without printing message text or row identifiers. Allowed categories are documented in the script. The summary helper has not yet been run.
