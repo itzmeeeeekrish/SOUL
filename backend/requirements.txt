@@ -4,3 +4,5 @@ uvicorn==0.54.0
 python-dotenv==1.2.4
 httpx2==2.16.0
 pytest==9.2.0
+scikit-learn==1.9.1
+joblib==1.6.0
