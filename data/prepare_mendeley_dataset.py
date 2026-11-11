@@ -213,7 +213,13 @@ def prepare_rows(rows):
         prepared.append(
             {
                 "record_id": f"M{len(prepared) + 1:05d}",
+                "source_label": records[0]["source_label"],
+                # Backward-compatible provisional mapping used by the first baseline.
                 "label": records[0]["mapped_label"],
+                # SOUL labels remain blank until a human review is completed.
+                "soul_label": "",
+                "review_status": "pending",
+                "annotation_note": "",
                 "text": masked_text,
                 "source_occurrences": len(records),
                 "has_url_candidate": int(features["url_domain"]),
@@ -247,7 +253,11 @@ def write_outputs(prepared, quarantine):
 
     prepared_columns = [
         "record_id",
+        "source_label",
         "label",
+        "soul_label",
+        "review_status",
+        "annotation_note",
         "text",
         "source_occurrences",
         "has_url_candidate",
