@@ -360,3 +360,12 @@ After redaction there are 5,722 unique normalised masked texts among 5,797 prepa
 The user also ran the full backend test suite: `18 passed in 0.92s`.
 
 A 70/15/15 stratified split helper is being added using only the Python standard library. It will group on normalised final masked text, create deterministic train/validation/test partitions with a fixed seed, and keep identical texts together. This exact-text split does not detect near-duplicate campaigns; results must be treated as exploratory until independent campaign/source holdouts are available.
+
+
+### Deterministic grouped split utility added (11 November 2026)
+
+Added `data/create_mendeley_splits.py` and six tests in `backend/tests/test_create_mendeley_splits.py`. It groups rows by the normalised final masked text, collapses same-label identical model inputs into one row, quarantines groups where the same final text has multiple labels, then uses a fixed seed (42) to stratify the remaining unique texts by label into 70/15/15 train/validation/test partitions.
+
+Outputs are planned under `data/private/mendeley_splits/`; no raw or prepared files are committed. The split contains only the columns needed for text-only baseline and audit (`text`, `label`, group/record IDs, split and occurrence counts). Original/recalculated metadata flags are not included as model features.
+
+This split prevents exact final masked-text leakage only. It does not group near-duplicate campaigns or prove independent real-world generalisation. The class imbalance remains significant, so later evaluation must report per-class precision/recall/F1, macro-F1 and confusion matrix. The splitter and tests are committed but have not yet been run locally.
