@@ -108,7 +108,7 @@ The spam class is the main improvement target: 51 of 66 spam messages were corre
 After the baseline has been trained, run this from the repository root:
 
 ```powershell
-python data\\analyze_baseline_errors.py
+python data\analyze_baseline_errors.py
 ```
 
 The script:
