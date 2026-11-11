@@ -555,6 +555,35 @@ The initial local run of `python data\audit_mendeley_privacy.py` completed succe
 
 **How to interpret this:** These counts overlap. One row may contain multiple kinds of patterns. A long digit sequence may be an OTP, date, transaction reference or account-like number rather than a phone number. A 12-digit match does not establish that it is Aadhaar. No PAN-like pattern was found, but regex limitations mean this does not prove no PAN information exists.
 
-The next version of the script prints aggregate pattern counts by source label and counts of pattern combinations. It still does not print or save messages or matched values. The enhanced version is committed but has not yet been run locally.
+The enhanced version was subsequently run locally and produced the label-wise breakdown:
+
+| Label | Rows | At least one candidate | Email/UPI | URL/domain | Phone/long number | 12-digit | PAN |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| ham | 4,844 | 20 | 1 | 16 | 6 | 0 | 0 |
+| smishing | 638 | 605 | 13 | 126 | 506 | 29 | 0 |
+| spam | 489 | 282 | 10 | 119 | 197 | 11 | 0 |
+
+Thus, 0.4% of ham, 94.8% of smishing and 57.7% of spam messages had at least one candidate pattern. This is a pattern in this dataset, not a general fraud rule. Combination counts also showed that 5,064 rows had no match, 614 matched only phone/long-number, 55 matched URL/domain plus phone/long-number, and 23 matched phone/long-number plus 12-digit.
 
 **Decision:** Do not delete all 907 flagged rows automatically. First review the label-wise distribution and pattern combinations. Then locally review any candidate examples only in a private environment, mask them where needed, and keep raw third-party data out of GitHub and chat.
+
+
+## 23. Local masked privacy review
+
+We added `data/create_masked_privacy_review.py`. It reads the nested archive locally and writes only the candidate rows to:
+
+`data/private/mendeley_privacy_review_masked.csv`
+
+Run it from the repository root:
+
+```powershell
+python data\create_masked_privacy_review.py
+```
+
+It includes the source row number, source label, detected pattern categories and a masked message body. The script replaces candidate URLs/domains, email/UPI-like strings, PAN-like strings, 12-digit sequences and long-number sequences with placeholders.
+
+**Very important:** Masking is not the same as anonymisation. A name, address, bank detail or personal context may remain if the regex does not recognise it. The file is under `data/private/`, which is ignored by Git. Keep it on your local computer only. Do not upload it, commit it or paste its contents into chat. Review the masked text locally; if necessary compare with the original locally, without sharing the raw message.
+
+When you finish, share only aggregate review totals, such as how many candidates were actual contact details, URLs, OTPs, transaction references, dates or false positives. Do not send message text or actual identifiers.
+
+**Current execution status:** The aggregate audit has been run twice (the enhanced result is documented). The masked-review generator is committed but has not yet been run locally.
