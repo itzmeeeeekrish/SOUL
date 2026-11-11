@@ -287,4 +287,7 @@ Added `data/prepare_mendeley_dataset.py` and tests in `backend/tests/test_prepar
 
 The script prints aggregate counts, class counts and mismatches between the supplied URL/EMAIL/PHONE flags and SOUL's independently detected flags. It does not create train/validation/test splits or train a model. The output can still contain information missed by regex and must remain local; no anonymisation guarantee is made.
 
-The script's mapping is provisional. It does not adjudicate whether a source spam item is fraudulent or promotional beyond preserving the source's three classes. Do not use the local derivative in a public release. Four? No: seven unit tests have been added for conflict quarantine, same-label deduplication, label mapping, masking, source-flag mismatch counting, unknown labels and blank text. They are committed but have not yet been run locally.
+The script's mapping is provisional. It does not adjudicate whether a source spam item is fraudulent or promotional beyond preserving the source's three classes. Do not use the local derivative in a public release. Seven unit tests have been added for conflict quarantine, same-label deduplication, label mapping, masking, source-flag mismatch counting, unknown labels and blank text. They are committed but have not yet been run locally.
+
+
+The preparation script was refined to compare source YES/NO metadata against recomputed pattern flags for every occurrence in an exact-duplicate group. If duplicate rows have inconsistent source flags, the prepared record leaves that source flag blank and reports the inconsistent-group count rather than selecting one arbitrarily.
