@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector (5,797 prepared records; 68 exact-label-conflict rows quarantined; grouped 70/15/15 split completed; first TF-IDF + Logistic Regression baseline trained and evaluated locally; full test suite: 39 passed in 5.16s. Validation-only error-analysis utility has been run locally: 825/856 correct, 31 misclassified; largest error pair is spam → scam (14). Full suite: 39 passed in 5.16s (including eight error-analysis tests). Manual review of the 31 uploaded validation errors is complete; the dominant issue is spam/scam label-boundary overlap (19/31). The uploaded message text is not stored in GitHub. Dataset source/privacy approval and external validation remain pending). Milestones 0 and 1 are complete.  
+**Current stage:** Milestone 2 – Data and baseline communication detector (5,797 prepared records; 68 exact-label-conflict rows quarantined; grouped 70/15/15 split completed; first TF-IDF + Logistic Regression baseline trained and evaluated locally; full test suite: 39 passed in 5.16s. Validation-only error-analysis utility has been run locally: 825/856 correct, 31 misclassified; largest error pair is spam → scam (14). Full suite: 39 passed in 5.16s (including eight error-analysis tests). Manual review of the 31 uploaded validation errors is complete; the dominant issue is spam/scam label-boundary overlap (19/31). The uploaded message text is not stored in GitHub. Source-label provenance fields and human-review states have been added to the local preparation/validation code; local regeneration and verification are pending. Dataset source/privacy approval and external validation remain pending). Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -44,6 +44,9 @@ A single event can be an incident. Cross-channel correlation is optional context
 - [x] Define legitimate, spam and scam labels in `data/annotation_guide.md` and apply them to synthetic examples.
 - [x] Assign synthetic v2 campaign groups to train/validation/test in `data/split_strategy.md`; verify that no campaign crosses splits. Real-source/campaign split still requires approved third-party data.
 - [x] Build a local preprocessing utility for label mapping, exact-text deduplication, conflict quarantine and candidate-pattern redaction.
+- [x] Preserve original `source_label` separately from the historical provisional `label`; add empty `soul_label`, `review_status=pending` and `annotation_note` fields without changing the frozen baseline target.
+- [x] Extend prepared-data validation to check source-label mappings and human-review states.
+- [ ] Regenerate the local prepared CSV with provenance fields, run the validator and full test suite; do not regenerate or alter the frozen baseline split/model.
 - [x] Create and validate a deterministic grouped train/validation/test split for the prepared Mendeley candidate; keep identical masked text within one partition.
 - [x] Run the fixed text-only TF-IDF + Logistic Regression baseline and record validation/test metrics.
 - [x] Report precision, recall, F1, confusion matrix and false-positive rate.
@@ -54,6 +57,8 @@ A single event can be an incident. Cross-channel correlation is optional context
 | 2026-11-11 | Added and ran the validation-only baseline error-analysis utility; added eight unit tests | Validation: 856 rows, 825 correct, 31 misclassified (accuracy 0.9638). Error pairs: spam → scam 14; legitimate → spam 7; scam → spam 5; spam → legitimate 5. Script verifies the original validation split hash and did not read the test set. Eight focused error-analysis tests and the complete backend suite now pass (39 passed in 5.16s); message-level CSV remains local/private | Clarify source-label vs SOUL-label rules, preserve original source labels, and design a reviewable annotation workflow before any relabelling or model tuning; keep the initial test split frozen |
 
 | 2026-11-11 | Manually reviewed the 31 validation misclassifications from the user-uploaded local report | Spam → scam: 14; legitimate → spam: 7; scam → spam: 5; spam → legitimate: 5. Nineteen errors cross the spam/scam boundary, indicating source-label overlap; 12 involve legitimate messages with short/context-poor or neutral/personal wording. No message content was committed | Clarify annotation definitions and preserve original source labels before model tuning; add reviewed hard negatives; keep the initial test split frozen |
+
+| 2026-11-11 | Added source-label provenance and explicit SOUL review fields to the prepared-data workflow | Preparation output now keeps original `source_label`, retains the old provisional `label` for baseline compatibility, and adds blank `soul_label`, `review_status=pending` and `annotation_note`. Validator/tests check mapping and review-state consistency. Local execution pending | Pull, regenerate `mendeley_prepared.csv`, run its validator and full test suite. Do not overwrite existing split/model artifacts; review labels in a separate future dataset version |
 
 ## Milestone 3 – Supported evidence processing
 
