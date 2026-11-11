@@ -68,3 +68,20 @@ The script checks required columns, blank fields, unique IDs, approved labels/la
 ## Future dataset extensions
 
 Document the need and privacy impact before adding fields. Possible audit fields include source dataset ID, coarse collection date, reviewer and second-review result. Do not add sender phone numbers or user identity fields without a specific approved need.
+
+
+## Local third-party prepared-data label provenance
+
+The local prepared Mendeley derivative uses extra fields so the source annotation and any future SOUL human review cannot overwrite each other:
+
+| Field | Meaning |
+|---|---|
+| `source_label` | Publisher's original label, normalised to lowercase: `ham`, `smishing`, `spam` |
+| `label` | Provisional mapping used by the historical baseline: `legitimate`, `scam`, `spam`. Retained for compatibility with the frozen baseline and existing split. |
+| `soul_label` | Empty until a human review; then `legitimate`, `spam`, `scam`, or `needs_review` |
+| `review_status` | `pending`, `reviewed`, or `needs_review` |
+| `annotation_note` | Short evidence-based reason for a completed review; blank while pending |
+
+The first baseline continues to use `label`. Do not substitute `soul_label` into the existing split or model. A future reviewed-label experiment must be a separate dataset version with a new split and separate metrics.
+
+See [label_review_protocol.md](label_review_protocol.md) for the review rules and safe workflow. Raw/prepared records remain local under Git-ignored `data/private/`.
