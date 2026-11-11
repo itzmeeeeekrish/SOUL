@@ -139,6 +139,34 @@ Misclassification pairs (actual → predicted):
 
 The main observed issue is distinguishing spam from scam: 14 of the 31 errors are spam predicted as scam. This is a hypothesis for local example review, not yet an explanation of why the messages were confused. Inspect the private validation error CSV locally and categorise the likely reasons before changing the model. Do not share message text; share aggregate review categories only. Keep the initial test set untouched.
 
+## Manual review of the 31 validation errors (11 November 2026)
+
+The uploaded validation misclassification CSV was reviewed without reproducing its message text in project documentation. No raw SMS examples are stored in this repository.
+
+| Actual → predicted | Count | Observed pattern |
+|---|---:|---|
+| Spam → scam | 14 | Prize/free offers, premium-rate calls or subscriptions, reward claims and other paid-message promotions. Strong overlap between the dataset's spam and smishing/scam labels. |
+| Legitimate → spam | 7 | Four short or context-poor conversational fragments; two service/contact notifications with promotional wording; one legitimate bank security advisory using security-related terms. |
+| Scam → spam | 5 | Promotional or solicitation-style wording (shopping, chat, finance, prize and event offers); the text alone does not make the source's smishing label obvious. |
+| Spam → legitimate | 5 | Three neutral, explanatory or service-status messages; two personal-sounding messages that still promote or lead to a paid service. |
+
+### What this suggests
+
+- **19 of 31 errors (61.3%) are between spam and scam.** The strongest current problem is the boundary between those two source-derived classes, not simply missing suspicious language.
+- **12 of 31 errors (38.7%) involve legitimate.** Very short messages provide little context; generic conversational language can look like spam, while some spam messages are written in a personal or neutral style.
+- The source's `smishing` label was mapped to the project's broader `scam` label. Some examples in that source category look like commercial promotions or paid-service solicitations rather than clearly evidenced phishing. This is a **label-definition / source-annotation ambiguity**, not proof that each source label is wrong.
+- The dataset contains older premium-SMS, shortcode, prize-promotion and UK-style commercial message patterns. It is not a representative sample of current Indian scams or multilingual Indian SMS traffic.
+
+### Recommended response before model tuning
+
+1. Keep the current baseline and its initial test evaluation frozen.
+2. Clarify the project's annotation rule: distinguish unsolicited promotion/premium-rate spam from deceptive impersonation, credential theft, payment fraud or phishing. Preserve the original source label separately from any SOUL label in future dataset versions.
+3. Review or obtain independently human-labelled examples around this boundary before relabelling any examples. Do not automatically relabel the 19 spam/scam confusions.
+4. Add hard negative legitimate examples such as short personal chats, bank security advisories and neutral service notifications.
+5. Build a privacy-reviewed, campaign-separated and India-relevant evaluation set before making claims about real-world usefulness.
+
+The uploaded CSV was used only for this analysis. It is not copied into the repository. The initial test set remains untouched.
+
 ## Important limitations
 
 - This is an exploratory source-derived baseline, not production validation.
