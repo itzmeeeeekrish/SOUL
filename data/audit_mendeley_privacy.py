@@ -2,7 +2,7 @@
 
 Reads the nested CSV directly from the downloaded ZIP. It does not extract files,
 write message contents, or print matched values.
-Run from any directory with:
+Run from the repository root:
     python data/audit_mendeley_privacy.py
 """
 
@@ -10,6 +10,7 @@ import csv
 import io
 import re
 import zipfile
+from collections import Counter, defaultdict
 from pathlib import Path
 
 
@@ -41,8 +42,7 @@ BARE_DOMAIN_PATTERN = re.compile(
     r"top|live|store|tech|ai|uk|us|de|au|ca)\b"
 )
 
-# Broad number pattern: it can also match dates, IDs or account-like values.
-# Therefore the report calls these "phone/long-number candidates".
+# Broad number pattern: it can also match dates, OTPs, IDs or references.
 PHONE_OR_LONG_NUMBER_PATTERN = re.compile(
     r"(?<!\w)\+?\d(?:[\s().-]*\d){6,14}(?!\w)"
 )
@@ -52,6 +52,14 @@ TWELVE_DIGIT_PATTERN = re.compile(r"(?<!\d)(?:\d[\s-]?){11}\d(?!\d)")
 # Indian PAN-like shape only; a pattern match is not proof of a valid PAN.
 PAN_LIKE_PATTERN = re.compile(
     r"(?i)(?<![A-Z0-9])[A-Z]{5}\d{4}[A-Z](?![A-Z0-9])"
+)
+
+PATTERN_NAMES = (
+    "email_upi",
+    "url_domain",
+    "phone_long_number",
+    "twelve_digit",
+    "pan_like",
 )
 
 
@@ -68,17 +76,26 @@ def find_nested_member(archive: zipfile.ZipFile, suffix: str) -> str:
     return matches[0]
 
 
-def audit_archive(archive_path: Path) -> dict:
-    counts = {
-        "total_rows": 0,
-        "blank_text_rows": 0,
-        "email_or_upi_like_rows": 0,
-        "url_or_domain_like_rows": 0,
-        "phone_or_long_number_candidate_rows": 0,
-        "twelve_digit_candidate_rows": 0,
-        "pan_like_candidate_rows": 0,
-        "rows_with_any_candidate_pattern": 0,
+def detect_patterns(message: str) -> dict:
+    """Return booleans only; never return or store the matched text."""
+    return {
+        "email_upi": bool(EMAIL_OR_UPI_PATTERN.search(message)),
+        "url_domain": bool(
+            URL_PATTERN.search(message)
+            or BARE_DOMAIN_PATTERN.search(message)
+        ),
+        "phone_long_number": bool(
+            PHONE_OR_LONG_NUMBER_PATTERN.search(message)
+        ),
+        "twelve_digit": bool(TWELVE_DIGIT_PATTERN.search(message)),
+        "pan_like": bool(PAN_LIKE_PATTERN.search(message)),
     }
+
+
+def audit_archive(archive_path: Path) -> dict:
+    totals = Counter()
+    by_label = defaultdict(Counter)
+    combinations = Counter()
 
     with zipfile.ZipFile(archive_path) as outer:
         nested_name = find_nested_member(outer, NESTED_ZIP_SUFFIX)
@@ -105,43 +122,37 @@ def audit_archive(archive_path: Path) -> dict:
                 )
 
             for row in reader:
-                counts["total_rows"] += 1
+                totals["total_rows"] += 1
                 message = (row.get("TEXT") or "").strip()
+                label = (row.get("LABEL") or "").strip().casefold() or "<blank>"
 
                 if not message:
-                    counts["blank_text_rows"] += 1
+                    totals["blank_text_rows"] += 1
+                    by_label[label]["blank_text_rows"] += 1
+                    combinations["blank_text"] += 1
                     continue
 
-                email_match = bool(EMAIL_OR_UPI_PATTERN.search(message))
-                url_match = bool(
-                    URL_PATTERN.search(message)
-                    or BARE_DOMAIN_PATTERN.search(message)
-                )
-                phone_match = bool(
-                    PHONE_OR_LONG_NUMBER_PATTERN.search(message)
-                )
-                twelve_digit_match = bool(
-                    TWELVE_DIGIT_PATTERN.search(message)
-                )
-                pan_match = bool(PAN_LIKE_PATTERN.search(message))
+                flags = detect_patterns(message)
+                matched = [name for name in PATTERN_NAMES if flags[name]]
 
-                counts["email_or_upi_like_rows"] += email_match
-                counts["url_or_domain_like_rows"] += url_match
-                counts["phone_or_long_number_candidate_rows"] += phone_match
-                counts["twelve_digit_candidate_rows"] += twelve_digit_match
-                counts["pan_like_candidate_rows"] += pan_match
+                for name in matched:
+                    totals[name] += 1
+                    by_label[label][name] += 1
 
-                counts["rows_with_any_candidate_pattern"] += any(
-                    (
-                        email_match,
-                        url_match,
-                        phone_match,
-                        twelve_digit_match,
-                        pan_match,
-                    )
-                )
+                if matched:
+                    totals["rows_with_any_candidate_pattern"] += 1
+                    by_label[label]["rows_with_any"] += 1
+                    combinations[" + ".join(matched)] += 1
+                else:
+                    combinations["none"] += 1
 
-    return counts
+                by_label[label]["rows"] += 1
+
+    return {
+        "totals": totals,
+        "by_label": by_label,
+        "combinations": combinations,
+    }
 
 
 def main() -> None:
@@ -156,22 +167,43 @@ def main() -> None:
     except (zipfile.BadZipFile, OSError, UnicodeError, ValueError) as error:
         raise SystemExit(f"Privacy audit could not complete: {error}") from error
 
+    totals = results["totals"]
+
     print("SOUL — Mendeley SMS privacy pattern audit")
-    print("Source rows:", results["total_rows"])
-    print("Blank TEXT rows:", results["blank_text_rows"])
+    print("Source rows:", totals["total_rows"])
+    print("Blank TEXT rows:", totals["blank_text_rows"])
     print("\nRows with possible sensitive-data patterns:")
-    print("  Email/UPI-like:", results["email_or_upi_like_rows"])
-    print("  URL/domain-like:", results["url_or_domain_like_rows"])
-    print(
-        "  Phone/long-number candidates:",
-        results["phone_or_long_number_candidate_rows"],
-    )
-    print("  12-digit numeric candidates:", results["twelve_digit_candidate_rows"])
-    print("  PAN-like candidates:", results["pan_like_candidate_rows"])
+    print("  Email/UPI-like:", totals["email_upi"])
+    print("  URL/domain-like:", totals["url_domain"])
+    print("  Phone/long-number candidates:", totals["phone_long_number"])
+    print("  12-digit numeric candidates:", totals["twelve_digit"])
+    print("  PAN-like candidates:", totals["pan_like"])
     print(
         "  Rows with at least one candidate pattern:",
-        results["rows_with_any_candidate_pattern"],
+        totals["rows_with_any_candidate_pattern"],
     )
+
+    print("\nPattern candidates by source label:")
+    print(
+        "  LABEL       ROWS  ANY  EMAIL/UPI  URL  PHONE/LONG  12-DIGIT  PAN"
+    )
+    for label in sorted(results["by_label"]):
+        counts = results["by_label"][label]
+        print(
+            f"  {label:<10} "
+            f"{counts['rows']:>5} "
+            f"{counts['rows_with_any']:>4} "
+            f"{counts['email_upi']:>10} "
+            f"{counts['url_domain']:>4} "
+            f"{counts['phone_long_number']:>10} "
+            f"{counts['twelve_digit']:>9} "
+            f"{counts['pan_like']:>4}"
+        )
+
+    print("\nCombination counts (one row may match multiple pattern types):")
+    for combination, count in sorted(results["combinations"].items()):
+        print(f"  {combination}: {count}")
+
     print(
         "\nNote: Counts are broad pattern matches, not proof of personal data. "
         "No message text or matched value was printed or saved."
