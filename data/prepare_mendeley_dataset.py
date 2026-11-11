@@ -176,11 +176,6 @@ def prepare_rows(rows):
             stats["duplicate_rows_collapsed"] += len(records) - 1
 
         features = detect_patterns(representative)
-        source_flags = {
-            "url": records[0]["source_url"],
-            "email": records[0]["source_email"],
-            "phone": records[0]["source_phone"],
-        }
         recomputed_flags = {
             "url": int(features["url_domain"]),
             "email": int(features["email_upi"]),
