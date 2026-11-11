@@ -1028,7 +1028,7 @@ Ab hum model ko change karne se pehle uski mistakes samjhenge.
 Run from the repository root:
 
 ```powershell
-python data\\analyze_baseline_errors.py
+python data\analyze_baseline_errors.py
 ```
 
 The script reads only the validation split, verifies that it is the exact split used in the baseline run, and does not retrain the model. It saves:
@@ -1144,6 +1144,6 @@ A new local helper creates two separate files from the 31 known validation error
 - `validation_label_review_blind.csv`: contains the message and blank SOUL review fields, but hides original source labels and model predictions.
 - `validation_label_review_key.csv`: contains source label, provisional label and model prediction, but no message text.
 
-Run `python data\\build_validation_label_review_queue.py` from the repository root after running the tests. Review the blind file first; do not open the key until independent labels are complete. This is an error-focused sample, not a representative sample of the dataset. Keep both files local and private.
+Run `python data\build_validation_label_review_queue.py` from the repository root after running the tests. Review the blind file first; do not open the key until independent labels are complete. This is an error-focused sample, not a representative sample of the dataset. Keep both files local and private.
 
-The new queue builder has 12 unit tests. The previous 45-test result does not include these new tests; run the full suite again after pulling.
+The new queue builder has 12 unit tests. The previous 45-test result does not include these new tests; run the full suite again after pulling (expected 57 tests).
