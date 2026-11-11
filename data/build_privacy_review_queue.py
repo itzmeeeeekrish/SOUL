@@ -3,10 +3,14 @@
 This is a privacy-review helper only. It does not change or delete the source
 dataset and does not decide whether a message is legitimate, spam or scam.
 
-Groups are formed from normalised MASKED text. Different source messages can
+Groups are formed on normalised masked text. Different source messages can
 therefore share a template if their detected identifiers are replaced by the
 same placeholders. This is useful for reviewing repeated patterns, but it is
 not a substitute for exact-message deduplication in the ML dataset.
+
+The report separately identifies true exact-text label conflicts by comparing
+normalised original text locally and exporting only counts/boolean flags.
+Original message text and matched values are never written to the output.
 
 The output stays under data/private/ (Git-ignored). Masking is not guaranteed
 anonymisation; never upload or share the output.
@@ -18,7 +22,7 @@ Run from the repository root:
 import csv
 import io
 import zipfile
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 
 from audit_mendeley_privacy import (
@@ -40,13 +44,18 @@ OUTPUT_PATH = (
 )
 
 
+def normalise_text(text: str) -> str:
+    """Normalise text for duplicate comparison without storing it in the report."""
+    return " ".join(text.casefold().split())
+
+
 def normalise_template(masked_text: str) -> str:
     """Create a comparison key without changing the text saved for review."""
-    return " ".join(masked_text.casefold().split())
+    return normalise_text(masked_text)
 
 
 def collect_review_groups(rows):
-    """Group candidate rows by normalised masked text, retaining aggregate data."""
+    """Group candidate rows by masked template and track exact-text conflicts."""
     groups = {}
 
     for row in rows:
@@ -54,6 +63,7 @@ def collect_review_groups(rows):
         if not message:
             continue
 
+        normalised_original = normalise_text(message)
         label = (row.get("LABEL") or "").strip().casefold() or "<blank>"
         flags = detect_patterns(message)
         matched_patterns = {
@@ -72,12 +82,21 @@ def collect_review_groups(rows):
                 "source_occurrences": 0,
                 "source_label_counts": Counter(),
                 "candidate_patterns": set(),
+                "original_text_labels": defaultdict(set),
             }
 
         group = groups[key]
         group["source_occurrences"] += 1
         group["source_label_counts"][label] += 1
         group["candidate_patterns"].update(matched_patterns)
+        group["original_text_labels"][normalised_original].add(label)
+
+    for group in groups.values():
+        group["distinct_source_texts"] = len(group["original_text_labels"])
+        group["has_exact_text_label_conflict"] = any(
+            len(labels) > 1
+            for labels in group["original_text_labels"].values()
+        )
 
     return list(groups.values())
 
@@ -118,9 +137,11 @@ def write_review_queue(groups, output_path: Path) -> None:
         fieldnames = [
             "template_group_id",
             "source_occurrences",
+            "distinct_source_texts",
             "source_labels",
             "source_label_counts",
             "source_label_conflict",
+            "has_exact_text_label_conflict",
             "candidate_patterns",
             "masked_text",
             "manual_review_category",
@@ -137,11 +158,15 @@ def write_review_queue(groups, output_path: Path) -> None:
                 {
                     "template_group_id": f"PT{index:05d}",
                     "source_occurrences": group["source_occurrences"],
+                    "distinct_source_texts": group["distinct_source_texts"],
                     "source_labels": ";".join(labels),
                     "source_label_counts": ";".join(
                         f"{label}={label_counts[label]}" for label in labels
                     ),
                     "source_label_conflict": "yes" if label_conflict else "no",
+                    "has_exact_text_label_conflict": (
+                        "yes" if group["has_exact_text_label_conflict"] else "no"
+                    ),
                     "candidate_patterns": ";".join(
                         name
                         for name in PATTERN_NAMES
@@ -176,6 +201,9 @@ def main() -> None:
     label_conflict_groups = sum(
         len(group["source_label_counts"]) > 1 for group in groups
     )
+    exact_conflict_groups = sum(
+        group["has_exact_text_label_conflict"] for group in groups
+    )
     label_counts = Counter()
     for group in groups:
         for label, count in group["source_label_counts"].items():
@@ -186,7 +214,8 @@ def main() -> None:
     print("Rows with candidate patterns:", flagged_rows)
     print("Unique masked templates:", len(groups))
     print("Repeated occurrences grouped:", collapsed_occurrences)
-    print("Groups with multiple source labels:", label_conflict_groups)
+    print("Masked templates with multiple source labels:", label_conflict_groups)
+    print("Masked templates containing an exact-text label conflict:", exact_conflict_groups)
 
     print("\nCandidate rows by source label:")
     for label, count in sorted(label_counts.items()):
@@ -194,12 +223,12 @@ def main() -> None:
 
     print("\nOutput:", OUTPUT_PATH)
     print(
-        "\nReview one masked template at a time, not every source occurrence. "
-        "A group with source_label_conflict=yes needs separate label review. "
-        "This grouping is only for privacy review; do not use it as the ML "
-        "train/test deduplication method."
+        "\nReview the 'has_exact_text_label_conflict' column first. "
+        "A source_label_conflict can be only a masked-template collision when "
+        "different original messages became identical after masking."
     )
     print(
+        "This grouping is for privacy review only, not ML train/test splitting. "
         "The output may still contain identifying context missed by regex. "
         "It stays local under data/private/ (Git-ignored); do not upload, "
         "commit or paste its contents into chat."
