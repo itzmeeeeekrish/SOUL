@@ -78,3 +78,22 @@ The repository-root `.env.example` shows the supported development settings:
 - `SOUL_ENV`: `development` enables FastAPI debug mode; use a non-development value to disable it.
 
 Never commit your real `.env` file, credentials, OTPs, bank data or API keys.
+
+
+## 5. Machine-learning baseline dependencies
+
+The same virtual environment is used for the local dataset and ML scripts. The direct requirements now include pinned versions of scikit-learn and joblib for the first TF-IDF + Logistic Regression baseline. From the repository root, after pulling updated requirements, run:
+
+```powershell
+python -m pip install -r backend\requirements.txt
+```
+
+The training script is run from the repository root, not from the backend folder:
+
+```powershell
+python data\train_text_baseline.py
+```
+
+It reads the local split files under `data/private/mendeley_splits/`, trains on the train partition, reports validation metrics and a first fixed-recipe test evaluation, then stores the local model and aggregate metrics under `data/private/model_artifacts/`. The test set must not be used for tuning. See [data/model_baseline.md](../data/model_baseline.md).
+
+Do not commit split files, metrics containing message content (none should be present), or model artefacts. Joblib files use pickle-based serialization; do not load an artifact from an untrusted source.
