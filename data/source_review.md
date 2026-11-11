@@ -369,3 +369,10 @@ Added `data/create_mendeley_splits.py` and six tests in `backend/tests/test_crea
 Outputs are planned under `data/private/mendeley_splits/`; no raw or prepared files are committed. The split contains only the columns needed for text-only baseline and audit (`text`, `label`, group/record IDs, split and occurrence counts). Original/recalculated metadata flags are not included as model features.
 
 This split prevents exact final masked-text leakage only. It does not group near-duplicate campaigns or prove independent real-world generalisation. The class imbalance remains significant, so later evaluation must report per-class precision/recall/F1, macro-F1 and confusion matrix. The splitter and tests are committed but have not yet been run locally.
+
+
+### Mendeley grouped split generated locally (11 November 2026)
+
+The local split run produced 5,721 model rows from 5,797 prepared records. It collapsed 36 same-label masked-text groups (74 prepared rows) and quarantined one cross-label masked-text group (2 rows). Partition counts: train 4,004 (3,383 legitimate / 318 scam / 303 spam), validation 856 (724 / 68 / 64), test 861 (726 / 69 / 66). The splitter confirmed no identical masked text or split group crosses partitions. Backend tests passed locally: `24 passed in 1.16s`.
+
+The first text-only TF-IDF + Logistic Regression script is committed. It has not yet been run and no performance result is available. Keep the test set as a holdout; do not use it for tuning. Source and privacy approval of the third-party candidate remains a separate pending decision.
