@@ -500,3 +500,42 @@ We need to handle contradictory labels, duplicates, privacy and split leakage fi
 | Date | Topic | What was learned | Next step |
 |---|---|---|---|
 | 2026-11-11 | Mendeley archive and metadata audit | ZIP structure, class counts, binary metadata flags, duplicates, conflicting labels and helper-script limitations | Privacy scan and independently recompute metadata from TEXT |
+
+
+## 21. Privacy pattern audit script
+
+We added `data/audit_mendeley_privacy.py`. It uses only Python's standard library to read the CSV inside the nested ZIP directly. It does not extract files or write message text to another file.
+
+Run it from the repository root:
+
+```powershell
+python data\audit_mendeley_privacy.py
+```
+
+It reports the number of rows with broad candidate patterns:
+- Email/UPI-like text.
+- URL/domain-like text.
+- Phone or long-number candidates.
+- 12-digit numeric candidates.
+- PAN-like candidates.
+- Rows with at least one of those candidates.
+
+**Important:** A regex only finds a shape that resembles something. A 10-digit sequence could be a phone number, account/reference number or another value. A 12-digit sequence is not proof of Aadhaar. An email-shaped string can also be a UPI ID. These counts are for risk triage, not proof of exposed personal information.
+
+The script deliberately prints no SMS content or matched value, and it does not claim to prove that the dataset is safe. The audit must still be followed by careful local review, redaction decisions and source/licence checks. Do not paste raw messages or identifiers into chat or commit them to GitHub.
+
+**Current execution status:** Script added to GitHub; awaiting local execution against the downloaded archive. No privacy-scan result has been recorded yet.
+
+### Viva questions
+
+**Q1. What is a regular expression (regex)?**
+
+Regex ek text pattern hota hai. Isse hum search kar sakte hain ki kisi message mein email-jaisi string, URL-jaisa domain ya number sequence hai ya nahi.
+
+**Q2. Does a regex match prove that personal data is present?**
+
+No. Regex only flags a possible pattern. The match may be a false positive, and a real identifier may also be missed.
+
+**Q3. Why does the privacy script print counts instead of messages?**
+
+Taaki dataset audit karte waqt raw SMS ya possible personal identifiers terminal logs, screenshots or shared chat mein expose na hon.
