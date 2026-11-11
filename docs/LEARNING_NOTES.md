@@ -605,7 +605,7 @@ The source-label counts were ham 20, smishing 605 and spam 282. These match the 
 
 ### Manual review categories
 
-Open the CSV only on the local computer. Add a final column named `manual_review_category` and choose one category for each row:
+The latest generator creates an empty `manual_review_category` column automatically. First pull the latest code and rerun `python data\\create_masked_privacy_review.py`; this overwrites the earlier unreviewed file with the new column. Open the CSV only on the local computer and choose one category for each row:
 
 - `phone_or_contact`
 - `email_or_upi`
