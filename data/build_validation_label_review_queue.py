@@ -19,6 +19,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
+from create_masked_privacy_review import neutralize_spreadsheet_formula
 from train_text_baseline import (
     ARTIFACT_DIRECTORY,
     LABEL_ORDER,
@@ -158,7 +159,7 @@ def build_review_records(error_rows, validation_rows, prepared_rows):
         blind_rows.append(
             {
                 "review_id": review_id,
-                "text": message,
+                "text": neutralize_spreadsheet_formula(message),
                 "soul_label": "",
                 "review_status": "pending",
                 "annotation_note": "",
