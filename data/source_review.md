@@ -291,3 +291,36 @@ The script's mapping is provisional. It does not adjudicate whether a source spa
 
 
 The preparation script was refined to compare source YES/NO metadata against recomputed pattern flags for every occurrence in an exact-duplicate group. If duplicate rows have inconsistent source flags, the prepared record leaves that source flag blank and reports the inconsistent-group count rather than selecting one arbitrarily.
+
+
+### Local preparation run and test result (11 November 2026)
+
+The user ran `python data/prepare_mendeley_dataset.py` successfully and then ran the backend test suite. Results:
+
+| Measure | Result |
+|---|---:|
+| Source rows | 5,971 |
+| Exact normalised-text groups | 5,831 |
+| Conflict groups quarantined | 34 |
+| Rows in conflict groups | 68 |
+| Same-label duplicate groups | 99 |
+| Duplicate occurrences collapsed | 106 |
+| Prepared unique records | 5,797 |
+| Quarantine groups | 34 |
+| Rows represented in quarantine | 68 |
+
+Prepared class counts:
+
+| SOUL label | Records | Share |
+|---|---:|---:|
+| legitimate | 4,834 | 83.4% |
+| scam | 528 | 9.1% |
+| spam | 435 | 7.5% |
+
+The class distribution is notably imbalanced. A majority-class-only guesser would already score about 83.4% accuracy while failing to identify scam and spam messages; accuracy alone must not be used to judge the model. Report per-class precision/recall/F1, macro-F1, confusion matrix and false-positive behaviour.
+
+Source flag vs SOUL-regex mismatches on eligible records: URL 58, EMAIL 9, PHONE 180. Within exact-duplicate groups, source flags were inconsistent in URL 5 groups, EMAIL 2 groups and PHONE 6 groups. The preparation script leaves such inconsistent source metadata blank in the prepared record instead of choosing an arbitrary value.
+
+These mismatches do not by themselves prove that either extractor is wrong: their regex definitions differ, and SOUL's broader number pattern can include OTPs, dates or transaction references. Do not use source or SOUL metadata flags as model features until their meaning and quality are separately validated. The first baseline should use redacted TEXT only.
+
+The user ran the backend test suite after the new preparation tests were added: `13 passed in 1.22s`. The prepared and quarantine files remain local under Git-ignored `data/private/`. The preparation script has not made a train/validation/test split and has not trained a model.
