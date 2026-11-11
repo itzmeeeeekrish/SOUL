@@ -2,7 +2,7 @@
 
 Ye file tumhari revision notebook hai. Har naye module ke baad isme concept, code ka flow, testing aur viva questions add karenge.
 
-> **Current status (11 November 2026):** Repository/backend foundation complete; Mendeley 2022 candidate ka local audit, privacy screening, deduplication, redaction and grouped 70/15/15 split complete. First text-only TF-IDF + Logistic Regression baseline trained. Full backend test suite: 31 passed in 4.54s. Validation macro-F1: 0.8682; initial test macro-F1: 0.8915. Dataset source/privacy approval and external validation are still pending.
+> **Current status (11 November 2026):** Repository/backend foundation complete; Mendeley 2022 candidate ka local audit, privacy screening, deduplication, redaction and grouped 70/15/15 split complete. First text-only TF-IDF + Logistic Regression baseline trained. Full backend test suite: 39 passed in 5.16s. Validation macro-F1: 0.8682; initial test macro-F1: 0.8915. Dataset source/privacy approval and external validation are still pending.
 
 ## 1. SOUL kya banane ki koshish kar raha hai?
 
@@ -995,7 +995,7 @@ The first run reports validation and initial test metrics:
 
 A test set is not for tuning. Agar test output dekh kar hyperparameters/thresholds change karenge, test set independent final evaluation nahi rahega. Changes ke liye validation set use karo and test holdout ko preserve karo.
 
-**Completed locally:** The model was trained. Validation metrics: accuracy 0.9638, balanced accuracy 0.8733, macro-F1 0.8682. Initial test metrics: accuracy 0.9675, balanced accuracy 0.8920, macro-F1 0.8915. Full suite: 31 passed in 4.54s. These are exploratory results, not real-world detection accuracy.
+**Completed locally:** The model was trained. Validation metrics: accuracy 0.9638, balanced accuracy 0.8733, macro-F1 0.8682. Initial test metrics: accuracy 0.9675, balanced accuracy 0.8920, macro-F1 0.8915. Full suite: 39 passed in 5.16s. These are exploratory results, not real-world detection accuracy.
 
 ### Viva questions
 
@@ -1016,7 +1016,7 @@ Jab ek class ke examples bahut zyada aur doosri classes ke examples kam hote hai
 Har message ko legitimate bolne par bhi test split par roughly 84.3% accuracy aa sakti hai. Lekin model ek bhi scam ya spam catch nahi karega. Isliye per-class recall, macro-F1 aur confusion matrix dekhna zaroori hai.
 
 
-## 33. Validation-only error analysis — next step
+## 33. Validation-only error analysis
 
 Ab hum model ko change karne se pehle uski mistakes samjhenge.
 
@@ -1059,7 +1059,7 @@ Error pairs (actual → predicted):
 
 The message-level CSV is private. Review it on your own computer and classify each error into a broad reason (for example: promotional wording, urgency/impersonation wording, legitimate message with suspicious-looking terms, too little context, possible source-label ambiguity, masking removed useful clues, or unsure). A single message may fit more than one pattern; use one primary category consistently for a simple count. Do not paste message text into chat or GitHub. Share only category totals.
 
-The new error-analysis utility has eight unit tests, but the full local test suite still needs to be run after pulling the latest changes.
+The new error-analysis utility has eight unit tests. The complete local test suite has now passed: 39 passed in 5.16s.
 
 
 ## 35. What the 31 validation mistakes actually show
@@ -1085,3 +1085,16 @@ The source dataset's `smishing` label was mapped to `scam`. But a few examples i
 These are proposed SOUL annotation rules, not proof that every existing source label follows them.
 
 **Next engineering decision:** Freeze this baseline, clarify labels and add representative hard-negative examples first. Do not tune against the test set, and do not automatically relabel the 19 spam/scam cases.
+
+
+## 36. Validation error-analysis tests verified
+
+After adding the eight tests for the validation-only error report, the complete backend test suite was run locally:
+
+```text
+39 passed in 5.16s
+```
+
+Iska matlab error-report ke helper functions aur pehle ke dataset/model helper tests sab pass hue. Ye software tests hain; ye model ki real-world fraud detection ability ka proof nahi hain.
+
+**Next:** Dataset labels ko review karne se pehle source label aur SOUL label ko alag-alag record karne ka plan banayenge. Kisi source label ko sirf model prediction ke basis par change nahi karna.
