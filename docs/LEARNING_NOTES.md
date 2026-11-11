@@ -861,3 +861,45 @@ The split will prevent exact masked-text leakage. It will not discover every nea
 
 The user ran the full backend test suite after adding the prepared-data validator:
 `python -m pytest -q` → `18 passed in 0.92s`.
+
+
+## 30. Create a group-safe train/validation/test split
+
+The prepared CSV contains 5,797 records but only 5,722 unique normalised masked texts. Some different original messages become identical after our masking rules. If the exact same final text is present in both train and test, evaluation may be misleading.
+
+We added `data/create_mendeley_splits.py`. It uses only the Python standard library; no new package installation is required.
+
+Run from the repository root:
+
+```powershell
+python data\create_mendeley_splits.py
+```
+
+### What it does
+
+1. Groups rows by the final redacted text after case-folding and collapsing extra whitespace.
+2. If a group has one label, it collapses the repeated model input into one row and sums source occurrence counts for audit.
+3. If the same final text has different labels, it quarantines that entire group rather than guessing which label is right.
+4. Separately shuffles the three classes using fixed seed 42.
+5. Assigns approximately 70% to train, 15% to validation and 15% to test inside each class.
+6. Checks that identical final text and group IDs do not cross partitions.
+
+Expected local output directory:
+
+`data/private/mendeley_splits/`
+
+Files:
+- `train.csv`
+- `validation.csv`
+- `test.csv`
+- `split_quarantine.csv`
+
+Only `text` should be model input (X), and `label` should be target (y). Other columns are traceability metadata and must not be used as model features.
+
+### Limitations
+
+This groups exact final masked texts, not near-duplicate campaign families. Two messages with small wording changes may still be in different splits. So this is a leakage-aware first development split, not a campaign-independent test. A stronger evaluation later needs campaign/source grouping or a separately collected holdout.
+
+The classes are imbalanced (legitimate 83.4%, scam 9.1%, spam 7.5%). Model evaluation must not rely on accuracy alone. Report precision, recall and F1 for each class, macro-F1 and a confusion matrix. A majority-class classifier can reach about 83.4% accuracy while missing all scam and spam examples.
+
+Six unit tests were added in `backend/tests/test_create_mendeley_splits.py` for duplicate collapse, cross-label quarantine, stratification, reproducibility, no text leakage across splits and invalid input. The splitter and tests are committed but not yet run locally.
