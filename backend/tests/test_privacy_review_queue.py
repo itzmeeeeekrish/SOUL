@@ -27,10 +27,12 @@ def test_same_masked_template_is_grouped_together():
     assert len(groups) == 1
     assert groups[0]["source_occurrences"] == 2
     assert groups[0]["source_label_counts"] == Counter({"smishing": 2})
+    assert groups[0]["distinct_source_texts"] == 2
+    assert groups[0]["has_exact_text_label_conflict"] is False
     assert "phone_long_number" in groups[0]["candidate_patterns"]
 
 
-def test_same_masked_template_with_different_labels_is_preserved_as_conflict():
+def test_same_masked_template_with_different_labels_is_a_masking_collision():
     rows = [
         {
             "LABEL": "smishing",
@@ -49,6 +51,28 @@ def test_same_masked_template_with_different_labels_is_preserved_as_conflict():
     assert groups[0]["source_label_counts"] == Counter(
         {"smishing": 1, "spam": 1}
     )
+    assert groups[0]["distinct_source_texts"] == 2
+    assert groups[0]["has_exact_text_label_conflict"] is False
+
+
+def test_identical_normalised_original_text_with_different_labels_is_exact_conflict():
+    rows = [
+        {
+            "LABEL": "smishing",
+            "TEXT": "Call 9876543210 to verify your account",
+        },
+        {
+            "LABEL": "spam",
+            "TEXT": "  CALL 9876543210   TO VERIFY YOUR ACCOUNT  ",
+        },
+    ]
+
+    groups = collect_review_groups(rows)
+
+    assert len(groups) == 1
+    assert groups[0]["source_occurrences"] == 2
+    assert groups[0]["distinct_source_texts"] == 1
+    assert groups[0]["has_exact_text_label_conflict"] is True
 
 
 def test_different_masked_templates_stay_in_separate_groups():
