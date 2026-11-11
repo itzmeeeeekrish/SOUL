@@ -51,7 +51,7 @@ A single event can be an incident. Cross-channel correlation is optional context
 
 **Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed on 10 November 2026. The Mendeley candidate exists only as a local ignored derivative; source/privacy approval remains pending. The grouped 70/15/15 split was generated locally and passed integrity checks. The first ML baseline has now been trained and evaluated locally; the complete backend suite reports 31 passed. Metrics and limitations are recorded in `data/model_baseline.md`. Dataset source/privacy approval and external campaign-independent validation remain pending.
 
-| 2026-11-11 | Added a validation-only baseline error-analysis utility and seven tests | Script reads only the original validation split, verifies its saved SHA-256, and writes an aggregate summary plus a local message-level error CSV under Git-ignored `data/private/`. Tests and local execution are pending | Pull, run `python data\\analyze_baseline_errors.py`, inspect the masked error CSV locally, and share aggregate counts only; do not tune on or inspect the initial test split |
+| 2026-11-11 | Added a validation-only baseline error-analysis utility and eight tests | Script reads only the original validation split, verifies its saved SHA-256, and writes an aggregate summary plus a local message-level error CSV under Git-ignored `data/private/`. Tests and local execution are pending | Pull, run `python data\\analyze_baseline_errors.py`, inspect the masked error CSV locally, and share aggregate counts only; do not tune on or inspect the initial test split |
 
 ## Milestone 3 – Supported evidence processing
 
