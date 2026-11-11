@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector (synthetic v2 split and initial grouped-queue tests validated locally; enhanced queue now distinguishes exact-text label conflicts from masked-template collisions and awaits rerun; privacy/source approval pending). Milestones 0 and 1 are complete.  
+**Current stage:** Milestone 2 – Data and baseline communication detector (Mendeley candidate structurally audited; 5,797 locally prepared records, 68 exact-label-conflict rows quarantined; prepared-data validation passed and 18 tests passed locally. Deterministic grouped 70/15/15 split utility committed and awaiting local run/tests. Dataset source/privacy approval and ML baseline remain pending). Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -37,14 +37,18 @@ A single event can be an incident. Cross-channel correlation is optional context
 ## Milestone 2 – Data and baseline communication detector
 
 - [x] Define a documented dataset schema in `data/dataset_schema.md`.
-- [ ] Approve/import a permitted, traceable primary dataset after archive inspection, de-duplication, label review and privacy scan. Current source review is in `data/source_review.md`.
+- [x] Download and structurally inspect the Mendeley 2022 candidate archive; document source, labels, licence and limitations in `data/source_review.md`.
+- [x] Locally audit labels, exact duplicates, privacy-pattern candidates and source metadata flags; prepare a redacted derivative under Git-ignored `data/private/` and quarantine conflicting labels.
+- [ ] Complete dataset/source approval after privacy, annotation and licence review; do not redistribute raw or prepared third-party messages without a separate permission check.
 - [x] Create a synthetic starter dataset v1 (24 rows) and a grouped v2 dataset (84 rows) in `data/synthetic/`.
 - [x] Define legitimate, spam and scam labels in `data/annotation_guide.md` and apply them to synthetic examples.
 - [x] Assign synthetic v2 campaign groups to train/validation/test in `data/split_strategy.md`; verify that no campaign crosses splits. Real-source/campaign split still requires approved third-party data.
-- [ ] Build preprocessing and a TF-IDF + Logistic Regression baseline.
+- [x] Build a local preprocessing utility for label mapping, exact-text deduplication, conflict quarantine and candidate-pattern redaction.
+- [ ] Create and validate a deterministic grouped train/validation/test split for the prepared Mendeley candidate.
+- [ ] Build a TF-IDF + Logistic Regression baseline using text only.
 - [ ] Report precision, recall, F1, confusion matrix and false-positive rate.
 
-**Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed locally on 10 November 2026. No third-party data has been imported and no model training or evaluation has begun.
+**Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed locally on 10 November 2026. The Mendeley candidate has been imported only as a local ignored derivative for development; source/privacy approval is still pending. No model training or evaluation has begun.
 
 ## Milestone 3 – Supported evidence processing
 
