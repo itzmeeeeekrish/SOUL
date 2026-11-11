@@ -684,7 +684,7 @@ This reduces the initial list from 907 source rows to 705 masked templates for a
 The backend test suite was run locally:
 `python -m pytest -q` → `5 passed in 1.43s`.
 
-**Next:** Open `data/private/mendeley_privacy_review_unique_templates.csv` locally and filter `source_label_conflict` to `yes`. Review these 35 templates first. For each, decide privately whether it is (a) the same original text with inconsistent labels, (b) different messages merged by masking, or (c) unclear. Do not paste masked messages into chat. There is no need to manually inspect all 705 templates yet.
+**Next:** Open `data/private/mendeley_privacy_review_unique_templates.csv` locally and filter `has_exact_text_label_conflict` to `yes` in the latest regenerated queue. Review these 35 templates first. For each, decide privately whether it is (a) the same original text with inconsistent labels, (b) different messages merged by masking, or (c) unclear. Do not paste masked messages into chat. There is no need to manually inspect all 705 templates yet.
 
 
 ### Distinguish real label conflicts from masked-template collisions
