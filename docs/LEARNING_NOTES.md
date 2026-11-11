@@ -2,7 +2,7 @@
 
 Ye file tumhari revision notebook hai. Har naye module ke baad isme concept, code ka flow, testing aur viva questions add karenge.
 
-> **Current status (11 November 2026):** Repository/backend foundation complete; Mendeley 2022 candidate ka local audit, privacy screening, deduplication, redaction and grouped 70/15/15 split complete. Test suite last run: 24 passed. First TF-IDF + Logistic Regression training script and its tests are committed, but ML dependencies are not yet confirmed installed and the model has not been trained.
+> **Current status (11 November 2026):** Repository/backend foundation complete; Mendeley 2022 candidate ka local audit, privacy screening, deduplication, redaction and grouped 70/15/15 split complete. First text-only TF-IDF + Logistic Regression baseline trained. Full backend test suite: 31 passed in 4.54s. Validation macro-F1: 0.8682; initial test macro-F1: 0.8915. Dataset source/privacy approval and external validation are still pending.
 
 ## 1. SOUL kya banane ki koshish kar raha hai?
 
