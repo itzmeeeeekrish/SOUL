@@ -44,6 +44,8 @@ The first model is fixed before evaluating the held-out test partition:
 
 The vectorizer is fitted only on the training text. Validation and test text are transformed using that fitted vocabulary. Only the `text` field is passed to the model; labels are targets. IDs, split names, group IDs, source occurrence counts and source metadata flags are not model features.
 
+**Label provenance note:** The historical baseline target column `label` is the provisional source mapping (`ham → legitimate`, `smishing → scam`, `spam → spam`). The prepared-data workflow now also preserves `source_label` and adds blank human-review fields (`soul_label`, `review_status`, `annotation_note`). This does not change the already-trained baseline, its original split, or its metrics. A future model trained on reviewed SOUL labels must be a separate experiment with a new split and separate metrics.
+
 ## Evaluation
 
 The script reports validation and initial held-out test metrics:
