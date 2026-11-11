@@ -230,3 +230,14 @@ The user ran `data/create_masked_privacy_review.py` successfully. It wrote 907 c
 This validates the selection/count consistency of the generator, not the accuracy of each regex or the presence of actual personal data. The masked file may retain identifying context missed by the patterns. It remains local and Git-ignored; it must not be uploaded, committed, or pasted into chat.
 
 A count-only helper, `data/summarize_privacy_review.py`, has been added. The latest masked-review generator now creates an empty `manual_review_category` column automatically and prefixes masked text that begins with common spreadsheet formula characters. Regenerate the masked CSV with the latest script before beginning manual annotation; this overwrites the previous unreviewed masked CSV. After local classification, the summary helper reports category totals by label without printing text or row identifiers. It has not yet been run.
+
+
+### Grouped privacy-review queue added (11 November 2026)
+
+Added `data/build_privacy_review_queue.py`. It rereads the original nested CSV locally, detects the same candidate patterns, masks them, then groups rows by normalised masked-message template. The output is written to `data/private/mendeley_privacy_review_unique_templates.csv`.
+
+Each output group records occurrence count, source-label counts, a source-label conflict flag, candidate pattern types, one masked representative and a blank manual review category. It does not store source row numbers or original matched values. Groups with more than one source label are explicitly marked; this is template-level review grouping, not a correction to the original ground-truth labels.
+
+**Important distinction:** Grouping occurs on normalised masked text. Two different source messages can collapse into one template if their detected identifiers are replaced by the same placeholders. This is intentional to reduce repeated privacy review, but it must not be used as the exact-message/campaign deduplication strategy for ML train/test splitting. The original dataset remains unchanged.
+
+Four unit tests were added at `backend/tests/test_privacy_review_queue.py` for repeated templates, conflicting source labels, different templates and rows with no candidate patterns. These tests have been committed but have not yet been run locally.
