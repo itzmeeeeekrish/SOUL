@@ -117,6 +117,28 @@ The script:
 
 The message-level CSV contains text. Keep it on the local machine, do not commit it, and do not paste its contents into public tools or issues. Regex masking is not guaranteed anonymisation. Share aggregate counts only. The reported top-class probability is a model score, not calibrated confidence.
 
+## Validation-only error analysis (11 November 2026)
+
+The new error-analysis script was run against the saved validation split. It verified the validation CSV's SHA-256 against the original baseline metadata. It read no test data and did not retrain the model.
+
+| Validation result | Count |
+|---|---:|
+| Total | 856 |
+| Correct | 825 |
+| Misclassified | 31 |
+| Accuracy | 0.9638 |
+
+Misclassification pairs (actual → predicted):
+
+| Error pair | Count |
+|---|---:|
+| Spam → scam | 14 |
+| Legitimate → spam | 7 |
+| Scam → spam | 5 |
+| Spam → legitimate | 5 |
+
+The main observed issue is distinguishing spam from scam: 14 of the 31 errors are spam predicted as scam. This is a hypothesis for local example review, not yet an explanation of why the messages were confused. Inspect the private validation error CSV locally and categorise the likely reasons before changing the model. Do not share message text; share aggregate review categories only. Keep the initial test set untouched.
+
 ## Important limitations
 
 - This is an exploratory source-derived baseline, not production validation.
