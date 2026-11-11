@@ -4,9 +4,9 @@
 
 SOUL is a proposed Android-first assistant intended to help people—especially elderly and less technically confident smartphone users—recognise suspicious digital activity, understand the evidence, and take safer next steps.
 
-> **Project status: Milestone 2 — first real-data text baseline implementation in progress**
+> **Project status: Milestone 2 — first text-only ML baseline trained and evaluated**
 >
-> Repository and backend foundations are complete. A Mendeley 2022 SMS candidate has been structurally inspected and processed into a local, redacted development derivative. Exact-text label conflicts are quarantined; a deterministic 70/15/15 grouped split has been generated locally. The last full local test run before adding baseline-specific tests passed 24 tests. Seven baseline-helper tests have since been added and await a run after installing the pinned ML dependencies. The TF-IDF + Logistic Regression training script is committed but has not yet been run. Source/privacy approval, external validation and all financial-integrity, RAG and Android features remain pending.
+> Repository and backend foundations are complete. A Mendeley 2022 SMS candidate has been structurally inspected and processed into a local, redacted development derivative. Exact-text label conflicts are quarantined; a deterministic 70/15/15 grouped split has been generated locally. The first TF-IDF + Logistic Regression baseline has been trained and evaluated: validation macro-F1 0.8682; initial test macro-F1 0.8915. The full local test suite passes (31 tests). These are exploratory results on this dataset, not real-world fraud-detection accuracy. Source/privacy approval and external campaign-independent validation remain pending; financial-integrity, RAG and Android features are not yet implemented.
 
 ## The problem
 
@@ -69,7 +69,7 @@ The repository contains the documented three-class schema, annotation guide, 24-
 
 The raw third-party archive, prepared messages, split CSVs and model artefacts are kept under Git-ignored `data/raw/` and `data/private/`; they are not committed. The candidate's licence and source are documented in [data/source_review.md](data/source_review.md), but this does not itself approve redistribution or establish that the data is anonymous.
 
-The first text-only TF-IDF + Logistic Regression implementation is in [data/train_text_baseline.py](data/train_text_baseline.py), with its fixed recipe and limitations in [data/model_baseline.md](data/model_baseline.md). It has not yet been executed, so no model performance is reported. The synthetic CSV validator remains available via `python data/validate_dataset.py`.
+The first text-only TF-IDF + Logistic Regression implementation is in [data/train_text_baseline.py](data/train_text_baseline.py), with its fixed recipe, initial validation/test metrics and limitations in [data/model_baseline.md](data/model_baseline.md). The model and aggregate metrics are stored locally under Git-ignored `data/private/model_artifacts/`; they are not committed. The full backend test suite passes (31 tests). The synthetic CSV validator remains available via `python data/validate_dataset.py`.
 
 See [data/dataset_schema.md](data/dataset_schema.md), [data/annotation_guide.md](data/annotation_guide.md), [data/source_review.md](data/source_review.md), [data/split_strategy.md](data/split_strategy.md) and [data/model_baseline.md](data/model_baseline.md).
 
