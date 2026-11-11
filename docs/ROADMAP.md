@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector (synthetic v2 dataset and campaign-safe split validated locally; real-source approval pending). Milestones 0 and 1 are complete.  
+**Current stage:** Milestone 2 – Data and baseline communication detector (synthetic v2 split validated locally; Mendeley 2022 archive structurally inspected and first metadata/duplicate audit completed; privacy, conflict review and source approval pending). Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
