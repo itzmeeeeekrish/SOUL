@@ -240,4 +240,22 @@ Each output group records occurrence count, source-label counts, a source-label 
 
 **Important distinction:** Grouping occurs on normalised masked text. Two different source messages can collapse into one template if their detected identifiers are replaced by the same placeholders. This is intentional to reduce repeated privacy review, but it must not be used as the exact-message/campaign deduplication strategy for ML train/test splitting. The original dataset remains unchanged.
 
-Four unit tests were added at `backend/tests/test_privacy_review_queue.py` for repeated templates, conflicting source labels, different templates and rows with no candidate patterns. These tests have been committed but have not yet been run locally.
+Four unit tests were added at `backend/tests/test_privacy_review_queue.py` for repeated templates, conflicting source labels, different templates and rows with no candidate patterns. The user ran the backend test suite locally: `5 passed in 1.43s`.
+
+
+### Grouped masked-template queue generated and tested locally (11 November 2026)
+
+The user ran `python data/build_privacy_review_queue.py` against the local archive. Results:
+
+- Source rows read: 5,971.
+- Rows with candidate patterns: 907.
+- Unique masked templates: 705.
+- Repeated occurrences grouped: 202.
+- Masked templates with multiple source labels: 35.
+- Candidate rows by source label: ham 20, smishing 605, spam 282.
+
+The 35 groups are cross-label **masked-template groups**, not necessarily true exact-text label conflicts. Different source messages can collapse to the same template after URLs/numbers are masked. The earlier audit independently found 34 exact normalised-text conflict groups (smishing + spam); these two counts must not be treated as equivalent.
+
+The local backend test run returned `5 passed in 1.43s`. This confirms the current test suite passed, including the grouped-review tests. No model training, source approval or final privacy clearance has occurred.
+
+**Recommended next review:** Open the local grouped queue and filter `source_label_conflict=yes` to inspect those 35 masked templates first. Do not upload or paste their contents. Determine locally whether each is a true same-text label conflict or merely different messages that became identical after masking. Only after this small high-priority review should we decide whether any additional sample is needed.
