@@ -169,6 +169,8 @@ The uploaded validation misclassification CSV was reviewed without reproducing i
 
 The uploaded CSV was used only for this analysis. It is not copied into the repository. The initial test set remains untouched.
 
+**Prepared-data provenance update (11 November 2026):** The preparation utility now records original `source_label` separately from the provisional `label`, plus blank/pending human-review fields. The regenerated local file passed validation: 5,797 records, all 5,797 pending review, zero invalid mappings or review-state inconsistencies. Full backend suite at that point: 45 passed in 5.25s. The historical baseline split and model remain unchanged.
+
 ## Important limitations
 
 - This is an exploratory source-derived baseline, not production validation.
@@ -180,3 +182,10 @@ The uploaded CSV was used only for this analysis. It is not copied into the repo
 - High recall may increase false alarms; model output must be an advisory signal with reasons and safe next steps, not proof of fraud.
 
 A meaningful next evaluation needs independently sourced, privacy-reviewed, campaign-separated and language-diverse data, plus human-reviewed labels.
+
+
+## Blinded validation-error review queue
+
+The local helper `data/build_validation_label_review_queue.py` creates a blind review CSV and a separate source/model key for the known validation misclassifications. It verifies the saved validation fingerprint and exact mapping back to the prepared data.
+
+The blind CSV contains message text and blank SOUL review fields, but no source label, provisional label or model prediction. The separate key contains labels and model score but no message text. Review the blind file first; do not open the key until independent labels are complete. The 31 examples were selected because the baseline misclassified them, so this queue is not a representative dataset sample. Both files remain in Git-ignored `data/private/model_artifacts/`. Never commit or share the message-level CSV.
