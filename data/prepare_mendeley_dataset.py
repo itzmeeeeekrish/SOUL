@@ -24,7 +24,6 @@ from pathlib import Path
 
 from audit_mendeley_privacy import (
     ARCHIVE_PATH,
-    PATTERN_NAMES,
     detect_patterns,
     find_nested_member,
 )
@@ -143,7 +142,6 @@ def prepare_rows(rows):
                 "source_url": source_yes_no(row.get("URL")),
                 "source_email": source_yes_no(row.get("EMAIL")),
                 "source_phone": source_yes_no(row.get("PHONE")),
-                "source_row_number": source_row_number,
             }
         )
 
@@ -189,9 +187,33 @@ def prepare_rows(rows):
             "phone": int(features["phone_long_number"]),
         }
 
-        for name, source_value in source_flags.items():
-            if source_value is not None and source_value != recomputed_flags[name]:
-                stats[f"{name}_flag_mismatches"] += 1
+        for record in records:
+            record_source_flags = {
+                "url": record["source_url"],
+                "email": record["source_email"],
+                "phone": record["source_phone"],
+            }
+            for name, source_value in record_source_flags.items():
+                if (
+                    source_value is not None
+                    and source_value != recomputed_flags[name]
+                ):
+                    stats[f"{name}_flag_mismatches"] += 1
+
+        prepared_source_flags = {}
+        for name in ("url", "email", "phone"):
+            distinct_values = {
+                record[f"source_{name}"]
+                for record in records
+                if record[f"source_{name}"] is not None
+            }
+            if len(distinct_values) > 1:
+                stats[f"{name}_flag_inconsistent_duplicate_groups"] += 1
+                prepared_source_flags[name] = ""
+            elif distinct_values:
+                prepared_source_flags[name] = next(iter(distinct_values))
+            else:
+                prepared_source_flags[name] = ""
 
         prepared.append(
             {
@@ -206,15 +228,9 @@ def prepare_rows(rows):
                 ),
                 "has_12_digit_candidate": int(features["twelve_digit"]),
                 "has_pan_like_candidate": int(features["pan_like"]),
-                "source_url_flag": (
-                    "" if source_flags["url"] is None else source_flags["url"]
-                ),
-                "source_email_flag": (
-                    "" if source_flags["email"] is None else source_flags["email"]
-                ),
-                "source_phone_flag": (
-                    "" if source_flags["phone"] is None else source_flags["phone"]
-                ),
+                "source_url_flag": prepared_source_flags["url"],
+                "source_email_flag": prepared_source_flags["email"],
+                "source_phone_flag": prepared_source_flags["phone"],
             }
         )
 
@@ -303,6 +319,10 @@ def main():
     print("  URL:", stats["url_flag_mismatches"])
     print("  EMAIL:", stats["email_flag_mismatches"])
     print("  PHONE:", stats["phone_flag_mismatches"])
+    print("  Duplicate groups with inconsistent source flags:")
+    print("    URL:", stats["url_flag_inconsistent_duplicate_groups"])
+    print("    EMAIL:", stats["email_flag_inconsistent_duplicate_groups"])
+    print("    PHONE:", stats["phone_flag_inconsistent_duplicate_groups"])
 
     print("\nLocal output files:")
     print("  Prepared:", PREPARED_PATH)
