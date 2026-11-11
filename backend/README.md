@@ -129,7 +129,7 @@ Do not rerun `data/create_mendeley_splits.py` or `data/train_text_baseline.py` a
 After the baseline error-analysis report exists and the regenerated prepared CSV has passed validation, run from the repository root:
 
 ```powershell
-python data\\build_validation_label_review_queue.py
+python data\build_validation_label_review_queue.py
 ```
 
 This generates two local files under `data/private/model_artifacts/`:
