@@ -45,8 +45,8 @@ A single event can be an incident. Cross-channel correlation is optional context
 - [x] Assign synthetic v2 campaign groups to train/validation/test in `data/split_strategy.md`; verify that no campaign crosses splits. Real-source/campaign split still requires approved third-party data.
 - [x] Build a local preprocessing utility for label mapping, exact-text deduplication, conflict quarantine and candidate-pattern redaction.
 - [x] Create and validate a deterministic grouped train/validation/test split for the prepared Mendeley candidate; keep identical masked text within one partition.
-- [ ] Run the fixed text-only TF-IDF + Logistic Regression baseline and record validation/test metrics.
-- [ ] Report precision, recall, F1, confusion matrix and false-positive rate.
+- [x] Run the fixed text-only TF-IDF + Logistic Regression baseline and record validation/test metrics.
+- [x] Report precision, recall, F1, confusion matrix and false-positive rate.
 
 **Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed on 10 November 2026. The Mendeley candidate exists only as a local ignored derivative; source/privacy approval remains pending. The grouped 70/15/15 split was generated locally and passed integrity checks. The first ML baseline has now been trained and evaluated locally; the complete backend suite reports 31 passed. Metrics and limitations are recorded in `data/model_baseline.md`. Dataset source/privacy approval and external campaign-independent validation remain pending.
 
