@@ -240,7 +240,7 @@ Each output group records occurrence count, source-label counts, a source-label 
 
 **Important distinction:** Grouping occurs on normalised masked text. Two different source messages can collapse into one template if their detected identifiers are replaced by the same placeholders. This is intentional to reduce repeated privacy review, but it must not be used as the exact-message/campaign deduplication strategy for ML train/test splitting. The original dataset remains unchanged.
 
-Four unit tests were added at `backend/tests/test_privacy_review_queue.py` for repeated templates, conflicting source labels, different templates and rows with no candidate patterns. The user ran the backend test suite locally: `5 passed in 1.43s`.
+Five unit tests now cover repeated templates, masked-template collisions, exact-text label conflicts, separate templates and rows with no candidate patterns. The prior local backend test suite run before this latest refinement reported `5 passed in 1.43s`; the updated five-test file has not yet been rerun.
 
 
 ### Grouped masked-template queue generated and tested locally (11 November 2026)
@@ -259,3 +259,16 @@ The 35 groups are cross-label **masked-template groups**, not necessarily true e
 The local backend test run returned `5 passed in 1.43s`. This confirms the current test suite passed, including the grouped-review tests. No model training, source approval or final privacy clearance has occurred.
 
 **Recommended next review:** Open the local grouped queue and filter `source_label_conflict=yes` to inspect those 35 masked templates first. Do not upload or paste their contents. Determine locally whether each is a true same-text label conflict or merely different messages that became identical after masking. Only after this small high-priority review should we decide whether any additional sample is needed.
+
+
+### Exact-conflict distinction added to the review queue (11 November 2026)
+
+The earlier output contained 35 masked templates with multiple source labels. To avoid treating every such group as a true label conflict, `data/build_privacy_review_queue.py` has been enhanced. While processing the original text locally, it now records only:
+- Number of distinct normalised original texts inside each masked template.
+- Whether any identical normalised original text has more than one source label.
+
+The output adds `distinct_source_texts` and `has_exact_text_label_conflict`. It still exports no original raw text or matched values. This allows the user to distinguish an exact-text label conflict from different source messages collapsing to the same masked template.
+
+Five unit tests now cover same-label repeated templates, different texts collapsing to one masked template, identical normalised text with conflicting labels, separate masked templates and messages without candidate patterns. The latest code and tests are committed but have not yet been run locally.
+
+**Next:** Pull the latest code, rerun `python data/build_privacy_review_queue.py`, then run the backend pytest suite. Use `has_exact_text_label_conflict=yes` to prioritise genuine conflicting-label groups; use `source_label_conflict=yes` alone only as a broader masked-template collision indicator. Keep all queue contents local.
