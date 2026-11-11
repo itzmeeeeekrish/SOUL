@@ -3,8 +3,8 @@
 Expected input:
     data/private/mendeley_privacy_review_masked.csv
 
-Add a manual_review_category column in a spreadsheet editor and use one of
-the allowed values below. This script prints counts only; it never prints
+The CSV includes an empty manual_review_category column. Fill it locally with
+one allowed category per row. This script prints counts only; it never prints
 masked message text or row identifiers.
 
 Run from the repository root:
@@ -36,7 +36,7 @@ ALLOWED_CATEGORIES = {
 }
 
 
-def summarize_review(path: Path) -> tuple[int, int, Counter, dict]:
+def summarize_review(path: Path):
     if not path.is_file():
         raise FileNotFoundError(
             f"Review CSV not found: {path}\n"
@@ -62,8 +62,8 @@ def summarize_review(path: Path) -> tuple[int, int, Counter, dict]:
         if missing:
             raise ValueError(
                 "Review CSV needs a manual_review_category column. "
-                "Open it locally, add that column, classify each row, and save "
-                "as CSV UTF-8. Missing columns: "
+                "Run the latest data/create_masked_privacy_review.py again "
+                "to generate it. Missing columns: "
                 + ", ".join(sorted(missing))
             )
 
@@ -98,7 +98,9 @@ def main() -> None:
             INPUT_PATH
         )
     except (OSError, UnicodeError, csv.Error, ValueError) as error:
-        raise SystemExit(f"Privacy review summary could not complete: {error}") from error
+        raise SystemExit(
+            f"Privacy review summary could not complete: {error}"
+        ) from error
 
     classified = total - unclassified - invalid
 
