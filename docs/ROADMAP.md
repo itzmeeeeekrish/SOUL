@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector (synthetic v2 split validated locally; Mendeley 2022 archive and aggregate privacy audit reviewed; grouped masked-template review queue and tests added but awaiting local execution; label-conflict review and source approval pending). Milestones 0 and 1 are complete.  
+**Current stage:** Milestone 2 – Data and baseline communication detector (synthetic v2 split and initial grouped-queue tests validated locally; enhanced queue now distinguishes exact-text label conflicts from masked-template collisions and awaits rerun; privacy/source approval pending). Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -160,6 +160,6 @@ Update this section after each meaningful development session.
 
 | 2026-11-11 | Added `data/build_privacy_review_queue.py` to group flagged messages by normalised masked template; added four unit tests | Code and test files verified on GitHub; local queue generation and tests are still pending | Pull, run the grouped queue generator and execute the backend tests; inspect one representative per masked template and prioritise label conflicts/ambiguous cases |
 
-| 2026-11-11 | Ran grouped privacy-review queue and backend tests locally | 5,971 source rows; 907 flagged; 705 unique masked templates; 202 occurrences grouped; 35 masked templates with multiple source labels. Backend pytest: 5 passed in 1.43s. The 35 template collisions are not necessarily the 34 exact-text label conflicts identified earlier | Filter `source_label_conflict=yes` in the local queue and review those 35 masked templates first; keep all contents local |
+| 2026-11-11 | Ran grouped privacy-review queue and backend tests locally | 5,971 source rows; 907 flagged; 705 unique masked templates; 202 occurrences grouped; 35 masked templates with multiple source labels. Backend pytest: 5 passed in 1.43s. The 35 template collisions are not necessarily the 34 exact-text label conflicts identified earlier | Pull and rerun the enhanced queue and pytest; then filter `has_exact_text_label_conflict=yes` and review only genuine exact-text conflicts locally |
 
 | 2026-11-11 | Enhanced grouped privacy queue to distinguish exact-text label conflicts from different messages merged by masking; expanded unit tests to five cases | Code and tests committed; the earlier local suite was 5 passed before this refinement. Latest version still needs local execution | Pull, rerun the grouped queue, run pytest, then review only groups with `has_exact_text_label_conflict=yes` first |
