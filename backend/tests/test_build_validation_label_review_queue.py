@@ -189,3 +189,20 @@ def test_build_review_records_rejects_missing_prepared_text_match():
             [make_validation_row()],
             [make_prepared_row(text="another masked message")],
         )
+
+
+
+def test_blind_queue_neutralizes_formula_like_message_text():
+    message = "=HYPERLINK(\"https://example.invalid\")"
+    error = make_error_row(text=message)
+    validation = make_validation_row(text=message)
+    prepared = make_prepared_row(text=message)
+
+    blind, key = build_review_records(
+        [error],
+        [validation],
+        [prepared],
+    )
+
+    assert blind[0]["text"].startswith("'=")
+    assert key[0]["review_id"] == "S00001"
