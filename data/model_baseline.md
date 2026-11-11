@@ -101,6 +101,22 @@ spam                  7       8    51
 
 The spam class is the main improvement target: 51 of 66 spam messages were correctly identified. Use validation data for error analysis and subsequent experiments. Do not tune on this initial test result. The test split groups exact masked text, not near-duplicate campaigns, and is small for the minority classes.
 
+## Validation-only error analysis
+
+After the baseline has been trained, run this from the repository root:
+
+```powershell
+python data\\analyze_baseline_errors.py
+```
+
+The script:
+- Reads `validation.csv` only; it does not open `test.csv` or retrain the model.
+- Checks the validation file's SHA-256 against the metadata saved by the baseline run, so it cannot silently analyse a different split.
+- Writes an aggregate report to `data/private/model_artifacts/validation_error_summary.json`.
+- Writes the misclassified validation messages to `data/private/model_artifacts/validation_misclassified.csv` for local inspection.
+
+The message-level CSV contains text. Keep it on the local machine, do not commit it, and do not paste its contents into public tools or issues. Regex masking is not guaranteed anonymisation. Share aggregate counts only. The reported top-class probability is a model score, not calibrated confidence.
+
 ## Important limitations
 
 - This is an exploratory source-derived baseline, not production validation.
