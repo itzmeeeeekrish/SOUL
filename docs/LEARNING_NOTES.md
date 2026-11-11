@@ -539,3 +539,22 @@ No. Regex only flags a possible pattern. The match may be a false positive, and 
 **Q3. Why does the privacy script print counts instead of messages?**
 
 Taaki dataset audit karte waqt raw SMS ya possible personal identifiers terminal logs, screenshots or shared chat mein expose na hon.
+
+
+## 22. First privacy scan — aggregate findings
+
+The initial local run of `python data\audit_mendeley_privacy.py` completed successfully and reported:
+
+- 5,971 source rows; 0 blank TEXT rows.
+- 24 email/UPI-like candidates.
+- 261 URL/domain-like candidates.
+- 709 phone/long-number candidates.
+- 40 12-digit numeric candidates.
+- 0 PAN-like candidates.
+- 907 rows with at least one candidate pattern (about 15.2%).
+
+**How to interpret this:** These counts overlap. One row may contain multiple kinds of patterns. A long digit sequence may be an OTP, date, transaction reference or account-like number rather than a phone number. A 12-digit match does not establish that it is Aadhaar. No PAN-like pattern was found, but regex limitations mean this does not prove no PAN information exists.
+
+The next version of the script prints aggregate pattern counts by source label and counts of pattern combinations. It still does not print or save messages or matched values. The enhanced version is committed but has not yet been run locally.
+
+**Decision:** Do not delete all 907 flagged rows automatically. First review the label-wise distribution and pattern combinations. Then locally review any candidate examples only in a private environment, mask them where needed, and keep raw third-party data out of GitHub and chat.
