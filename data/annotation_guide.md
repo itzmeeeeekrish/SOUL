@@ -90,3 +90,16 @@ Dataset v2 has four related synthetic variants in each campaign group. All four 
 ## Starter dataset note
 
 The original 24 rows in `data/synthetic/sms_messages.csv` and the 84 rows in `data/synthetic/sms_messages_v2.csv` are hand-authored educational examples. They are deliberately balanced across the three labels and should not be treated as a representative sample of real incoming messages or used to claim production accuracy.
+
+
+## Source labels and SOUL review
+
+For third-party source examples, preserve the publisher's original label separately from SOUL's label. The current Mendeley working derivative stores:
+
+- `source_label`: original source class (`ham`, `smishing`, or `spam`).
+- `label`: provisional mapping used by the historical baseline.
+- `soul_label`: blank until a human review is completed.
+- `review_status`: `pending`, `reviewed`, or `needs_review`.
+- `annotation_note`: reason for a completed review.
+
+Never copy the model prediction into `soul_label` automatically. Read the label review protocol before adjudicating borderline promotional, premium-rate or service messages. The initial model/split remains frozen and continues to use the original provisional `label`.
