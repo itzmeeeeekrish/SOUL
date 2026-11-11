@@ -1115,3 +1115,35 @@ Updated prepared-data fields:
 **Important:** Model ki prediction ko copy karke `soul_label` mat bharna. Model galat ho sakta hai; review independent hona chahiye.
 
 The preparation code and validator have been updated, but local regeneration and verification are still pending. Existing train/validation/test files and the first model must remain unchanged.
+
+
+## 38. Prepared dataset provenance validation completed
+
+The updated preparation script was run locally. It retained all original aggregate counts:
+
+- Source rows: 5,971.
+- Prepared unique records: 5,797.
+- Conflicting exact-text rows quarantined: 68.
+- Provisional classes: legitimate 4,834, scam 528, spam 435.
+- Original source classes: ham 4,834, smishing 528, spam 435.
+
+The validator confirmed:
+- 5,797 unique IDs and no blank text.
+- Zero invalid source labels or provisional labels.
+- Zero mismatches in the original source → provisional mapping.
+- All 5,797 records have `review_status=pending`.
+- Zero invalid SOUL labels or review-state inconsistencies.
+- Zero residual matches for the known privacy regex patterns (this is not proof of anonymity).
+
+The existing train/validation/test split and original model were not rebuilt. Full backend test suite: `45 passed in 5.25s`.
+
+## 39. Next: blind review of validation mistakes
+
+A new local helper creates two separate files from the 31 known validation errors:
+
+- `validation_label_review_blind.csv`: contains the message and blank SOUL review fields, but hides original source labels and model predictions.
+- `validation_label_review_key.csv`: contains source label, provisional label and model prediction, but no message text.
+
+Run `python data\\build_validation_label_review_queue.py` from the repository root after running the tests. Review the blind file first; do not open the key until independent labels are complete. This is an error-focused sample, not a representative sample of the dataset. Keep both files local and private.
+
+The new queue builder has 12 unit tests. The previous 45-test result does not include these new tests; run the full suite again after pulling.
