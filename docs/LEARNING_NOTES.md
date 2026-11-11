@@ -831,3 +831,33 @@ A residual regex count of zero is only a check against our known patterns. It do
 The five validator tests cover a valid record, residual URL detection, same-label masked duplicates, cross-label masked collisions and invalid fields/IDs. These tests are committed but have not yet been run locally.
 
 **Next:** Pull, run the prepared-data validator, then run the complete pytest suite. Only after reviewing masked-text collisions should we create a leakage-aware split. The first model should use text-only features.
+
+
+## 29. Prepared-data validation result
+
+The local prepared-data validator reported:
+- 5,797 records and 5,797 unique record IDs.
+- No missing IDs, duplicate IDs, blank text, invalid labels, invalid binary metadata values or invalid source-occurrence values.
+- Source occurrences represented: 5,903. This equals 5,971 original rows minus the 68 rows quarantined for contradictory exact-text labels.
+- Zero residual matches for the same regex patterns used by our redaction code.
+- 5,722 unique normalised masked texts.
+- 37 repeated masked-text groups containing 112 records.
+- 1 repeated masked-text group with different labels.
+
+**Important:** Zero residual regex matches only says that the known patterns used by our own redaction rules were removed. It is not proof that all personal information has been removed. Names, addresses and other unrecognised context may remain.
+
+### Why we need one more grouping step before train/test split
+
+The prepared CSV has 5,797 rows, but 5,722 unique masked texts. The same final text must not be split across train and test. If identical model input appears in both, evaluation may be too optimistic. If one identical masked text has different labels, the model receives conflicting targets for the exact same input.
+
+So the split builder will:
+1. Group records by normalised final masked text.
+2. Quarantine a group if its same masked text has more than one label.
+3. Collapse same-label repeated masked texts to one model row (sum the source occurrence count for audit).
+4. Stratify the remaining unique texts by class into train/validation/test.
+5. Use a fixed random seed so the same input produces the same split.
+
+The split will prevent exact masked-text leakage. It will not discover every near-duplicate campaign or prove generalisation to new fraud campaigns.
+
+The user ran the full backend test suite after adding the prepared-data validator:
+`python -m pytest -q` → `18 passed in 0.92s`.
