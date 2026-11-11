@@ -347,3 +347,16 @@ A prepared-data validator and five tests have now been added:
 - `backend/tests/test_validate_prepared_dataset.py` contains five aggregate validation tests.
 
 These files are committed but have not yet been run locally. The validator reads only `data/private/mendeley_prepared.csv` and prints aggregate values only. Zero regex matches is not proof of anonymity. No split or model training is included.
+
+
+### Prepared-data validation completed locally (11 November 2026)
+
+The user ran `python data/validate_prepared_dataset.py` against the local prepared derivative. It reported 5,797 records, all record IDs unique, no missing IDs, no duplicate IDs, no blank text, no invalid labels, no invalid binary metadata and no invalid source-occurrence values. The sum of `source_occurrences` is 5,903, matching the 5,971 source rows after excluding 68 quarantined conflict rows.
+
+The prepared class counts remain legitimate 4,834 (83.4%), scam 528 (9.1%) and spam 435 (7.5%). The current regex set found zero residual candidates in the prepared text. This only means the same known patterns used by the redaction pass were not found again; it is not independent proof of anonymisation and cannot detect every name, address, identifier or sensitive context.
+
+After redaction there are 5,722 unique normalised masked texts among 5,797 prepared records: 37 repeated masked-text groups cover 112 records. One repeated masked-text group contains different labels. This is a masking collision, not necessarily a source-label error. For text-only ML, the same final text must not appear in different splits with different labels. The split builder will quarantine any cross-label masked-text group and collapse same-label identical masked texts to one model row to avoid duplicate weighting.
+
+The user also ran the full backend test suite: `18 passed in 0.92s`.
+
+A 70/15/15 stratified split helper is being added using only the Python standard library. It will group on normalised final masked text, create deterministic train/validation/test partitions with a fixed seed, and keep identical texts together. This exact-text split does not detect near-duplicate campaigns; results must be treated as exploratory until independent campaign/source holdouts are available.
