@@ -662,7 +662,7 @@ python data\build_privacy_review_queue.py
 
 The script prints the number of candidate rows, number of masked templates, number of repeated occurrences grouped and number of groups with conflicting source labels. Review one template at a time, especially conflict groups and ambiguous numeric contexts. You do not need to review every occurrence. The output is local under `data/private/`, is Git-ignored and may still contain personal context missed by regex. Never upload or share it.
 
-Four tests were added in `backend/tests/test_privacy_review_queue.py`. They cover two different numbers collapsing to the same masked template, preserving a source-label conflict, keeping different templates separate and excluding messages with no candidate. The user ran the backend suite locally and reported `5 passed in 1.43s`.
+Five tests are now in `backend/tests/test_privacy_review_queue.py`. They cover same-label repeated templates, different messages collapsing to the same masked template, identical normalised original text with conflicting labels, different templates and messages with no candidate. The earlier backend suite run passed (`5 passed in 1.43s`), but this latest test refinement has not yet been run locally.
 
 **Next command after pulling:** From the repository root run `git pull origin main`; then `python data\build_privacy_review_queue.py`. Share only the aggregate counts printed by the script.
 
@@ -685,3 +685,16 @@ The backend test suite was run locally:
 `python -m pytest -q` → `5 passed in 1.43s`.
 
 **Next:** Open `data/private/mendeley_privacy_review_unique_templates.csv` locally and filter `source_label_conflict` to `yes`. Review these 35 templates first. For each, decide privately whether it is (a) the same original text with inconsistent labels, (b) different messages merged by masking, or (c) unclear. Do not paste masked messages into chat. There is no need to manually inspect all 705 templates yet.
+
+
+### Distinguish real label conflicts from masked-template collisions
+
+A masked template can combine different original messages because their URLs or numbers become the same placeholder. So `source_label_conflict=yes` alone does not prove that the exact same original message received different labels.
+
+The updated `data/build_privacy_review_queue.py` now compares the normalised original message text internally (case-folding and collapsing whitespace) and exports only two safe fields:
+- `distinct_source_texts`: how many different normalised original messages collapsed into this masked template.
+- `has_exact_text_label_conflict`: yes only when the same normalised original text occurs with more than one label.
+
+No original message text or matched number/link is written to the queue. Use `has_exact_text_label_conflict=yes` to prioritise genuine exact-text label conflicts. Other multi-label templates are masking collisions and may not need label correction.
+
+The tests were expanded to check this distinction. **Pull and rerun the script and tests before relying on the new columns; the enhanced version has not yet been run locally.**
