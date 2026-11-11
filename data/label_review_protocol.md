@@ -71,8 +71,8 @@ Do not infer a SOUL label from the model prediction. Keep the predicted label as
 A helper script creates a review sheet for the 31 known validation misclassifications:
 
 ```powershell
-python data\\analyze_baseline_errors.py
-python data\\build_validation_label_review_queue.py
+python data\analyze_baseline_errors.py
+python data\build_validation_label_review_queue.py
 ```
 
 The builder verifies the validation split hash, checks every error row against its exact validation text and label, maps the masked text back to the prepared source-label provenance, and rejects ambiguous source-label matches.
