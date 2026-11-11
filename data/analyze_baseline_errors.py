@@ -130,7 +130,7 @@ def build_error_summary(y_true, y_pred):
 
 
 def save_error_csv(path, errors):
-    """Save message-level errors to a local CSV file."""
+    """Save message-level errors safely to a local CSV file."""
     fieldnames = [
         "validation_row",
         "actual_label",
@@ -140,10 +140,20 @@ def save_error_csv(path, errors):
         "text",
     ]
 
+    safe_rows = []
+    for error in errors:
+        safe_error = dict(error)
+        message = str(safe_error.get("text") or "")
+        first_visible = message.lstrip()[:1]
+        if first_visible in ("=", "+", "-", "@"):
+            # Reduce spreadsheet formula-injection risk when a user opens CSV.
+            safe_error["text"] = "'" + message
+        safe_rows.append(safe_error)
+
     with path.open("w", encoding="utf-8", newline="") as output:
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(errors)
+        writer.writerows(safe_rows)
 
 
 def main():
