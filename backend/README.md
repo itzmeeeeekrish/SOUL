@@ -67,7 +67,7 @@ Still inside the `backend` folder:
 python -m pytest -q
 ```
 
-The health test checks the HTTP status and the important response fields. The original health-only test passed on 10 November 2026 (1 passed, no warnings). The broader suite now also covers data auditing, preparation, split generation and the ML baseline helpers. The most recent full local run before adding baseline-specific tests was 24 passed in 1.16s. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
+The health test checks the HTTP status and the important response fields. The broader suite also covers data auditing, preparation, split generation and ML baseline helpers. The latest full local run on 11 November 2026 passed: 31 passed in 4.54s. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
 
 ## 4. Configuration
 
