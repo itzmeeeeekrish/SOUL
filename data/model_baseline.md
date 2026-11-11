@@ -72,7 +72,7 @@ These files are Git-ignored. Do not upload model artefacts or private data to Gi
 
 ## Initial local results (11 November 2026)
 
-The fixed first model recipe was run once locally. The complete backend test suite subsequently passed: 31 passed in 4.54 seconds.
+The fixed first model recipe was run once locally. The complete backend test suite subsequently passed: 39 passed in 5.16 seconds.
 
 | Metric | Validation | Initial test holdout |
 |---|---:|---:|
@@ -119,7 +119,7 @@ The message-level CSV contains text. Keep it on the local machine, do not commit
 
 ## Validation-only error analysis (11 November 2026)
 
-The new error-analysis script was run against the saved validation split. It verified the validation CSV's SHA-256 against the original baseline metadata. It read no test data and did not retrain the model.
+The new error-analysis script was run against the saved validation split, and its eight new unit tests are included in the full suite result (39 passed in 5.16 seconds). It verified the validation CSV's SHA-256 against the original baseline metadata. It read no test data and did not retrain the model.
 
 | Validation result | Count |
 |---|---:|
