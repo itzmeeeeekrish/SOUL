@@ -633,3 +633,35 @@ python data\summarize_privacy_review.py
 It prints aggregate totals by category and source label only. It does not print message text, matched values or source row numbers. It checks for blank or unrecognised category entries so the review does not silently appear complete.
 
 **Current status:** Masked review CSV created locally; no manual row classification has been completed yet. Count-only summary helper committed but not yet run.
+
+
+## 25. Reduce manual privacy review using masked templates
+
+We should not ask a person to classify all 907 flagged source rows one by one. Repeated message formats can be reviewed as a group.
+
+Added `data/build_privacy_review_queue.py`. It reads the original ZIP locally, detects candidates, masks them, and groups rows by the normalised masked text. It creates:
+
+`data/private/mendeley_privacy_review_unique_templates.csv`
+
+Each row in this new file represents one masked template, with:
+- A generated group ID.
+- Number of source messages represented by the template.
+- Source labels and counts for those labels.
+- A flag when the same masked template occurs with different source labels.
+- Detected pattern categories.
+- One representative masked message.
+- An empty manual review category.
+
+This grouping may combine source messages whose actual identifiers differ but whose masked template is the same. That is useful for reviewing privacy patterns, but it is not a claim that the raw messages are exact duplicates. Do not use these masked template groups for ML train/test splitting or delete any original records based on this grouping.
+
+Run from the repository root:
+
+```powershell
+python data\build_privacy_review_queue.py
+```
+
+The script prints the number of candidate rows, number of masked templates, number of repeated occurrences grouped and number of groups with conflicting source labels. Review one template at a time, especially conflict groups and ambiguous numeric contexts. You do not need to review every occurrence. The output is local under `data/private/`, is Git-ignored and may still contain personal context missed by regex. Never upload or share it.
+
+Four tests were added in `backend/tests/test_privacy_review_queue.py`. They cover two different numbers collapsing to the same masked template, preserving a source-label conflict, keeping different templates separate and excluding messages with no candidate. They are committed but not yet run locally.
+
+**Next command after pulling:** From the repository root run `git pull origin main`; then `python data\build_privacy_review_queue.py`. Share only the aggregate counts printed by the script.
