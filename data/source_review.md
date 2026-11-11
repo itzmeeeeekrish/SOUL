@@ -276,3 +276,15 @@ Five unit tests now cover same-label repeated templates, different texts collaps
 The exact-conflict count matches the earlier independent raw-text audit: 34 exact normalised-text conflict groups involving 68 source rows (one smishing and one spam row per conflict group in the earlier audit). The 35 multi-label masked templates are a broader set; at least one is a masked-template collision rather than an exact-text conflict. Do not assume that all 35 have bad labels.
 
 **Next decision:** Quarantine all 68 rows from the 34 exact-text conflict groups from the first supervised baseline unless a later evidence-based relabelling review resolves them. Do not guess which label is correct. Preserve them separately for audit. No manual review of all 705 masked templates is needed at this stage.
+
+
+### Local dataset preparation utility added (11 November 2026)
+
+Added `data/prepare_mendeley_dataset.py` and tests in `backend/tests/test_prepare_mendeley_dataset.py`. The script reads the nested CSV directly from the archive and writes two local, Git-ignored outputs under `data/private/`:
+
+- `mendeley_prepared.csv`: one record per normalised exact message with a consistent source label; maps ham → legitimate, smishing → scam and spam → spam; collapses same-label exact duplicates; masks the current broad URL/domain, email/UPI-like, PAN-like, 12-digit and long-number candidate patterns; retains candidate-presence flags plus the source YES/NO flags for later comparison.
+- `mendeley_quarantine.csv`: grouped masked records for exact-text groups with conflicting labels, blank text and unexpected labels.
+
+The script prints aggregate counts, class counts and mismatches between the supplied URL/EMAIL/PHONE flags and SOUL's independently detected flags. It does not create train/validation/test splits or train a model. The output can still contain information missed by regex and must remain local; no anonymisation guarantee is made.
+
+The script's mapping is provisional. It does not adjudicate whether a source spam item is fraudulent or promotional beyond preserving the source's three classes. Do not use the local derivative in a public release. Four? No: seven unit tests have been added for conflict quarantine, same-label deduplication, label mapping, masking, source-flag mismatch counting, unknown labels and blank text. They are committed but have not yet been run locally.
