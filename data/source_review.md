@@ -240,7 +240,7 @@ Each output group records occurrence count, source-label counts, a source-label 
 
 **Important distinction:** Grouping occurs on normalised masked text. Two different source messages can collapse into one template if their detected identifiers are replaced by the same placeholders. This is intentional to reduce repeated privacy review, but it must not be used as the exact-message/campaign deduplication strategy for ML train/test splitting. The original dataset remains unchanged.
 
-Five unit tests now cover repeated templates, masked-template collisions, exact-text label conflicts, separate templates and rows with no candidate patterns. The prior local backend test suite run before this latest refinement reported `5 passed in 1.43s`; the updated five-test file has not yet been rerun.
+Five unit tests cover repeated templates, masked-template collisions, exact-text label conflicts, separate templates and rows with no candidate patterns. The user reran the updated backend test suite locally after the exact-conflict refinement: `6 passed in 1.14s`.
 
 
 ### Grouped masked-template queue generated and tested locally (11 November 2026)
@@ -271,4 +271,8 @@ The output adds `distinct_source_texts` and `has_exact_text_label_conflict`. It 
 
 Five unit tests now cover same-label repeated templates, different texts collapsing to one masked template, identical normalised text with conflicting labels, separate masked templates and messages without candidate patterns. The latest code and tests are committed but have not yet been run locally.
 
-**Next:** Pull the latest code, rerun `python data/build_privacy_review_queue.py`, then run the backend pytest suite. Use `has_exact_text_label_conflict=yes` to prioritise genuine conflicting-label groups; use `source_label_conflict=yes` alone only as a broader masked-template collision indicator. Keep all queue contents local.
+**Local verification (11 November 2026):** The user pulled the latest code and reran the grouped queue. It reported 5,971 source rows, 907 flagged rows, 705 masked templates, 202 repeated occurrences grouped, 35 templates with multiple labels, and 34 masked templates containing an exact-text label conflict. Candidate rows remain ham 20, smishing 605 and spam 282. The user also ran the updated backend suite: `6 passed in 1.14s`.
+
+The exact-conflict count matches the earlier independent raw-text audit: 34 exact normalised-text conflict groups involving 68 source rows (one smishing and one spam row per conflict group in the earlier audit). The 35 multi-label masked templates are a broader set; at least one is a masked-template collision rather than an exact-text conflict. Do not assume that all 35 have bad labels.
+
+**Next decision:** Quarantine all 68 rows from the 34 exact-text conflict groups from the first supervised baseline unless a later evidence-based relabelling review resolves them. Do not guess which label is correct. Preserve them separately for audit. No manual review of all 705 masked templates is needed at this stage.
