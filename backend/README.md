@@ -67,7 +67,7 @@ Still inside the `backend` folder:
 python -m pytest -q
 ```
 
-The health test checks the HTTP status and the important response fields. The broader suite also covers data auditing, preparation, split generation and ML baseline helpers. The latest full local run on 11 November 2026 passed: 39 passed in 5.16s. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
+The health test checks the HTTP status and the important response fields. The broader suite also covers data auditing, preparation, split generation and ML baseline helpers. The latest full local run after source-label provenance changes passed: 45 passed in 5.25s. A new blinded validation-review queue and its 12 tests have since been added; run the suite again after pulling. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
 
 ## 4. Configuration
 
@@ -122,3 +122,18 @@ python data\\validate_prepared_dataset.py
 ```
 
 Do not rerun `data/create_mendeley_splits.py` or `data/train_text_baseline.py` as part of this step; preserve the existing baseline split and model. Then run the full pytest suite from `backend/`.
+
+
+## 8. Blinded validation label-review queue
+
+After the baseline error-analysis report exists and the regenerated prepared CSV has passed validation, run from the repository root:
+
+```powershell
+python data\\build_validation_label_review_queue.py
+```
+
+This generates two local files under `data/private/model_artifacts/`:
+- `validation_label_review_blind.csv`: text and blank SOUL review fields; no source label or prediction.
+- `validation_label_review_key.csv`: original source label, provisional label, prediction and score; no message text.
+
+Review the blind CSV first. Do not open the key until labels have been entered independently. This is a targeted error sample, not a representative sample. Keep both files private and do not commit or upload them. See [data/label_review_protocol.md](../data/label_review_protocol.md).
