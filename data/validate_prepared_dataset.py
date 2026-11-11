@@ -1,8 +1,9 @@
 """Validate the local prepared Mendeley derivative using aggregate counts only.
 
 Reads data/private/mendeley_prepared.csv and never prints message text or IDs.
-It checks schema, labels, blank records, metadata values, residual regex
-candidates, exact masked-text collisions and class balance.
+It checks source-label provenance, the provisional baseline mapping, pending
+SOUL review fields, schema, metadata, residual patterns and masked-text
+collisions.
 
 Run from the repository root:
     python data/validate_prepared_dataset.py
@@ -23,7 +24,11 @@ INPUT_PATH = (
 
 REQUIRED_COLUMNS = {
     "record_id",
+    "source_label",
     "label",
+    "soul_label",
+    "review_status",
+    "annotation_note",
     "text",
     "source_occurrences",
     "has_url_candidate",
@@ -36,6 +41,13 @@ REQUIRED_COLUMNS = {
     "source_phone_flag",
 }
 ALLOWED_LABELS = {"legitimate", "scam", "spam"}
+SOURCE_LABEL_MAP = {
+    "ham": "legitimate",
+    "smishing": "scam",
+    "spam": "spam",
+}
+ALLOWED_SOUL_LABELS = ALLOWED_LABELS | {"needs_review"}
+ALLOWED_REVIEW_STATUSES = {"pending", "reviewed", "needs_review"}
 BINARY_COLUMNS = {
     "has_url_candidate",
     "has_email_upi_candidate",
@@ -56,6 +68,8 @@ def audit_records(records):
     """Return aggregate validation counts without retaining or printing text."""
     stats = Counter()
     label_counts = Counter()
+    source_label_counts = Counter()
+    review_status_counts = Counter()
     record_ids = set()
     masked_groups = defaultdict(list)
 
@@ -70,11 +84,45 @@ def audit_records(records):
         else:
             record_ids.add(record_id)
 
+        source_label = (row.get("source_label") or "").strip().casefold()
+        if source_label not in SOURCE_LABEL_MAP:
+            stats["invalid_source_label_rows"] += 1
+        else:
+            source_label_counts[source_label] += 1
+
         label = (row.get("label") or "").strip().casefold()
         if label not in ALLOWED_LABELS:
             stats["invalid_label_rows"] += 1
         else:
             label_counts[label] += 1
+
+        expected_label = SOURCE_LABEL_MAP.get(source_label)
+        if expected_label != label:
+            stats["provisional_label_mismatch_rows"] += 1
+
+        soul_label = (row.get("soul_label") or "").strip().casefold()
+        if soul_label and soul_label not in ALLOWED_SOUL_LABELS:
+            stats["invalid_soul_label_rows"] += 1
+
+        review_status = (row.get("review_status") or "").strip().casefold()
+        if review_status not in ALLOWED_REVIEW_STATUSES:
+            stats["invalid_review_status_rows"] += 1
+        else:
+            review_status_counts[review_status] += 1
+
+        annotation_note = (row.get("annotation_note") or "").strip()
+        if review_status == "pending":
+            stats["pending_review_rows"] += 1
+            if soul_label or annotation_note:
+                stats["review_state_mismatch_rows"] += 1
+        elif review_status == "reviewed":
+            stats["reviewed_rows"] += 1
+            if soul_label not in ALLOWED_LABELS or not annotation_note:
+                stats["review_state_mismatch_rows"] += 1
+        elif review_status == "needs_review":
+            stats["needs_review_rows"] += 1
+            if soul_label != "needs_review" or not annotation_note:
+                stats["review_state_mismatch_rows"] += 1
 
         text = (row.get("text") or "").strip()
         if not text:
@@ -113,7 +161,7 @@ def audit_records(records):
                 stats["cross_label_masked_text_collision_groups"] += 1
 
     stats["unique_masked_texts"] = len(masked_groups)
-    return stats, label_counts
+    return stats, label_counts, source_label_counts, review_status_counts
 
 
 def read_prepared_csv(path):
@@ -138,7 +186,7 @@ def read_prepared_csv(path):
 def main():
     try:
         records = read_prepared_csv(INPUT_PATH)
-        stats, label_counts = audit_records(records)
+        stats, label_counts, source_counts, review_counts = audit_records(records)
     except (OSError, UnicodeError, csv.Error, ValueError) as error:
         raise SystemExit(f"Prepared-data validation failed: {error}") from error
 
@@ -148,16 +196,29 @@ def main():
     print("Missing record IDs:", stats["missing_record_ids"])
     print("Duplicate record-ID rows:", stats["duplicate_record_id_rows"])
     print("Blank text rows:", stats["blank_text_rows"])
-    print("Invalid label rows:", stats["invalid_label_rows"])
+    print("Invalid source-label rows:", stats["invalid_source_label_rows"])
+    print("Invalid provisional-label rows:", stats["invalid_label_rows"])
+    print("Provisional mapping mismatches:", stats["provisional_label_mismatch_rows"])
+    print("Invalid SOUL-label rows:", stats["invalid_soul_label_rows"])
+    print("Invalid review-status rows:", stats["invalid_review_status_rows"])
+    print("Review-state inconsistencies:", stats["review_state_mismatch_rows"])
     print("Invalid binary metadata values:", stats["invalid_binary_metadata_values"])
     print("Invalid source occurrence values:", stats["invalid_source_occurrence_values"])
     print("Source occurrences represented:", stats["source_occurrences_total"])
 
-    print("\nClass balance:")
+    print("\nOriginal source-label counts:")
+    for label in ("ham", "smishing", "spam"):
+        print(f"  {label}: {source_counts[label]}")
+
+    print("\nProvisional baseline-label counts:")
     for label in ("legitimate", "scam", "spam"):
         count = label_counts[label]
         percentage = count / stats["total_records"] * 100 if stats["total_records"] else 0
         print(f"  {label}: {count} ({percentage:.1f}%)")
+
+    print("\nSOUL review status:")
+    for status in ("pending", "reviewed", "needs_review"):
+        print(f"  {status}: {review_counts[status]}")
 
     print("\nResidual regex candidates in prepared text:")
     print("  Any candidate:", stats["residual_candidate_rows"])
@@ -175,16 +236,16 @@ def main():
         stats["records_in_masked_text_collision_groups"],
     )
     print(
-        "  Repeated masked-text groups with different labels:",
+        "  Repeated masked-text groups with different provisional labels:",
         stats["cross_label_masked_text_collision_groups"],
     )
 
     print(
-        "\nNote: Regex checks only the patterns known to this project. Zero "
-        "residual matches does not prove the text is anonymous. Masked-text "
-        "collisions can arise because different original identifiers were "
-        "replaced with the same placeholder. This validator does not split "
-        "data or train a model."
+        "\nNote: label is retained as the provisional mapping used by the "
+        "original baseline. source_label preserves the publisher label. "
+        "soul_label remains blank until human review. Regex checks only known "
+        "patterns; zero matches does not prove anonymity. This validator "
+        "does not split data or train a model."
     )
 
 
