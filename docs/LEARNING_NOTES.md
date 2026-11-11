@@ -1060,3 +1060,28 @@ Error pairs (actual → predicted):
 The message-level CSV is private. Review it on your own computer and classify each error into a broad reason (for example: promotional wording, urgency/impersonation wording, legitimate message with suspicious-looking terms, too little context, possible source-label ambiguity, masking removed useful clues, or unsure). A single message may fit more than one pattern; use one primary category consistently for a simple count. Do not paste message text into chat or GitHub. Share only category totals.
 
 The new error-analysis utility has eight unit tests, but the full local test suite still needs to be run after pulling the latest changes.
+
+
+## 35. What the 31 validation mistakes actually show
+
+I reviewed the uploaded misclassification report. The original message contents were not added to GitHub or to these notes.
+
+| Actual → predicted | Count | Simple explanation |
+|---|---:|---|
+| Spam → scam | 14 | Prize offers, free gifts, premium-rate numbers, paid subscriptions and reward claims look scam-like. |
+| Legitimate → spam | 7 | Some are short personal chats; others are service notifications or a genuine bank security warning. |
+| Scam → spam | 5 | These examples look like commercial ads or service promotions, so they resemble spam. |
+| Spam → legitimate | 5 | Some look like neutral service updates or normal conversations even though the source labels them spam. |
+
+**Main finding:** 19/31 mistakes are between spam and scam. This is a class-definition problem we need to investigate, not a reason to immediately increase model complexity.
+
+The source dataset's `smishing` label was mapped to `scam`. But a few examples in that class resemble normal commercial promotions or paid-service advertisements. We should keep the original source label separate from SOUL's own label and write a clear annotation rule before changing labels.
+
+**Simple class distinction for the next annotation review:**
+- **Spam:** Unsolicited promotion, marketing, bulk messages or premium-rate service advertising. It may be annoying or costly, but is not automatically phishing.
+- **Scam/smishing:** A deceptive message that impersonates someone or tricks the recipient into revealing information, paying money, opening a malicious link or taking another harmful action.
+- **Legitimate:** Expected personal, business, banking or service communication that is not deceptive or unsolicited promotion.
+
+These are proposed SOUL annotation rules, not proof that every existing source label follows them.
+
+**Next engineering decision:** Freeze this baseline, clarify labels and add representative hard-negative examples first. Do not tune against the test set, and do not automatically relabel the 19 spam/scam cases.
