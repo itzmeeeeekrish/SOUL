@@ -730,7 +730,7 @@ python data\prepare_mendeley_dataset.py
 
 It reads the original nested ZIP and creates two files under `data/private/`:
 
-1. `mendeley_prepared.csv`: maps the source labels to SOUL classes, groups messages by case-insensitive text with collapsed whitespace, collapses same-label exact duplicates and masks regex-detected candidate identifiers. It also retains the regex presence indicators and the original YES/NO metadata flags so we can compare them later.
+1. `mendeley_prepared.csv`: maps the source labels to SOUL classes, groups messages by case-insensitive text with collapsed whitespace, collapses same-label exact duplicates and masks regex-detected candidate identifiers. It also retains the regex presence indicators and the original YES/NO metadata flags so we can compare them later. For duplicate rows, it checks source-flag consistency across every occurrence; if duplicates disagree, that metadata value is left blank rather than arbitrarily selecting the first row.
 2. `mendeley_quarantine.csv`: keeps groups whose exact normalised text has conflicting labels, plus rows with blank text or unexpected labels. The quarantine output contains masked text and aggregate label information, not raw matched values.
 
 ### Why quarantine conflicting labels?
@@ -752,3 +752,6 @@ We want to compare a text-only model with a text-plus-metadata model later. The 
 Seven unit tests were added in `backend/tests/test_prepare_mendeley_dataset.py`. They cover conflicting-label quarantine, duplicate collapse, source-label mapping, candidate redaction, source-flag mismatch counts, unknown labels and blank text.
 
 **Execution status:** The preparation script and its seven tests are committed but have not yet been run locally.
+
+
+The preparation script was refined to count source-flag mismatches across all records in a duplicate group and report duplicate groups whose source metadata disagrees. The latest version has not yet been run locally.
