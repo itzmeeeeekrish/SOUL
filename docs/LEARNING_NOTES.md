@@ -755,3 +755,42 @@ Seven unit tests were added in `backend/tests/test_prepare_mendeley_dataset.py`.
 
 
 The preparation script was refined to count source-flag mismatches across all records in a duplicate group and report duplicate groups whose source metadata disagrees. The latest version has not yet been run locally.
+
+
+## 27. Local preparation result — first clean derivative
+
+The user ran `python data\prepare_mendeley_dataset.py` successfully. It produced:
+
+- Source rows: 5,971.
+- Exact normalised-text groups: 5,831.
+- Conflicting label groups quarantined: 34 groups / 68 rows.
+- Same-label duplicate groups: 99.
+- Duplicate rows collapsed: 106.
+- Prepared unique records: 5,797.
+- Quarantine groups: 34 / 68 source rows.
+
+### Class balance
+
+| Class | Prepared records | Share |
+|---|---:|---:|
+| legitimate | 4,834 | 83.4% |
+| scam | 528 | 9.1% |
+| spam | 435 | 7.5% |
+
+This is an imbalanced dataset. A model that always predicts legitimate could appear to achieve about 83.4% accuracy while missing every scam and spam message. So later we must report per-class precision/recall/F1, macro-F1, confusion matrix and false-positive rate, not accuracy alone.
+
+### Metadata mismatch findings
+
+Comparing the source YES/NO flags with SOUL's regex flags gave:
+- URL mismatches: 58.
+- EMAIL mismatches: 9.
+- PHONE mismatches: 180.
+
+Among duplicate groups, source flags were inconsistent within 5 URL groups, 2 EMAIL groups and 6 PHONE groups. The preparation utility leaves the inconsistent source flag blank rather than choosing one arbitrarily.
+
+A mismatch does not automatically mean the source flag is wrong. The dataset creators' original regex and SOUL's independent regex use different detection rules. SOUL's broad number pattern can flag OTPs, dates or transaction references as well as phone numbers. Therefore the first baseline must use redacted TEXT only; keep metadata out of model training until separately validated.
+
+The full backend suite passed locally:
+`python -m pytest -q` → `13 passed in 1.22s`.
+
+**Important:** The prepared CSV and quarantine CSV remain in `data/private/`. They are local research files, not reviewed as fully anonymous and not to be committed or uploaded. No train/validation/test split or model training has happened yet.
