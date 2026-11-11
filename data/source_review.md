@@ -324,3 +324,26 @@ Source flag vs SOUL-regex mismatches on eligible records: URL 58, EMAIL 9, PHONE
 These mismatches do not by themselves prove that either extractor is wrong: their regex definitions differ, and SOUL's broader number pattern can include OTPs, dates or transaction references. Do not use source or SOUL metadata flags as model features until their meaning and quality are separately validated. The first baseline should use redacted TEXT only.
 
 The user ran the backend test suite after the new preparation tests were added: `13 passed in 1.22s`. The prepared and quarantine files remain local under Git-ignored `data/private/`. The preparation script has not made a train/validation/test split and has not trained a model.
+
+
+### Prepared derivative result confirmed locally (11 November 2026)
+
+The user executed `data/prepare_mendeley_dataset.py` and the full backend tests. Local results:
+
+- 5,971 source rows.
+- 5,831 exact normalised-text groups.
+- 34 conflicting groups / 68 rows quarantined.
+- 99 same-label duplicate groups; 106 repeated occurrences collapsed.
+- 5,797 prepared unique records.
+- Class counts: 4,834 legitimate (83.4%), 528 scam (9.1%), 435 spam (7.5%).
+- Source flag vs SOUL regex mismatches: URL 58, EMAIL 9, PHONE 180.
+- Exact-duplicate groups with inconsistent source flags: URL 5, EMAIL 2, PHONE 6.
+- Backend suite: `13 passed in 1.22s`.
+
+The source-flag mismatches reflect differing detection definitions and need not mean the source is wrong. SOUL's long-number pattern may also match OTPs, dates or references. Keep metadata flags out of the first baseline; use redacted text only. Because legitimate is 83.4% of the derivative, a majority-class predictor could score 83.4% accuracy while detecting no scam or spam. Future evaluation must include per-class recall/precision/F1, macro-F1 and confusion matrix, not accuracy alone.
+
+A prepared-data validator and five tests have now been added:
+- `data/validate_prepared_dataset.py` checks schema-related values, labels, blanks, metadata values, residual matches under current regexes, exact duplicate masked texts and cross-label masked-text collisions.
+- `backend/tests/test_validate_prepared_dataset.py` contains five aggregate validation tests.
+
+These files are committed but have not yet been run locally. The validator reads only `data/private/mendeley_prepared.csv` and prints aggregate values only. Zero regex matches is not proof of anonymity. No split or model training is included.
