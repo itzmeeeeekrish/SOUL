@@ -587,3 +587,49 @@ It includes the source row number, source label, detected pattern categories and
 When you finish, share only aggregate review totals, such as how many candidates were actual contact details, URLs, OTPs, transaction references, dates or false positives. Do not send message text or actual identifiers.
 
 **Current execution status:** The aggregate audit has been run twice (the enhanced result is documented). The masked-review generator is committed but has not yet been run locally.
+
+
+## 24. Masked candidate review file generated
+
+The user ran:
+
+```powershell
+python data\create_masked_privacy_review.py
+```
+
+The script wrote 907 candidate rows to:
+
+`data\private\mendeley_privacy_review_masked.csv`
+
+The source-label counts were ham 20, smishing 605 and spam 282. These match the enhanced privacy audit's "ANY" counts. This validates that the generator selected the expected rows; it does not prove that all rows contain personal data or that masking removed every identifier.
+
+### Manual review categories
+
+Open the CSV only on the local computer. Add a final column named `manual_review_category` and choose one category for each row:
+
+- `phone_or_contact`
+- `email_or_upi`
+- `website_link`
+- `otp`
+- `transaction_reference`
+- `date_or_amount`
+- `other_personal_data`
+- `multiple_categories`
+- `false_positive`
+- `unclear`
+
+Use `multiple_categories` when more than one category genuinely applies and you do not want to choose a primary one. Use `unclear` instead of guessing. A phone number in a scam message can be a scammer's contact number rather than the recipient's personal number; record what the content appears to contain, not who owns it unless the message makes that clear.
+
+Do not paste message bodies or identifiers into chat or GitHub. A masked body may still contain names, locations or financial context not caught by regex. Do not upload the CSV. The parent folder `data/private/` is Git-ignored.
+
+### Count-only review summary
+
+We added `data/summarize_privacy_review.py`. After saving the spreadsheet as CSV UTF-8 with the `manual_review_category` column, run:
+
+```powershell
+python data\summarize_privacy_review.py
+```
+
+It prints aggregate totals by category and source label only. It does not print message text, matched values or source row numbers. It checks for blank or unrecognised category entries so the review does not silently appear complete.
+
+**Current status:** Masked review CSV created locally; no manual row classification has been completed yet. Count-only summary helper committed but not yet run.
