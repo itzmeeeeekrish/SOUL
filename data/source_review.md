@@ -186,3 +186,21 @@ The raw archive remains under data/raw/, which is ignored by Git. No third-party
 A standard-library script, `data/audit_mendeley_privacy.py`, has been added. It reads the nested CSV directly from the downloaded archive; it does not extract the archive, save message contents, or print matched values. It reports only aggregate row counts for broad email/UPI-like, URL/domain-like, phone/long-number, 12-digit and PAN-like patterns.
 
 **Execution status:** The script is committed, but it has not yet been run against the local archive. Its output is not yet available. Pattern counts are candidate flags only: a long number may be an account/reference/date, an email-shaped string may be a UPI ID, and patterns can produce false positives or miss real identifiers. Manual review must remain local and must not copy raw examples into GitHub or chat.
+
+
+### First local privacy-scan result (11 November 2026)
+
+The user ran the initial aggregate-only script locally against the downloaded archive. It reported:
+
+| Candidate pattern | Rows flagged |
+|---|---:|
+| Email/UPI-like | 24 |
+| URL/domain-like | 261 |
+| Phone/long-number | 709 |
+| 12-digit numeric | 40 |
+| PAN-like | 0 |
+| At least one candidate pattern | 907 |
+
+There were 5,971 source rows and no blank TEXT rows. The 907 rows are approximately 15.2% of the source. Pattern counts overlap and must not be added to derive the union. These are broad regex candidates, not confirmed personal data. Phone/long-number matches may include OTPs, dates, references or account-like values; 12-digit matches are not proof of Aadhaar; zero PAN-like matches does not prove absence of PAN data.
+
+The first scan did not report label-wise distribution or pattern combinations. The script has now been enhanced to report those aggregate breakdowns without printing matched text. **The enhanced version has not yet been run locally.** Do not remove all 907 rows. First examine per-label candidate counts and combinations, then make a documented local review/redaction/quarantine decision.
