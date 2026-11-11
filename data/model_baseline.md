@@ -1,6 +1,6 @@
 # SOUL Text-Only Baseline — TF-IDF + Logistic Regression
 
-**Status:** Fixed training script and dependencies committed; awaiting local installation, script execution and test verification. No performance result is claimed yet.
+**Status:** First local training and evaluation completed; all 31 backend tests pass. Results below are exploratory dataset results, not real-world fraud-detection accuracy.
 
 ## Goal
 
@@ -69,6 +69,37 @@ The model and metrics are written locally under:
 - `data/private/model_artifacts/baseline_metrics.json`
 
 These files are Git-ignored. Do not upload model artefacts or private data to GitHub unless a separate release/security review approves it. Joblib is pickle-based: only load the model file created by your own trusted run. Loading an untrusted joblib/pickle file can execute arbitrary code.
+
+## Initial local results (11 November 2026)
+
+The fixed first model recipe was run once locally. The complete backend test suite subsequently passed: 31 passed in 4.54 seconds.
+
+| Metric | Validation | Initial test holdout |
+|---|---:|---:|
+| Accuracy | 0.9638 | 0.9675 |
+| Balanced accuracy | 0.8733 | 0.8920 |
+| Macro-F1 | 0.8682 | 0.8915 |
+| Weighted-F1 | 0.9634 | 0.9673 |
+
+Per-class test metrics:
+
+| Class | Precision | Recall | F1 | Support |
+|---|---:|---:|---:|---:|
+| Legitimate | 0.9904 | 0.9904 | 0.9904 | 726 |
+| Scam | 0.8630 | 0.9130 | 0.8873 | 69 |
+| Spam | 0.8226 | 0.7727 | 0.7969 | 66 |
+
+Test confusion matrix (rows = actual; columns = predicted; class order: legitimate, scam, spam):
+
+```text
+                 Predicted
+Actual          legitimate  scam  spam
+legitimate          719       2     5
+scam                  0      63     6
+spam                  7       8    51
+```
+
+The spam class is the main improvement target: 51 of 66 spam messages were correctly identified. Use validation data for error analysis and subsequent experiments. Do not tune on this initial test result. The test split groups exact masked text, not near-duplicate campaigns, and is small for the minority classes.
 
 ## Important limitations
 
