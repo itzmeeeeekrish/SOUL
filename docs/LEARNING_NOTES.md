@@ -662,6 +662,26 @@ python data\build_privacy_review_queue.py
 
 The script prints the number of candidate rows, number of masked templates, number of repeated occurrences grouped and number of groups with conflicting source labels. Review one template at a time, especially conflict groups and ambiguous numeric contexts. You do not need to review every occurrence. The output is local under `data/private/`, is Git-ignored and may still contain personal context missed by regex. Never upload or share it.
 
-Four tests were added in `backend/tests/test_privacy_review_queue.py`. They cover two different numbers collapsing to the same masked template, preserving a source-label conflict, keeping different templates separate and excluding messages with no candidate. They are committed but not yet run locally.
+Four tests were added in `backend/tests/test_privacy_review_queue.py`. They cover two different numbers collapsing to the same masked template, preserving a source-label conflict, keeping different templates separate and excluding messages with no candidate. The user ran the backend suite locally and reported `5 passed in 1.43s`.
 
 **Next command after pulling:** From the repository root run `git pull origin main`; then `python data\build_privacy_review_queue.py`. Share only the aggregate counts printed by the script.
+
+
+### Local grouped-review result (11 November 2026)
+
+The queue script ran successfully and reported:
+- 5,971 source rows read.
+- 907 rows with candidate patterns.
+- 705 unique masked templates.
+- 202 repeated source occurrences consolidated.
+- 35 templates occurring under multiple labels.
+- Candidate source rows: ham 20, smishing 605, spam 282.
+
+This reduces the initial list from 907 source rows to 705 masked templates for a potential review. It does not mean 705 distinct real-world scam campaigns or exact duplicate groups. A masked template is created after replacing detected identifiers; two messages with different original phone numbers or URLs can therefore become the same template.
+
+**Do not confuse the 35 multi-label masked templates with the 34 exact normalised-text label conflicts found earlier.** The first count is produced after masking and can include template collisions; the second count is based on normalised original text. They require separate interpretation.
+
+The backend test suite was run locally:
+`python -m pytest -q` → `5 passed in 1.43s`.
+
+**Next:** Open `data/private/mendeley_privacy_review_unique_templates.csv` locally and filter `source_label_conflict` to `yes`. Review these 35 templates first. For each, decide privately whether it is (a) the same original text with inconsistent labels, (b) different messages merged by masking, or (c) unclear. Do not paste masked messages into chat. There is no need to manually inspect all 705 templates yet.
