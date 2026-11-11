@@ -128,3 +128,54 @@ Reference: https://github.com/jeyadev-jd/ScamShield
 - **India-domain candidate:** JuniorAlive Indian Telecom SMS collection, pending de-duplication, privacy redaction and manual re-labelling of spam into promotion vs scam where evidence supports it.
 - **Hindi candidate:** IEEE Hindi SMS dataset, pending licence and annotation review.
 - No third-party dataset has been imported into SOUL yet. Dataset v2 remains synthetic and is only for pipeline/split testing.
+
+
+## Candidate 1 — local archive audit (11 November 2026)
+
+The downloaded outer ZIP was inspected without executing or extracting its contents. It contains three helper scripts, three PDFs and a nested archive named Dataset_5971.zip. The nested archive contains Dataset_5971.csv (595,987 bytes). The CSV was read directly from the nested archive for metadata-only checks.
+
+### Confirmed CSV structure and counts
+
+- Columns: LABEL, TEXT, URL, EMAIL, PHONE.
+- Rows: 5,971, matching the Mendeley record.
+- After case-normalising LABEL: ham 4,844; smishing 638; spam 489.
+- Blank TEXT rows: 0. Blank LABEL rows: 0.
+- Normalised non-empty message texts: 5,831.
+- Repeated normalised-text groups: 133 (99 same-label groups and 34 conflicting groups).
+- Repeated occurrences beyond the first copy: 140.
+- The 34 conflicting groups are smishing + spam conflicts and involve 68 rows. These records must be held out of the first supervised baseline until reviewed; do not arbitrarily pick one label.
+
+### Extracted metadata fields
+
+URL, EMAIL and PHONE each contain only YES/NO values in the inspected CSV. Their YES counts are:
+
+| Source label | URL YES | EMAIL YES | PHONE YES |
+|---|---:|---:|---:|
+| ham (4,844) | 8 (0.2%) | 1 (<0.1%) | 7 (0.1%) |
+| smishing (638) | 100 (15.7%) | 11 (1.7%) | 527 (82.6%) |
+| spam (489) | 99 (20.2%) | 7 (1.4%) | 310 (63.4%) |
+
+These are dataset-specific associations, not rules for declaring an individual message fraudulent. Legitimate messages can contain links or phone numbers; scams can contain neither. The metadata fields do not contain the actual URL, email address or phone number.
+
+### Bundled helper-script review
+
+The bundled scripts were read as text only; they were not executed. They appear intended to produce presence flags, but their inclusion in the archive does not prove that these exact scripts generated every CSV metadata value.
+
+- Http_extract.py searches for an http:// or https:// prefix. It can miss bare domains and other URL forms.
+- Email_extract.py uses a pattern with lowercase character classes and attempts to support forms such as an address written with " at " or " dot ". It may miss uppercase variants.
+- Phone_extract.py contains the source pattern `(\d{3})\D\*(\d{3})\D\*(\d{4})\D\*(\d\*)$`. In this pattern, \D\* means one non-digit followed by a literal asterisk; the final \d\* means a digit followed by a literal asterisk. This is a narrow format, not a general phone-number detector.
+
+Next, independently recompute metadata from TEXT using documented SOUL rules and compare the results with the supplied YES/NO fields. Do not blindly trust the bundled flags as model features.
+
+### Current use decision
+
+The dataset remains a promising three-class development candidate, not yet approved for model training or redistribution. Before approval:
+
+1. Perform a privacy scan on message text locally; do not paste raw message examples into chat or commit the original archive.
+2. Review or quarantine the 34 conflicting groups.
+3. Deduplicate exact same-label messages before splitting, or at minimum keep duplicate groups together in one split.
+4. Check possible overlap with UCI and other candidate sources.
+5. Recalculate URL/email/phone indicators from TEXT and compare them with the supplied flags.
+6. Confirm attribution and licence obligations for any permitted derivative.
+
+The raw archive remains under data/raw/, which is ignored by Git. No third-party message rows have been committed to the repository.
