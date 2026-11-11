@@ -716,3 +716,39 @@ The updated backend test suite passed locally:
 `python -m pytest -q` → `6 passed in 1.14s`.
 
 **Decision for the first baseline:** Keep the 34 exact-text conflict groups (68 rows) in a separate quarantine set until reliable evidence supports a label correction. Do not choose spam or smishing arbitrarily. This does not require reviewing all 705 privacy templates by hand. We can proceed to a reproducible clean-data preparation stage after preserving the quarantine and designing conservative identifier redaction.
+
+
+## 26. Prepare a clean local derivative before model training
+
+We added `data/prepare_mendeley_dataset.py`. The goal is to automate repetitive data cleanup instead of manually reviewing every flagged source row.
+
+Run it from the repository root:
+
+```powershell
+python data\prepare_mendeley_dataset.py
+```
+
+It reads the original nested ZIP and creates two files under `data/private/`:
+
+1. `mendeley_prepared.csv`: maps the source labels to SOUL classes, groups messages by case-insensitive text with collapsed whitespace, collapses same-label exact duplicates and masks regex-detected candidate identifiers. It also retains the regex presence indicators and the original YES/NO metadata flags so we can compare them later.
+2. `mendeley_quarantine.csv`: keeps groups whose exact normalised text has conflicting labels, plus rows with blank text or unexpected labels. The quarantine output contains masked text and aggregate label information, not raw matched values.
+
+### Why quarantine conflicting labels?
+
+A model cannot learn one reliable answer when exactly the same message has two different labels. We should not guess which label is correct. Keep those messages aside unless we can resolve them from reliable annotation evidence.
+
+### Why keep feature flags?
+
+We want to compare a text-only model with a text-plus-metadata model later. The source CSV says whether URL/email/phone indicators were present; the new script independently recomputes candidate flags from the original text. It also counts where those flags disagree. These are candidate features, not proof of fraud.
+
+### Important limitations
+
+- The redaction patterns are broad. A long number may be an OTP, transaction reference, date or phone number. The script replaces candidates with placeholders, which can remove useful context. This is a conservative privacy-first starting point, not a perfect named-entity recogniser.
+- Regex can miss a real identifier or leave a person's name, address or other context behind. These outputs are not guaranteed anonymous.
+- Same-label exact duplicates are collapsed; near-duplicate campaign variants are not automatically grouped.
+- The script does not split data or train a model.
+- Keep both outputs in `data/private/`; do not upload, commit or paste them into chat.
+
+Seven unit tests were added in `backend/tests/test_prepare_mendeley_dataset.py`. They cover conflicting-label quarantine, duplicate collapse, source-label mapping, candidate redaction, source-flag mismatch counts, unknown labels and blank text.
+
+**Execution status:** The preparation script and its seven tests are committed but have not yet been run locally.
