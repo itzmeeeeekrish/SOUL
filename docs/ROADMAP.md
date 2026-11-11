@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector (Mendeley candidate structurally audited; 5,797 locally prepared records, 68 exact-label-conflict rows quarantined; prepared-data validation passed and 18 tests passed locally. Deterministic grouped 70/15/15 split utility committed and awaiting local run/tests. Dataset source/privacy approval and ML baseline remain pending). Milestones 0 and 1 are complete.  
+**Current stage:** Milestone 2 – Data and baseline communication detector (5,797 prepared records; 68 exact-label-conflict rows quarantined; prepared-data validation and grouped 70/15/15 split completed locally; 24 tests passed. Fixed TF-IDF + Logistic Regression baseline committed but awaiting local dependency installation and first run. Dataset source/privacy approval remains pending). Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -44,11 +44,11 @@ A single event can be an incident. Cross-channel correlation is optional context
 - [x] Define legitimate, spam and scam labels in `data/annotation_guide.md` and apply them to synthetic examples.
 - [x] Assign synthetic v2 campaign groups to train/validation/test in `data/split_strategy.md`; verify that no campaign crosses splits. Real-source/campaign split still requires approved third-party data.
 - [x] Build a local preprocessing utility for label mapping, exact-text deduplication, conflict quarantine and candidate-pattern redaction.
-- [ ] Create and validate a deterministic grouped train/validation/test split for the prepared Mendeley candidate.
+- [x] Create and validate a deterministic grouped train/validation/test split for the prepared Mendeley candidate; keep identical masked text within one partition.
 - [ ] Build a TF-IDF + Logistic Regression baseline using text only.
 - [ ] Report precision, recall, F1, confusion matrix and false-positive rate.
 
-**Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed locally on 10 November 2026. The Mendeley candidate has been imported only as a local ignored derivative for development; source/privacy approval is still pending. No model training or evaluation has begun.
+**Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed on 10 November 2026. The Mendeley candidate exists only as a local ignored derivative; source/privacy approval remains pending. The grouped 70/15/15 split was generated locally and passed integrity checks. The first ML baseline script is committed but has not yet been run.
 
 ## Milestone 3 – Supported evidence processing
 
@@ -181,3 +181,5 @@ Update this section after each meaningful development session.
 | 2026-11-11 | Ran prepared-data validator and full backend tests locally | 5,797 records; IDs unique; no blank text/invalid labels/metadata values; 5,903 source occurrences represented; zero residual matches for current regex set; 5,722 unique masked texts; 37 repeated groups / 112 records; 1 cross-label masked-text collision. Pytest: 18 passed in 0.92s | Build deterministic stratified split by final masked text; quarantine cross-label masked-text collision and keep identical model inputs in one partition |
 
 | 2026-11-11 | Added deterministic 70/15/15 stratified split utility and six tests | Groups on final masked text, collapses same-label repeated inputs, quarantines cross-label masked-text groups, uses fixed seed 42 and checks exact text/group separation. Code/tests committed; not yet run locally | Pull, run `python data\\create_mendeley_splits.py` and full pytest; share aggregate split counts only |
+
+| 2026-11-11 | Generated the Mendeley 70/15/15 grouped split and ran the full test suite | 5,797 prepared inputs → 5,722 masked-text groups; 74 duplicate prepared rows collapsed; 2 rows in one cross-label masked group quarantined; 5,721 split rows. Train 4,004; validation 856; test 861. Integrity: no identical text/group crosses splits. Pytest: 24 passed in 1.16s | Install pinned ML requirements, run the fixed text-only TF-IDF + Logistic Regression script, and record validation/test metrics once; do not tune on test |
