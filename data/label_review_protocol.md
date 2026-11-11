@@ -64,3 +64,24 @@ Do not infer a SOUL label from the model prediction. Keep the predicted label as
 - Never put SMS content, contact information, OTPs, bank details or other personal information in GitHub issues, commits, documentation examples or public chats.
 - A human label is an annotation decision, not proof that a real message sender committed fraud.
 - Source licensing and privacy approval are separate gates; this workflow does not approve redistribution of the dataset.
+
+
+## Blinded review of baseline validation errors
+
+A helper script creates a review sheet for the 31 known validation misclassifications:
+
+```powershell
+python data\\analyze_baseline_errors.py
+python data\\build_validation_label_review_queue.py
+```
+
+The builder verifies the validation split hash, checks every error row against its exact validation text and label, maps the masked text back to the prepared source-label provenance, and rejects ambiguous source-label matches.
+
+It creates two local files under `data/private/model_artifacts/`:
+
+- `validation_label_review_blind.csv`: `review_id`, text, blank `soul_label`, `review_status=pending`, blank `annotation_note`. It deliberately excludes original source labels and model predictions.
+- `validation_label_review_key.csv`: review ID, source label, provisional baseline label, model prediction, top-class score and source-occurrence count. It deliberately contains no message text.
+
+**Review the blind file first. Do not open the key until you have completed independent labels.** Enter one of `legitimate`, `spam`, `scam`, or `needs_review` in `soul_label`; set `review_status` to `reviewed` or `needs_review`; add a concise evidence-based `annotation_note`. If uncertain, use `needs_review`.
+
+This is an error-focused sample selected because the baseline got it wrong. It is not representative of the full dataset and must not be used to estimate class proportions or model performance. It is a targeted annotation exercise to investigate confusing examples. Keep both files private; the blind file contains message text. Do not commit, upload or share it.
