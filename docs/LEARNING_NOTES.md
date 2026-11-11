@@ -794,3 +794,40 @@ The full backend suite passed locally:
 `python -m pytest -q` → `13 passed in 1.22s`.
 
 **Important:** The prepared CSV and quarantine CSV remain in `data/private/`. They are local research files, not reviewed as fully anonymous and not to be committed or uploaded. No train/validation/test split or model training has happened yet.
+
+
+## 28. Validate prepared data before creating train/test splits
+
+The local preparation run produced 5,797 unique records after quarantining 68 rows with contradictory labels and collapsing 106 repeated rows. Class counts:
+
+- legitimate: 4,834 (83.4%)
+- scam: 528 (9.1%)
+- spam: 435 (7.5%)
+
+This is class imbalance. A model that predicts "legitimate" for every message could get 83.4% accuracy while catching zero scams and zero spam. Later we must report per-class precision, recall and F1, macro-F1 and a confusion matrix. We should not celebrate accuracy alone.
+
+The original metadata flags differ from SOUL's broad pattern flags on 58 URL, 9 EMAIL and 180 PHONE records. Some exact-duplicate groups also have inconsistent source flags (5 URL, 2 EMAIL, 6 PHONE groups). These mismatches can come from different regex definitions; the phone candidate can also be an OTP, reference or date. **For the first baseline, use redacted TEXT only.** Metadata features will be deferred.
+
+### New prepared-data validator
+
+Added `data/validate_prepared_dataset.py` and five tests in `backend/tests/test_validate_prepared_dataset.py`.
+
+Run from the repository root:
+
+```powershell
+python data\validate_prepared_dataset.py
+```
+
+It reads the local prepared CSV and prints only aggregate information:
+- Empty or duplicate IDs.
+- Blank text and invalid labels.
+- Invalid binary feature values.
+- Residual candidate patterns still detected by the current regex.
+- Duplicate masked text groups, including collisions between different labels.
+- Class counts and source occurrences represented.
+
+A residual regex count of zero is only a check against our known patterns. It does not prove the messages are anonymous; personal names, addresses and context may remain. The validator does not change files, split data or train a model.
+
+The five validator tests cover a valid record, residual URL detection, same-label masked duplicates, cross-label masked collisions and invalid fields/IDs. These tests are committed but have not yet been run locally.
+
+**Next:** Pull, run the prepared-data validator, then run the complete pytest suite. Only after reviewing masked-text collisions should we create a leakage-aware split. The first model should use text-only features.
