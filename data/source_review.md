@@ -179,3 +179,10 @@ The dataset remains a promising three-class development candidate, not yet appro
 6. Confirm attribution and licence obligations for any permitted derivative.
 
 The raw archive remains under data/raw/, which is ignored by Git. No third-party message rows have been committed to the repository.
+
+
+### Privacy-audit utility added (11 November 2026)
+
+A standard-library script, `data/audit_mendeley_privacy.py`, has been added. It reads the nested CSV directly from the downloaded archive; it does not extract the archive, save message contents, or print matched values. It reports only aggregate row counts for broad email/UPI-like, URL/domain-like, phone/long-number, 12-digit and PAN-like patterns.
+
+**Execution status:** The script is committed, but it has not yet been run against the local archive. Its output is not yet available. Pattern counts are candidate flags only: a long number may be an account/reference/date, an email-shaped string may be a UPI ID, and patterns can produce false positives or miss real identifiers. Manual review must remain local and must not copy raw examples into GitHub or chat.
