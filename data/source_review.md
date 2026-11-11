@@ -258,7 +258,7 @@ The 35 groups are cross-label **masked-template groups**, not necessarily true e
 
 The local backend test run returned `5 passed in 1.43s`. This confirms the current test suite passed, including the grouped-review tests. No model training, source approval or final privacy clearance has occurred.
 
-**Recommended next review:** Open the local grouped queue and filter `source_label_conflict=yes` to inspect those 35 masked templates first. Do not upload or paste their contents. Determine locally whether each is a true same-text label conflict or merely different messages that became identical after masking. Only after this small high-priority review should we decide whether any additional sample is needed.
+**Recommended next review:** Regenerate the grouped queue using the latest script and filter `has_exact_text_label_conflict=yes`. Review only those exact-text conflict groups first. Do not use `source_label_conflict=yes` by itself as proof of contradictory labels; it includes different source messages that became identical after masking. Keep all queue contents local.
 
 
 ### Exact-conflict distinction added to the review queue (11 November 2026)
