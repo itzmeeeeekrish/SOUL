@@ -4,9 +4,9 @@
 
 SOUL is a proposed Android-first assistant intended to help people—especially elderly and less technically confident smartphone users—recognise suspicious digital activity, understand the evidence, and take safer next steps.
 
-> **Project status: Milestones 0 and 1 complete; Milestone 2 dataset preparation is in progress**
+> **Project status: Milestone 2 — first real-data text baseline implementation in progress**
 >
-> The project includes design documentation, a locally verified FastAPI backend foundation, and the first dataset-design increment. The health endpoint and automated test passed (1 passed, no warnings) on 10 November 2026. The starter message dataset is synthetic only; a trained detector and the financial-integrity, RAG and Android features are not implemented yet.
+> Repository and backend foundations are complete. A Mendeley 2022 SMS candidate has been structurally inspected and processed into a local, redacted development derivative. Exact-text label conflicts are quarantined; a deterministic 70/15/15 grouped split has been generated locally. The current backend test suite passed locally (24 tests). The TF-IDF + Logistic Regression training script is committed but has not yet been run. Source/privacy approval, external validation and all financial-integrity, RAG and Android features remain pending.
 
 ## The problem
 
@@ -63,7 +63,17 @@ The detection engine decides what signals are suspicious. RAG supplies relevant 
 The intended experience includes simple Hindi/Hinglish explanations, voice output, clear warnings, and optional trusted-family escalation with the user's consent.
 
 
-## Current dataset-design starter\n\nThe dataset foundation includes a documented schema, three annotation labels, a public-source review, 24 v1 and 84 grouped v2 synthetic SMS examples, a campaign split strategy and a CSV validator. From the repository root, run `python data/validate_dataset.py`. See [data/dataset_schema.md](data/dataset_schema.md), [data/annotation_guide.md](data/annotation_guide.md), [data/source_review.md](data/source_review.md), [data/split_strategy.md](data/split_strategy.md) and [data/synthetic/sms_messages_v2.csv](data/synthetic/sms_messages_v2.csv). Third-party datasets have not been imported. The leading three-class candidate is Mishra & Soni's 2022 Mendeley dataset (CC BY 4.0), pending row-level archive and privacy inspection; an India-domain ham/spam candidate also needs re-labelling and redaction. See the source review for details.\n\n## Current backend starter
+## Dataset and first baseline
+
+The repository contains the documented three-class schema, annotation guide, 24-row and 84-row synthetic development sets, and local-only scripts for auditing and preparing a Mendeley 2022 SMS candidate. The local prepared derivative contains 5,797 records before final masked-text grouping; 68 exact-text conflict rows are quarantined. The deterministic split contains 4,004 training, 856 validation and 861 test rows. The split is grouped by identical final masked text, not by near-duplicate campaign, so results will be exploratory only.
+
+The raw third-party archive, prepared messages, split CSVs and model artefacts are kept under Git-ignored `data/raw/` and `data/private/`; they are not committed. The candidate's licence and source are documented in [data/source_review.md](data/source_review.md), but this does not itself approve redistribution or establish that the data is anonymous.
+
+The first text-only TF-IDF + Logistic Regression implementation is in [data/train_text_baseline.py](data/train_text_baseline.py), with its fixed recipe and limitations in [data/model_baseline.md](data/model_baseline.md). It has not yet been executed, so no model performance is reported. The synthetic CSV validator remains available via `python data/validate_dataset.py`.
+
+See [data/dataset_schema.md](data/dataset_schema.md), [data/annotation_guide.md](data/annotation_guide.md), [data/source_review.md](data/source_review.md), [data/split_strategy.md](data/split_strategy.md) and [data/model_baseline.md](data/model_baseline.md).
+
+## Current backend starter
 
 The first backend increment includes a FastAPI application, environment-based configuration, a GET /health endpoint, one automated test, pinned direct dependencies and a placeholder .env.example.
 
