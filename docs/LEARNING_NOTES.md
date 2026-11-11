@@ -697,4 +697,22 @@ The updated `data/build_privacy_review_queue.py` now compares the normalised ori
 
 No original message text or matched number/link is written to the queue. Use `has_exact_text_label_conflict=yes` to prioritise genuine exact-text label conflicts. Other multi-label templates are masking collisions and may not need label correction.
 
-The tests were expanded to check this distinction. **Pull and rerun the script and tests before relying on the new columns; the enhanced version has not yet been run locally.**
+The tests were expanded to check this distinction. The user reran the latest queue locally and got 34 masked templates containing at least one exact-text label conflict. The same run reported 35 templates with multiple labels, so the difference is a masking collision. The user also reran the backend tests: `6 passed in 1.14s`.
+
+
+### Latest exact-conflict verification (11 November 2026)
+
+The latest local queue run reported:
+- 5,971 source rows.
+- 907 rows with candidate patterns.
+- 705 unique masked templates.
+- 202 repeated occurrences grouped.
+- 35 masked templates with multiple source labels.
+- 34 masked templates containing an exact-text label conflict.
+
+This matches the earlier raw-text audit of 34 conflicting exact-text groups involving 68 rows. The 35 count is broader because masked templates can merge different original messages.
+
+The updated backend test suite passed locally:
+`python -m pytest -q` → `6 passed in 1.14s`.
+
+**Decision for the first baseline:** Keep the 34 exact-text conflict groups (68 rows) in a separate quarantine set until reliable evidence supports a label correction. Do not choose spam or smishing arbitrarily. This does not require reviewing all 705 privacy templates by hand. We can proceed to a reproducible clean-data preparation stage after preserving the quarantine and designing conservative identifier redaction.
