@@ -1038,3 +1038,25 @@ The script reads only the validation split, verifies that it is the exact split 
 Dono files `data/private/model_artifacts/` ke andar rahengi. Message-level CSV mein text hota hai; ise GitHub par commit, upload ya chat mein paste mat karna. Masking complete anonymity guarantee nahi karti. Sirf aggregate counts share karna.
 
 **Next task:** Sabse common actual-to-predicted confusion identify karo. Abhi model settings change nahi karni; pehle examples ko locally inspect karke samajhna hai ki spam messages scam ya legitimate kyun predict ho rahe hain. Initial test split ko untouched rakho.
+
+
+## 34. First validation error-analysis result
+
+The validation-only script ran successfully and verified the saved validation split fingerprint. It did not read the initial test split and did not retrain the model.
+
+- Validation messages: 856
+- Correct predictions: 825
+- Wrong predictions: 31
+- Accuracy: 96.38%
+
+Error pairs (actual → predicted):
+- Spam → scam: 14
+- Legitimate → spam: 7
+- Scam → spam: 5
+- Spam → legitimate: 5
+
+**Simple Hinglish interpretation:** Model suspicious messages ko kaafi baar identify kar raha hai, lekin kuch spam ko scam samajh raha hai. Spam aur scam ka difference samajhne ke liye humein local examples dekhne honge. Abhi ye conclude nahi karna ki model ko kya confuse kar raha hai.
+
+The message-level CSV is private. Review it on your own computer and classify each error into a broad reason (for example: promotional wording, urgency/impersonation wording, legitimate message with suspicious-looking terms, too little context, possible source-label ambiguity, masking removed useful clues, or unsure). A single message may fit more than one pattern; use one primary category consistently for a simple count. Do not paste message text into chat or GitHub. Share only category totals.
+
+The new error-analysis utility has eight unit tests, but the full local test suite still needs to be run after pulling the latest changes.
