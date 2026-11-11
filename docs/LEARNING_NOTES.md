@@ -1098,3 +1098,20 @@ After adding the eight tests for the validation-only error report, the complete 
 Iska matlab error-report ke helper functions aur pehle ke dataset/model helper tests sab pass hue. Ye software tests hain; ye model ki real-world fraud detection ability ka proof nahi hain.
 
 **Next:** Dataset labels ko review karne se pehle source label aur SOUL label ko alag-alag record karne ka plan banayenge. Kisi source label ko sirf model prediction ke basis par change nahi karna.
+
+
+## 37. Keep source labels separate from SOUL labels
+
+We found that the source's `smishing` category does not always clearly match SOUL's `scam` definition. Isliye original publisher label ko overwrite nahi karenge.
+
+Updated prepared-data fields:
+
+- `source_label`: Mendeley ka original class — `ham`, `smishing`, `spam`.
+- `label`: Purana provisional mapping, jo original baseline aur existing split mein use hua. Isko abhi change nahi karna.
+- `soul_label`: Blank rahega jab tak human reviewer decision na le.
+- `review_status`: Initially `pending`; review ke baad `reviewed` ya `needs_review`.
+- `annotation_note`: Human decision ka short reason.
+
+**Important:** Model ki prediction ko copy karke `soul_label` mat bharna. Model galat ho sakta hai; review independent hona chahiye.
+
+The preparation code and validator have been updated, but local regeneration and verification are still pending. Existing train/validation/test files and the first model must remain unchanged.
