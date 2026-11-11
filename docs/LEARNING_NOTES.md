@@ -408,3 +408,95 @@ Ab real data ke liye humein label meaning samajhna hoga:
 **Rule:** Raw messages ko GitHub par commit nahi karna. Pehle duplicates, personal-data patterns aur label quality inspect karni hai. Sirf approved and redacted derived data use karenge.
 
 Related project ScamShield (released 10 October 2026) bhi Indian scam SMS dataset, de-duplication aur model evaluation discuss karta hai. Uske results author-reported hain; SOUL ne independently reproduce nahi kiye.
+
+
+## 20. Mendeley 2022 SMS dataset — first local audit (11 November 2026)
+
+### Archive structure
+
+The downloaded archive was inspected without executing its scripts or extracting the CSV. The outer ZIP contains a nested Dataset_5971.zip, and that inner ZIP contains Dataset_5971.csv. We read the CSV directly from the archive using Python's standard-library zipfile and csv modules.
+
+The CSV has five columns:
+- LABEL: source category.
+- TEXT: SMS message.
+- URL: URL-presence flag.
+- EMAIL: email-presence flag.
+- PHONE: phone-presence flag.
+
+The CSV contains 5,971 rows, matching the published dataset count. After normalising label case:
+- ham: 4,844
+- smishing: 638
+- spam: 489
+
+There are no blank TEXT or LABEL values in this first audit.
+
+### Why we normalise labels
+
+The raw file uses both "Smishing" and "smishing", and both "Spam" and "spam". These are casing variants, not extra classes. Convert labels to lowercase before counting or training.
+
+### Duplicate and label-conflict findings
+
+After normalising message text (lowercase and collapse repeated whitespace):
+- 5,831 unique non-empty message texts.
+- 133 repeated-text groups.
+- 99 repeated groups have one consistent label.
+- 34 groups have conflicting labels: smishing + spam.
+- Those 34 groups contain 68 rows.
+
+A conflicting group means the same normalised text has been assigned different classes. We must not let those records enter the first baseline as though their labels were certain. Keep them in a review/quarantine file. Same-label duplicate messages should be deduplicated or assigned to the same data split so copies cannot leak between train and test.
+
+### What URL / EMAIL / PHONE mean
+
+In this CSV, all three fields contain YES/NO values, not actual URLs, email addresses or phone numbers. YES counts by class:
+
+| Label | URL YES | EMAIL YES | PHONE YES |
+|---|---:|---:|---:|
+| ham | 8 / 4,844 | 1 / 4,844 | 7 / 4,844 |
+| smishing | 100 / 638 | 11 / 638 | 527 / 638 |
+| spam | 99 / 489 | 7 / 489 | 310 / 489 |
+
+These associations describe this dataset only. Presence of a phone number or URL is not proof of fraud, and absence is not proof of safety.
+
+### Why we inspected the original helper scripts
+
+The ZIP includes Phone_extract.py, Http_extract.py and Email_extract.py. We read them as text only; we did not execute them.
+
+- The URL pattern looks for http:// or https:// prefixes, so it may miss bare domains.
+- The email pattern uses lowercase character classes and attempts to recognise " at " / " dot " obfuscations.
+- The phone pattern is unusually narrow and includes literal asterisks in its expected format.
+
+The helper scripts being bundled with the CSV is not proof they generated the exact CSV flags. We will independently derive features from TEXT and compare them with the supplied YES/NO values.
+
+### Important project decision
+
+For the first baseline:
+1. Keep TEXT as the primary input.
+2. Map ham → legitimate, smishing → scam and spam → spam only as a provisional source-label mapping, preserving the difference between promotional spam and fraud.
+3. Quarantine the 34 conflicting text groups.
+4. Deduplicate exact same-label texts or keep duplicates together during splitting.
+5. Recompute any URL/email/phone features with SOUL's own documented rules.
+6. Run a local privacy scan before using or sharing message text.
+
+Never commit raw third-party SMS messages to GitHub. The raw archive is stored in data/raw/, which is ignored by Git. Do not paste real message contents, phone numbers or email addresses into public issues or chat.
+
+### Viva questions
+
+**Q1. Why not directly trust the URL, EMAIL and PHONE columns?**
+
+They are binary indicators produced by some extraction process. We need to understand that process and compare the flags with independently detected features before using them.
+
+**Q2. Why remove or quarantine conflicting labels?**
+
+The same message has contradictory ground-truth labels. Training on both without review teaches the model inconsistent answers.
+
+**Q3. Does a URL or phone number mean the SMS is a scam?**
+
+No. Legitimate messages can contain URLs and phone numbers. These are contextual features, not proof.
+
+**Q4. Why not train immediately on all 5,971 rows?**
+
+We need to handle contradictory labels, duplicates, privacy and split leakage first. A large dataset can still produce misleading results if its quality is not checked.
+
+| Date | Topic | What was learned | Next step |
+|---|---|---|---|
+| 2026-11-11 | Mendeley archive and metadata audit | ZIP structure, class counts, binary metadata flags, duplicates, conflicting labels and helper-script limitations | Privacy scan and independently recompute metadata from TEXT |
