@@ -185,7 +185,7 @@ The raw archive remains under data/raw/, which is ignored by Git. No third-party
 
 A standard-library script, `data/audit_mendeley_privacy.py`, has been added. It reads the nested CSV directly from the downloaded archive; it does not extract the archive, save message contents, or print matched values. It reports only aggregate row counts for broad email/UPI-like, URL/domain-like, phone/long-number, 12-digit and PAN-like patterns.
 
-**Execution status:** The script is committed, but it has not yet been run against the local archive. Its output is not yet available. Pattern counts are candidate flags only: a long number may be an account/reference/date, an email-shaped string may be a UPI ID, and patterns can produce false positives or miss real identifiers. Manual review must remain local and must not copy raw examples into GitHub or chat.
+**Execution status:** The initial aggregate-only script was run locally. Pattern counts are candidate flags only: a long number may be an OTP/account/reference/date, an email-shaped string may be a UPI ID, and patterns can produce false positives or miss real identifiers. Manual review must remain local and must not copy raw examples into GitHub or chat.
 
 
 ### First local privacy-scan result (11 November 2026)
@@ -203,4 +203,21 @@ The user ran the initial aggregate-only script locally against the downloaded ar
 
 There were 5,971 source rows and no blank TEXT rows. The 907 rows are approximately 15.2% of the source. Pattern counts overlap and must not be added to derive the union. These are broad regex candidates, not confirmed personal data. Phone/long-number matches may include OTPs, dates, references or account-like values; 12-digit matches are not proof of Aadhaar; zero PAN-like matches does not prove absence of PAN data.
 
-The first scan did not report label-wise distribution or pattern combinations. The script has now been enhanced to report those aggregate breakdowns without printing matched text. **The enhanced version has not yet been run locally.** Do not remove all 907 rows. First examine per-label candidate counts and combinations, then make a documented local review/redaction/quarantine decision.
+The enhanced script was run locally and reported this label-wise distribution:
+
+| Label | Rows | At least one candidate | Email/UPI-like | URL/domain-like | Phone/long-number | 12-digit | PAN-like |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| ham | 4,844 | 20 | 1 | 16 | 6 | 0 | 0 |
+| smishing | 638 | 605 | 13 | 126 | 506 | 29 | 0 |
+| spam | 489 | 282 | 10 | 119 | 197 | 11 | 0 |
+
+The 907 flagged rows represent approximately 15.2% of all rows. Within each class, at least one candidate was flagged in 0.4% of ham, 94.8% of smishing and 57.7% of spam messages. These patterns may reflect the source dataset's construction and are not a universal signal of fraud.
+
+Combination counts were also reported: 5,064 rows matched no pattern; the remaining 907 were distributed across combinations of email/UPI, URL/domain, phone/long-number and 12-digit patterns. Combination counts overlap by design only at the pattern-column level; each row belongs to one reported combination group. For example, 614 rows matched only phone/long-number, 55 matched URL/domain + phone/long-number, and 23 matched phone/long-number + 12-digit. These are still regex candidates, not confirmed PII.
+
+Do not remove all 907 rows. A new local helper, `data/create_masked_privacy_review.py`, writes candidate rows with regex-matched values replaced by placeholders to `data/private/mendeley_privacy_review_masked.csv`. The generated file may still contain identifying context missed by the patterns; it is Git-ignored and must not be uploaded or shared. The script has been committed but has not yet been run locally.
+
+
+### Masked-review helper
+
+Added `data/create_masked_privacy_review.py`. It creates a local CSV in `data/private/` with row number, label, candidate categories and a message body in which recognised candidate patterns are replaced with placeholders. The generated file may still contain personal context missed by regex. It is Git-ignored. The script has not yet been run locally.
