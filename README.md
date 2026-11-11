@@ -6,7 +6,7 @@ SOUL is a proposed Android-first assistant intended to help people—especially 
 
 > **Project status: Milestone 2 — first real-data text baseline implementation in progress**
 >
-> Repository and backend foundations are complete. A Mendeley 2022 SMS candidate has been structurally inspected and processed into a local, redacted development derivative. Exact-text label conflicts are quarantined; a deterministic 70/15/15 grouped split has been generated locally. The current backend test suite passed locally (24 tests). The TF-IDF + Logistic Regression training script is committed but has not yet been run. Source/privacy approval, external validation and all financial-integrity, RAG and Android features remain pending.
+> Repository and backend foundations are complete. A Mendeley 2022 SMS candidate has been structurally inspected and processed into a local, redacted development derivative. Exact-text label conflicts are quarantined; a deterministic 70/15/15 grouped split has been generated locally. The last full local test run before adding baseline-specific tests passed 24 tests. Seven baseline-helper tests have since been added and await a run after installing the pinned ML dependencies. The TF-IDF + Logistic Regression training script is committed but has not yet been run. Source/privacy approval, external validation and all financial-integrity, RAG and Android features remain pending.
 
 ## The problem
 
