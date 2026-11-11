@@ -46,7 +46,11 @@ def test_same_label_exact_duplicates_collapse_to_one_redacted_record():
 
     assert len(prepared) == 1
     assert quarantine == []
+    assert prepared[0]["source_label"] == "ham"
     assert prepared[0]["label"] == "legitimate"
+    assert prepared[0]["soul_label"] == ""
+    assert prepared[0]["review_status"] == "pending"
+    assert prepared[0]["annotation_note"] == ""
     assert prepared[0]["source_occurrences"] == 2
     assert "[LONG_NUMBER]" in prepared[0]["text"]
     assert "9876543210" not in prepared[0]["text"]
@@ -64,9 +68,14 @@ def test_source_labels_map_to_soul_classes():
     prepared, quarantine, stats = prepare_rows(rows)
 
     assert quarantine == []
+    assert Counter(row["source_label"] for row in prepared) == Counter(
+        {"ham": 1, "smishing": 1, "spam": 1}
+    )
     assert Counter(row["label"] for row in prepared) == Counter(
         {"legitimate": 1, "scam": 1, "spam": 1}
     )
+    assert all(row["soul_label"] == "" for row in prepared)
+    assert all(row["review_status"] == "pending" for row in prepared)
 
 
 def test_candidate_identifiers_are_redacted_from_prepared_text():
@@ -133,3 +142,19 @@ def test_empty_text_is_quarantined():
     assert len(quarantine) == 1
     assert quarantine[0]["reason"] == "blank_text"
     assert stats["blank_text_rows"] == 1
+
+
+
+def test_prepared_record_preserves_original_source_label_separately():
+    rows = [
+        make_row("Smishing", "Visit http://example.com to verify")
+    ]
+
+    prepared, quarantine, stats = prepare_rows(rows)
+
+    assert quarantine == []
+    assert len(prepared) == 1
+    assert prepared[0]["source_label"] == "smishing"
+    assert prepared[0]["label"] == "scam"
+    assert prepared[0]["soul_label"] == ""
+    assert prepared[0]["review_status"] == "pending"
