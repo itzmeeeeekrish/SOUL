@@ -97,3 +97,14 @@ python data\train_text_baseline.py
 It reads the local split files under `data/private/mendeley_splits/`, trains on the train partition, reports validation metrics and a first fixed-recipe test evaluation, then stores the local model and aggregate metrics under `data/private/model_artifacts/`. The test set must not be used for tuning. See [data/model_baseline.md](../data/model_baseline.md).
 
 Do not commit split files, metrics containing message content (none should be present), or model artefacts. Joblib files use pickle-based serialization; do not load an artifact from an untrusted source.
+
+
+## 6. Validation-only baseline error analysis
+
+After the first model run, execute this from the repository root:
+
+```powershell
+python data\\analyze_baseline_errors.py
+```
+
+This reads only the original validation split and verifies its SHA-256 against the saved baseline metadata. It does not retrain the model or read the initial test partition. Aggregate and message-level reports are saved locally under Git-ignored `data/private/model_artifacts/`. The message-level CSV contains text: inspect it locally and share aggregate counts only. Do not commit or upload it.
