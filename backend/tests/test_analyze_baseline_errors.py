@@ -114,3 +114,23 @@ def test_save_error_csv_writes_local_message_level_fields(tmp_path):
     assert "actual_label,predicted_label" in content
     assert "masked message" in content
     assert "spam,scam,scam,0.75" in content
+
+
+
+def test_save_error_csv_neutralizes_formula_like_message_text(tmp_path):
+    path = tmp_path / "errors.csv"
+    errors = [
+        {
+            "validation_row": 2,
+            "actual_label": "spam",
+            "predicted_label": "scam",
+            "top_class": "scam",
+            "top_class_probability": 0.8,
+            "text": "  =HYPERLINK(\"https://example.invalid\")",
+        }
+    ]
+
+    save_error_csv(path, errors)
+
+    content = path.read_text(encoding="utf-8")
+    assert "'  =HYPERLINK(" in content
