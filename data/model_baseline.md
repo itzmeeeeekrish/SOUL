@@ -1,6 +1,6 @@
 # SOUL Text-Only Baseline — TF-IDF + Logistic Regression
 
-**Status:** Implementation committed; awaiting local dependency installation, execution and test verification. No performance result is claimed yet.
+**Status:** Fixed training script and dependencies committed; awaiting local installation, script execution and test verification. No performance result is claimed yet.
 
 ## Goal
 
