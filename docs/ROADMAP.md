@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector (5,797 prepared records; 68 exact-label-conflict rows quarantined; prepared-data validation and grouped 70/15/15 split completed locally; 24 tests passed. Fixed TF-IDF + Logistic Regression baseline committed but awaiting local dependency installation and first run. Dataset source/privacy approval remains pending). Milestones 0 and 1 are complete.  
+**Current stage:** Milestone 2 – Data and baseline communication detector (5,797 prepared records; 68 exact-label-conflict rows quarantined; grouped 70/15/15 split completed; first TF-IDF + Logistic Regression baseline trained and evaluated locally; full test suite: 31 passed. Dataset source/privacy approval and external validation remain pending). Milestones 0 and 1 are complete.  
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -48,7 +48,7 @@ A single event can be an incident. Cross-channel correlation is optional context
 - [ ] Run the fixed text-only TF-IDF + Logistic Regression baseline and record validation/test metrics.
 - [ ] Report precision, recall, F1, confusion matrix and false-positive rate.
 
-**Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed on 10 November 2026. The Mendeley candidate exists only as a local ignored derivative; source/privacy approval remains pending. The grouped 70/15/15 split was generated locally and passed integrity checks. The first ML baseline script and tests are committed but await local dependency installation, test run and first execution.
+**Acceptance:** A repeatable training/evaluation script runs; the test split is not used for training; limitations and class balance are documented. Synthetic v2 validation passed on 10 November 2026. The Mendeley candidate exists only as a local ignored derivative; source/privacy approval remains pending. The grouped 70/15/15 split was generated locally and passed integrity checks. The first ML baseline has now been trained and evaluated locally; the complete backend suite reports 31 passed. Metrics and limitations are recorded in `data/model_baseline.md`. Dataset source/privacy approval and external campaign-independent validation remain pending.
 
 ## Milestone 3 – Supported evidence processing
 
@@ -184,4 +184,5 @@ Update this section after each meaningful development session.
 
 | 2026-11-11 | Generated the Mendeley 70/15/15 grouped split and ran the full test suite | 5,797 prepared inputs → 5,722 masked-text groups; 74 duplicate prepared rows collapsed; 2 rows in one cross-label masked group quarantined; 5,721 split rows. Train 4,004; validation 856; test 861. Integrity: no identical text/group crosses splits. Pytest: 24 passed in 1.16s | Install pinned ML requirements, run the fixed text-only TF-IDF + Logistic Regression script, and record validation/test metrics once; do not tune on test |
 
-| 2026-11-11 | Added fixed TF-IDF + Logistic Regression baseline and seven unit tests; pinned scikit-learn 1.9.1 and joblib 1.6.0 | Code and requirements verified on GitHub; ML packages not yet confirmed installed locally, baseline tests and model run pending | Pull, install `backend\\requirements.txt`, run full pytest, then execute `python data\\train_text_baseline.py`; record metrics without tuning on test |
+| 2026-11-11 | Added fixed TF-IDF + Logistic Regression baseline and seven unit tests; pinned scikit-learn 1.9.1 and joblib 1.6.0 | Local training completed; validation macro-F1 0.8682 and test macro-F1 0.8915; full backend suite: 31 passed in 4.54s. Test metrics are initial holdout results only, not for tuning | Use validation-only experiments for error analysis and threshold studies; preserve the initial test set for a later documented comparison |
+| 2026-11-11 | Trained the first text-only TF-IDF + Logistic Regression baseline and reran the full backend test suite | Validation: accuracy 0.9638, balanced accuracy 0.8733, macro-F1 0.8682. Initial test holdout: accuracy 0.9675, balanced accuracy 0.8920, macro-F1 0.8915. Test per-class recall: legitimate 0.9904, scam 0.9130, spam 0.7727. Pytest: 31 passed in 4.54s. Model and metrics saved locally under Git-ignored `data/private/model_artifacts/` | Review validation errors and improve spam recall without tuning against the initial test set; obtain campaign-separated and language-diverse evaluation data |
