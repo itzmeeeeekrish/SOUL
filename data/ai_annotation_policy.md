@@ -103,3 +103,12 @@ The generated corpus is AI silver data. Do not use its labels as independent val
 The local baseline API returns a **provisional model suggestion**, not a fraud verdict. It exposes uncalibrated model scores, states that review/verification is required, and explains that only message text was assessed. It cannot inspect a link destination, sender history, Android app state, device location or bank records.
 
 The current local model is a research baseline. Do not use its output alone to freeze accounts, block transactions, accuse a person or make a consequential decision.
+
+
+## Language coverage and abstention
+
+The current TF-IDF baseline has not yet been demonstrated to work reliably on Hindi or Hinglish. A conservative pre-classification guard now detects any non-Latin script and a small list of distinctive Romanized-Hindi words. For those messages the API returns `needs_review` and does not ask the current classifier for a label.
+
+This is a safety guard, not a full language detector. Latin script does not prove that a message is English, and Hinglish without a detected marker may pass the heuristic. The aggregate-only `data/audit_language_coverage.py` script reports script/lexical indicators without printing message text or IDs. Its counts are diagnostic, not ground-truth language annotations.
+
+Do not claim Hindi/Hinglish model support until an appropriately sourced, privacy-reviewed, language-diverse dataset has been prepared and evaluated using campaign-aware splits. The guard exists to avoid overclaiming while that work is pending.
