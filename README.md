@@ -207,3 +207,13 @@ Before considering any integration, run the validation-only shortcut diagnostic:
     python data/audit_multilingual_baseline.py
 
 It checks nearest training-message similarity and top character n-gram cues without reading the test partition or changing the trained model. The model remains an isolated binary experiment.
+
+
+### Multilingual model shortcut investigation
+A validation-only nearest-neighbour diagnostic found mean maximum training similarity 0.9062 and median 0.9512; 50.8% of validation messages had a nearest training message with similarity >=0.95, with 99.91% nearest-label agreement. Exact group/hash overlap was not found. This suggests close synthetic template/paraphrase families may explain part of the near-perfect score, but it does not prove data leakage.
+
+The strongest model fragments also include terms present in SOUL's privacy-redaction placeholders (`URL`, `DOMAIN`, `EMAIL_OR_UPI`, numeric markers). A train/validation-only audit checks whether placeholder prevalence differs by label:
+
+    python data/audit_multilingual_mask_tokens.py
+
+The synthetic model remains experimental and is not integrated into the live detector.
