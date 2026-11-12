@@ -55,6 +55,15 @@ def test_build_keeps_ai_labels_separate_from_official_review_fields():
         assert row["ai_created_date"] == "2026-11-12"
 
 
+
+def test_build_maps_blank_ai_label_with_needs_context_status_to_abstention():
+    suggestion = suggestion_row(label="", status="needs_more_context")
+
+    rows = build_ai_review_rows([blind_row()], [suggestion])
+
+    assert rows[0]["ai_suggested_label"] == "needs_review"
+    assert rows[0]["ai_annotation_status"] == "needs_review"
+
 def test_build_rejects_mismatched_review_ids():
     with pytest.raises(ValueError, match="Review IDs do not match"):
         build_ai_review_rows([blind_row("R1")], [suggestion_row("R2")])
