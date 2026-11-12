@@ -220,3 +220,17 @@ It downloads the candidate into the Hugging Face cache, writes a masked row-leve
 - A new audit enhancement adds unverified source-ID prefix hints, source-intent-by-source counts, a three-class taxonomy preview (legitimate / spam / scam / needs_review), and residual-pattern counts by source/language. These are diagnostics only; no labels are approved or training performed.
 - A separate public implementation using this corpus likewise separates promotional spam from fraud and describes some public-data labels as keyword-assigned/spot-checked. It is a methodological reference, not independent ground truth.
 - Local tests and rerun of the enhanced audit are pending.
+
+
+## 12 November 2026 — Cross-source audit enhancement (committed; local run pending)
+
+The ScamShield audit now adds:
+- source × language × original binary-label counts;
+- source × binary-label × intent counts;
+- source-wise unverified record-ID prefix counts;
+- exact and masked duplicate groups spanning distinct source_dataset values;
+- cross-source duplicate groups where original is_scam values conflict.
+
+This is necessary because publisher split_group is often only a source-level bucket. A real_ record ID prefix is not evidence that a message was personally received or independently verified. The dataset card declares both machine-generated and expert-annotated creators but does not document row-level source provenance or independent annotation procedure in sufficient detail. Do not treat the MIT dataset-card tag as per-upstream-source rights clearance.
+
+Two additional tests cover cross-source duplicate detection. Expected full backend suite after pulling: 188 tests. Local result pending.
