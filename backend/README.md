@@ -198,3 +198,12 @@ Then run from the repository root:
     python data/audit_multilingual_candidate.py
 
 The script writes its row-level synthetic candidate copy and aggregate report under Git-ignored data/private/multilingual_candidates/. It does not train a model, change the original split or print message text. Keep the row-level CSV local/private.
+
+
+## 13. Prepare the multilingual candidate and group-safe split
+
+After the first candidate audit succeeds, run from the repository root:
+
+    python data\prepare_multilingual_candidate.py
+
+This creates a masked local derivative, conflict quarantine and group-safe 80/10/10 train/validation/test CSVs under data/private/multilingual_candidates/prepared/. It groups on the final masked model text and will not allow that text to cross partitions. It uses the source's binary scam-vs-ham target; it does not map it to SOUL's existing three classes. It does not train a model or change the Mendeley baseline.
