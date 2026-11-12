@@ -360,6 +360,9 @@ def run_annotation(input_path=INPUT_PATH, output_path=OUTPUT_PATH, manifest_path
             api_key,
             model_name,
         )
+        expected_batch_ids = {row["record_id"] for row in batch}
+        if set(batch_annotations) != expected_batch_ids:
+            raise ValueError("Annotation batch response IDs do not match the submitted batch.")
         for record_id, annotation in batch_annotations.items():
             annotations[record_id] = {
                 **annotation,
