@@ -175,6 +175,23 @@ def test_run_annotation_is_resumable_and_writes_a_manifest(tmp_path):
     assert "api_key" not in metadata
 
 
+
+def test_run_annotation_rejects_mismatched_batch_response_ids(tmp_path):
+    source = tmp_path / "prepared.csv"
+    source.write_text("record_id,text\\nR1,Message\\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="batch response IDs"):
+        run_annotation(
+            input_path=source,
+            output_path=tmp_path / "output.csv",
+            manifest_path=tmp_path / "manifest.json",
+            base_url="https://example.invalid/v1",
+            api_key="not-a-real-key",
+            model_name="test-model",
+            allow_external_processing=True,
+            request_function=lambda *_args: {},
+        )
+
 def test_run_annotation_rejects_changed_dataset_on_resume(tmp_path):
     source = tmp_path / "prepared.csv"
     source.write_text("record_id,text\nR1,Message\n", encoding="utf-8")
