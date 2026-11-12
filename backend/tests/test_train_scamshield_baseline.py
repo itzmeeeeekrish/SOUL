@@ -2,6 +2,7 @@ import csv
 import hashlib
 import json
 import sys
+import warnings
 from pathlib import Path
 
 import pytest
@@ -247,3 +248,29 @@ def test_run_experiment_evaluates_test_only_when_requested_by_default(tmp_path):
 def test_class_report_uses_only_message_text_in_pipeline():
     pipeline = build_pipeline()
     assert list(pipeline.named_steps) == ["tfidf", "classifier"]
+
+
+
+def test_subgroup_metrics_exclude_absent_true_classes_without_warning():
+    y_true = ["legitimate", "legitimate", "scam", "scam"]
+    y_pred = ["legitimate", "scam", "scam", "scam"]
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        metrics = calculate_metrics(y_true, y_pred)
+
+    assert caught == []
+    assert metrics["macro_f1_classes_included"] == ["legitimate", "scam"]
+    assert metrics["macro_f1_excludes_absent_true_classes"] is True
+    assert metrics["class_metrics"]["spam"]["support"] == 0
+
+
+def test_full_three_class_metrics_include_all_classes_in_macro_f1():
+    y_true = ["legitimate", "spam", "scam"]
+    y_pred = ["legitimate", "spam", "scam"]
+
+    metrics = calculate_metrics(y_true, y_pred)
+
+    assert metrics["macro_f1"] == pytest.approx(1.0)
+    assert metrics["macro_f1_classes_included"] == list(LABEL_ORDER)
+    assert metrics["macro_f1_excludes_absent_true_classes"] is False
