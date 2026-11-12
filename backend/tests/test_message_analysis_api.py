@@ -60,3 +60,17 @@ def test_message_analysis_endpoint_reports_missing_model(monkeypatch):
 
     assert response.status_code == 503
     assert "not available" in response.json()["detail"]
+
+
+def test_message_analysis_endpoint_abstains_for_unsupported_script():
+    response = client.post(
+        "/v1/messages/analyze",
+        json={"text": "आपका बैंक खाता आज बंद हो जाएगा।"},
+    )
+
+    assert response.status_code == 200
+    result = response.json()
+    assert result["analysis_status"] == "abstained_unsupported_language"
+    assert result["candidate_label"] == "needs_review"
+    assert result["model_scores"] == {}
+    assert result["review_required"] is True
