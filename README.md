@@ -217,3 +217,13 @@ The strongest model fragments also include terms present in SOUL's privacy-redac
     python data/audit_multilingual_mask_tokens.py
 
 The synthetic model remains experimental and is not integrated into the live detector.
+
+
+### Redaction marker audit and ablation
+A train/validation audit found URL placeholders in 0% of ham versus 17.4% of scam training messages, and DOMAIN placeholders in 0% versus 6.3%; LONG_NUMBER markers occurred in 3.0% versus 12.1%. The same pattern appears in validation. These markers may contribute shortcuts, but they appear in only a subset of scam records.
+
+The controlled validation-only ablation removes the six SOUL privacy placeholders from train/validation text, retrains the same fixed recipe on train only, and compares validation metrics with the original saved model:
+
+    python data/ablate_multilingual_mask_markers.py
+
+It never reads the already-used initial test partition and does not overwrite the original model.
