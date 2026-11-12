@@ -253,3 +253,14 @@ Run the backend according to backend/README.md. If the local model artifact is a
 
 
 The optional full-dataset AI annotator is documented in data/ai_annotation_policy.md. It is not part of model training and does not alter the frozen baseline.
+
+
+## Language/script coverage check
+
+The baseline should not be described as multilingual. A conservative guard runs before prediction: messages with non-Latin script or distinctive Romanized-Hindi markers return `needs_review` without a classifier label. Messages with Latin script and no detected marker may still be another language; this guard is not a full language detector.
+
+Run the aggregate-only language coverage audit from the repository root:
+
+    python data\audit_language_coverage.py
+
+The audit reads the local prepared CSV and prints counts only. It does not print or export message text. Its lexical/script buckets are heuristic indicators, not ground-truth language labels. Hindi/Hinglish support requires a separate, suitable dataset and external evaluation; synthetic examples alone are not enough.
