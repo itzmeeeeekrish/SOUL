@@ -67,7 +67,7 @@ Still inside the `backend` folder:
 python -m pytest -q
 ```
 
-The health test checks the HTTP status and the important response fields. The suite also covers data auditing, preparation, split generation, ML helpers, AI silver-label export and the message-analysis API. The previously verified full run passed 57 tests in 14.21s. Twenty-four focused tests for the newest components passed in an isolated workspace; run the combined suite locally after pulling. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
+The health test checks the HTTP status and the important response fields. The suite also covers data auditing, preparation, split generation, ML helpers, AI silver-label export and the message-analysis API. The previously verified full run passed 57 tests in 14.21s. Twenty-five focused tests for the newest components passed in an isolated workspace; run the combined suite locally after pulling. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
 
 ## 4. Configuration
 
