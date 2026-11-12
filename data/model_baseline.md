@@ -1,6 +1,6 @@
 # SOUL Text-Only Baseline — TF-IDF + Logistic Regression
 
-**Status:** First local training and evaluation completed; the previously verified full test suite passed 57 tests. Sixteen focused tests for the newly added detector/API/exporter passed in an isolated workspace; the combined suite still requires local verification. Results below are exploratory dataset results, not real-world fraud-detection accuracy.
+**Status:** First local training and evaluation completed; the previously verified full test suite passed 57 tests. Twenty-four focused tests for the newly added detector/API/exporter passed in an isolated workspace; the combined suite still requires local verification. Results below are exploratory dataset results, not real-world fraud-detection accuracy.
 
 ## Goal
 
@@ -250,3 +250,6 @@ A FastAPI endpoint now exposes the local baseline at POST /v1/messages/analyze. 
 The response calls the class a candidate label, returns per-class model scores, includes conservative guidance and sets review_required to true. These scores are not calibrated probabilities. Every answer is provisional because the first baseline has not been externally validated. The endpoint analyses message text only and cannot inspect sender history, decoded URL destinations, Android app state, device location or bank records.
 
 Run the backend according to backend/README.md. If the local model artifact is absent, train it from the repository root before calling the endpoint. Do not use the endpoint alone to block transactions, freeze accounts or accuse a person.
+
+
+The optional full-dataset AI annotator is documented in data/ai_annotation_policy.md. It is not part of model training and does not alter the frozen baseline.
