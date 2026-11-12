@@ -184,6 +184,26 @@ The 31-row blind error CSV was reviewed from message text only, without inspecti
 
 The output preserves the original blind fields, adds `assistant_suggested_label` and `assistant_assessment_note`, and leaves `soul_label` blank with `review_status=pending`. It is not a completed human annotation set, and these suggestions are not ground truth. The sample was selected for model errors, so its label counts are not representative. Some fragments need the user's subscription/registration context to decide whether the message was expected. Do not train from this sheet or change the baseline; wait for human adjudication and keep the original test split frozen.
 
+## Comparison with the source/model key (12 November 2026)
+
+The uploaded key was joined to the assistant's blind suggestion file using `review_id`; all 31 IDs matched one-to-one.
+
+| Source-mapped class | Suggested legitimate | Suggested scam | Suggested spam | Needs review | Total |
+|---|---:|---:|---:|---:|---:|
+| Legitimate (`ham`) | 3 | 0 | 2 | 2 | 7 |
+| Scam (`smishing`) | 0 | 0 | 5 | 0 | 5 |
+| Spam (`spam`) | 3 | 3 | 8 | 5 | 19 |
+| **Total** | **6** | **3** | **15** | **7** | **31** |
+
+Of 24 definite assistant suggestions, 11 matched the source-to-baseline mapping and 13 differed; seven were marked `needs_review`. Assistant suggestions matched the model prediction in 11 of 31 cases. This is an advisory text-only comparison, not human ground truth or a validated estimate of annotation error.
+
+Notable observations:
+- All five source `smishing` examples in this error set (mapped to `scam`) were predicted as `spam` by the model and suggested as `spam` by the text-only assistant. This warrants source-label/context investigation, not automatic relabelling.
+- For the 14 source `spam` → model `scam` errors, assistant suggestions were `spam` 7, `needs_review` 4, `scam` 2 and `legitimate` 1. The group is mixed.
+- The 31 messages were selected because the model misclassified them. The class proportions cannot represent the full source dataset.
+
+Official `soul_label` fields remain blank and `review_status` remains `pending`. Preserve the original source label, baseline target, model prediction and assistant suggestion as separate information. Human adjudication is still required.
+
 ## Important limitations
 
 - This is an exploratory source-derived baseline, not production validation.
