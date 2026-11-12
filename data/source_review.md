@@ -457,3 +457,16 @@ Reviewed references:
 ## Multilingual follow-up implementation
 
 The source evaluation and staged decision process are documented in [multilingual_data_strategy.md](multilingual_data_strategy.md), with a separate [multilingual_dataset_schema.md](multilingual_dataset_schema.md). A local aggregate-only importer/auditor is available at data/audit_multilingual_candidate.py for Candidate 8. It preserves the binary scam-vs-ham task and original publisher split as metadata. It does not train a model or modify the historical baseline.
+
+
+## ScamShield multilingual candidate (audit pending)
+
+- Dataset: https://huggingface.co/datasets/sidzzz07/scamshield-dataset
+- Current dataset card reports 85,680 rows, train/val/test JSONL files, and fields including text, language, source_dataset, is_scam, head2_scam_intent, split_group, and metadata.
+- Dataset-card metadata declares MIT. This does not by itself establish upstream licence rights for each included source dataset.
+- Viewer examples identify source families such as Smishing_Dataset, UCI_SMS_Spam, Kaggle_Hindi_Merged, and Synthetic_Tier_C.
+- At least one displayed positive row has intent General Spam / Telemarketing. Therefore the binary is_scam label is not yet approved as a fraud-only target.
+- Audit tool: data/audit_scamshield_candidate.py. It preserves source label and intent, masks likely identifiers, and writes outputs only below data/private/scamshield_candidate/.
+- Status: audit implementation committed; local audit, source-specific licence review and label-semantics assessment pending. No model training or data integration approved.
+
+Do not claim this dataset is entirely real or entirely synthetic. Source-specific provenance must be verified from the audit and upstream documentation.
