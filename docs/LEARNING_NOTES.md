@@ -1360,3 +1360,31 @@ A new aggregate-only audit measures these marker rates by label and language, us
 It does not print message text, read the test partition, train a model or change the artifacts.
 
 **Current interpretation:** the 99.91% synthetic benchmark result is likely aided by highly similar same-label message templates and potentially class-associated redaction markers. This is a working explanation, not a proven cause. No live detector integration or real-world accuracy claim is justified.
+
+
+## 15. Redaction marker audit and next ablation
+The redaction-marker prevalence audit found consistent class associations in train and validation:
+
+| Marker | Train ham | Train scam | Validation ham | Validation scam |
+|---|---:|---:|---:|---:|
+| URL | 0.0% | 17.4% | 0.0% | 18.6% |
+| DOMAIN | 0.0% | 6.3% | 0.0% | 6.5% |
+| LONG_NUMBER | 3.0% | 12.1% | 2.6% | 11.5% |
+| 12_DIGIT_NUMBER | 1.3% | 3.6% | 2.5% | 2.6% |
+| EMAIL_OR_UPI | 0.0% | 0.0% | 0.0% | 0.0% |
+| PAN_LIKE | 0.0% | 0.0% | 0.0% | 0.0% |
+
+URL, DOMAIN and LONG_NUMBER placeholders are more common in scam rows. The pattern repeats in validation. However, these markers appear in only a subset of scam messages. They can contribute shortcut signal but are not sufficient on their own to explain the near-perfect scores. The 12-digit marker has little validation class separation.
+
+The next experiment is a controlled validation-only ablation:
+- Compare the saved original model on the original validation text.
+- Train the same fixed recipe using the existing training partition after removing only the six SOUL placeholder tokens.
+- Evaluate on validation text with those same placeholders removed.
+- Do not read the initial holdout test partition.
+- Do not overwrite the saved original model or save the ablation model.
+
+Run:
+
+    python data/ablate_multilingual_mask_markers.py
+
+A performance drop would indicate that marker tokens contribute predictive information under this recipe. It would not prove they are the only cause, nor would unchanged near-perfect performance resolve the separate high template-similarity concern. The validation data has already been used for development diagnostics, so it must not be described as a fresh independent test.
