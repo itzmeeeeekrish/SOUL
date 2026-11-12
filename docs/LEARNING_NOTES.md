@@ -1451,3 +1451,25 @@ Then repeat the last two commands with threshold 0.98.
 This is still a synthetic binary ham/scam experiment. The old validation partition has already been used in diagnostics, so this new validation is not a fresh final test. The original test partition remains untouched by these scripts. Similarity-connected components are approximate template families, not verified campaigns. A lower score would be evidence that the original split was easier because of similar wording, not proof of real-world performance.
 
 Fifteen new tests were added. Their local result is pending until the full suite is run after pulling.
+
+
+## 12 November 2026 — Interpreting family-separated scores and ScamShield audit
+
+### Family-split results
+
+- Similarity threshold 0.95: 9,206 training rows and 1,023 validation rows. Accuracy 99.90%; balanced accuracy 99.89%.
+- Similarity threshold 0.98: same split sizes. Accuracy and balanced accuracy 100%.
+- Original initial holdout test was not read or changed.
+- At threshold 0.95, Assamese validation had no ham rows and Odia had no scam rows. A subgroup with one missing class cannot show balanced performance. Tamil had only 7 scam rows.
+- At threshold 0.98, Odia had 7 scam and Tamil 5 scam rows, so subgroup scores are preliminary.
+- Interpretation: high results persist after grouping approximate similar-message families. Similar templates crossing the old split are not a sufficient explanation. Synthetic label/style regularities may still make the task unusually easy. This is not real-world fraud-detection accuracy.
+
+### New candidate audit
+
+A separate dataset, ScamShield, is being audited before any training. Its current public card reports 85,680 rows and fields for source dataset, language, source scam label, scam intent, split group and metadata. A displayed positive row is labelled General Spam / Telemarketing, so positive does not necessarily mean confirmed fraud. Preserve the source taxonomy and do not map it directly to SOUL's scam class.
+
+Run after pulling the new commit:
+
+    python data/audit_scamshield_candidate.py
+
+The script stores only a masked row-level candidate CSV and aggregate summary below data/private/scamshield_candidate/. It does not train a model or modify either existing SOUL model.
