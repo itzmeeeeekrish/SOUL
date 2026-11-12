@@ -187,10 +187,10 @@ def test_audit_records_keeps_source_label_and_intent_dimensions_separate():
     )
     summary = audit_records(rows)
 
-    assert summary["source_intent_counts_by_is_scam"]["1"][
+    assert summary["intent_counts_by_is_scam"]["1"][
         "general spam / telemarketing"
     ] == 1
-    assert summary["source_intent_counts_by_is_scam"]["0"][
+    assert summary["intent_counts_by_is_scam"]["0"][
         "legitimate / benign"
     ] == 1
     assert summary["source_labels_reinterpreted"] is False
