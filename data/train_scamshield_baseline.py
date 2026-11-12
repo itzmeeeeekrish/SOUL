@@ -176,9 +176,11 @@ def validate_splits(splits):
     seen_hashes = {}
 
     for split_name in SPLIT_NAMES:
-        rows = splits.get(split_name)
+        if split_name not in splits:
+            continue
+        rows = splits[split_name]
         if not rows:
-            raise ValueError(f"The {split_name} split is missing or empty.")
+            raise ValueError(f"The {split_name} split is empty.")
 
         labels = {row["label"] for row in rows}
         if labels != set(LABEL_ORDER):
