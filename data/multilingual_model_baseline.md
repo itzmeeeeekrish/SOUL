@@ -155,3 +155,15 @@ Run the controlled validation-only ablation:
     python data/ablate_multilingual_mask_markers.py
 
 It retrains the same fixed recipe on training text with only the six explicit placeholder tokens removed, then compares validation metrics against the existing saved model on original validation text. It does not read the initial holdout test, overwrite the saved baseline artifact or save an ablation model. This is a diagnostic, not independent evaluation or causal proof.
+
+
+## Placeholder ablation result
+The user ran the validation-only marker ablation. Removing all six exact SOUL privacy placeholders and retraining the same model recipe on training data produced **no change** in validation accuracy, balanced accuracy, macro F1 or weighted F1 (all remained 0.9991 / 0.9990 as applicable). Per-language accuracy and scam recall were also unchanged.
+
+This suggests explicit placeholder tokens are not the main explanation for the near-perfect score. It does not rule out other source-specific lexical patterns, message construction or generated-template similarity.
+
+An approximate top-five neighbour graph diagnostic is available:
+
+    python data/audit_multilingual_template_families.py
+
+It reads train and validation only, uses character-TF-IDF cosine similarity at 0.90, 0.95 and 0.98, and reports aggregate connected components/cross-partition links. It is not a verified campaign detector and does not read the initial holdout test.
