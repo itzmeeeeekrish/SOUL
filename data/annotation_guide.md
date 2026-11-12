@@ -105,3 +105,8 @@ For third-party source examples, preserve the publisher's original label separat
 - AI sidecars: `ai_suggested_label`, `ai_annotation_status`, `ai_annotation_note`, `ai_model`, `ai_method` and creation date.
 
 Routine manual annotation is not required for project progress. The AI-led workflow writes silver labels to a separate sidecar and marks uncertainty as `needs_review`. Never copy a model prediction into `soul_label`. Read [the AI annotation policy](ai_annotation_policy.md) and [the label review protocol](label_review_protocol.md). The initial model/split remains frozen and continues to use the original provisional `label`.
+
+
+## Language coverage note
+
+Apply the same intent definitions across languages, but do not assume the current baseline understands every language. Hindi in Devanagari and messages with recognised Romanized-Hindi markers are routed to `needs_review` by the current API guard. The guard is heuristic; Latin-script text without detected markers is not proof of English. Preserve the original text language and use a separate language-coverage audit before claiming language support.
