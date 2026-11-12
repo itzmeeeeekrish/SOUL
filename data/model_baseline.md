@@ -171,6 +171,19 @@ The uploaded CSV was used only for this analysis. It is not copied into the repo
 
 **Prepared-data provenance update (11 November 2026):** The preparation utility now records original `source_label` separately from the provisional `label`, plus blank/pending human-review fields. The regenerated local file passed validation: 5,797 records, all 5,797 pending review, zero invalid mappings or review-state inconsistencies. Full backend suite at that point: 45 passed in 5.25s. The historical baseline split and model remain unchanged.
 
+## Assistant-assisted preliminary review of blind validation errors (12 November 2026)
+
+The 31-row blind error CSV was reviewed from message text only, without inspecting the separate source-label/model-prediction key. An advisory suggestion file was produced with these counts:
+
+| Assistant suggestion | Count |
+|---|---:|
+| Spam | 15 |
+| Legitimate | 6 |
+| Scam | 3 |
+| Needs review | 7 |
+
+The output preserves the original blind fields, adds `assistant_suggested_label` and `assistant_assessment_note`, and leaves `soul_label` blank with `review_status=pending`. It is not a completed human annotation set, and these suggestions are not ground truth. The sample was selected for model errors, so its label counts are not representative. Some fragments need the user's subscription/registration context to decide whether the message was expected. Do not train from this sheet or change the baseline; wait for human adjudication and keep the original test split frozen.
+
 ## Important limitations
 
 - This is an exploratory source-derived baseline, not production validation.
