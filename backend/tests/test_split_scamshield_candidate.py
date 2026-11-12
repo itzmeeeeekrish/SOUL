@@ -11,6 +11,7 @@ if str(DATA_DIRECTORY) not in sys.path:
 
 from split_scamshield_candidate import (
     build_manifest,
+    build_stratification_keys,
     load_candidate_rows,
     make_splits,
     write_split_outputs,
@@ -116,14 +117,21 @@ def test_stratification_preserves_supported_language_class_slices():
         assert observed == expected
 
 
-def test_small_language_class_slices_use_label_level_rare_bucket():
+def test_small_language_class_slice_falls_back_to_label_only_stratification():
     rows = make_rows(repeats=20)
+    changed = 0
     for row in rows:
         if row["label"] == "scam" and row["languages_json"] == '["hindi"]':
             row["languages_json"] = '["assamese"]'
+            changed += 1
+            if changed == 5:
+                break
 
-    _, raw_counts = make_splits(rows)
-    assert raw_counts[("scam", "assamese")] == 20
+    keys, raw_counts = build_stratification_keys(rows)
+    assert raw_counts[("scam", "assamese")] == 5
+    assert set(keys) == {"legitimate", "spam", "scam"}
+    splits, _ = make_splits(rows)
+    assert all(splits[name] for name in ("train", "validation", "test"))
 
 
 def test_duplicate_masked_hashes_are_rejected(tmp_path):
