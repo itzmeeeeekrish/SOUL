@@ -172,3 +172,14 @@ The AI batch runner is documented in [data/ai_annotation_policy.md](../data/ai_a
     python data\ai_annotate_prepared_dataset.py --allow-external-processing
 
 This sends the locally prepared message text to the configured external provider. Do not run it until you have checked the provider's data retention and processing terms. The runner sends record_id and text only, never source_label or baseline label; it stores only AI labels/rationales and a run manifest under Git-ignored data/private/ai_annotations/. It saves progress after each batch and resumes safely. Low-confidence outputs become needs_review. This is an AI silver-label dataset, not verified ground truth.
+
+
+## 11. Language/script safety guard
+
+Before calling the local model, the message detector checks for non-Latin script and a conservative list of Romanized-Hindi markers. Messages with those indicators return `candidate_label=needs_review`; the baseline is not called. This avoids presenting the existing model as Hindi/Hinglish capable before those languages have been validated.
+
+The check is deliberately heuristic, not a complete language detector. Latin-script text without a detected marker can still be Hindi, Hinglish or another language. Run the aggregate-only coverage audit from the repository root:
+
+    python data\audit_language_coverage.py
+
+It reports counts only and never prints message text or IDs. See [data/model_baseline.md](../data/model_baseline.md) and [data/ai_annotation_policy.md](../data/ai_annotation_policy.md).
