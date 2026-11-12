@@ -395,7 +395,7 @@ def print_summary(summary):
     print("Same-language duplicate groups collapsed:", stats["same_language_masked_duplicate_groups_collapsed"])
     print("Same-language duplicate rows collapsed:", stats["same_language_duplicate_rows_collapsed"])
     print("Masked-text groups crossing publisher splits:", stats["masked_text_groups_crossing_publisher_splits"])
-    print("Masked-text groups with multiple language tags:", stats["same_masked_text_multiple_language_tags"])
+    print("Masked-text groups with multiple language tags:", stats.get("same_masked_text_multiple_language_tags", 0))
     print("Masked-text conflicts quarantined:", stats["masked_text_conflict_groups"])
     print("Quarantined source rows:", summary["quarantine_rows"])
 
