@@ -67,7 +67,7 @@ Still inside the `backend` folder:
 python -m pytest -q
 ```
 
-The health test checks the HTTP status and the important response fields. The suite also covers data auditing, preparation, split generation, ML helpers, AI silver-label export and the message-analysis API. The latest combined local run passed **82 tests in 5.05s** on 12 November 2026, including the new detector, endpoint, silver-label exporter and batch-annotation tests. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
+The health test checks the HTTP status and the important response fields. The suite also covers data auditing, preparation, split generation, ML helpers, AI silver-label export and the message-analysis API. The latest combined local run passed **93 tests in 4.95s** on 12 November 2026, including the detector, endpoint, silver-label exporter, batch-annotation, language-guard and language-audit tests. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
 
 ## 4. Configuration
 
