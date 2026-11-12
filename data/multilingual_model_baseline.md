@@ -112,3 +112,25 @@ A validation-only diagnostic is now available:
     python data/audit_multilingual_baseline.py
 
 It measures nearest-training-message character-TF-IDF similarity for validation rows and prints top alphabetic model-weighted character fragments. It does not read test rows, retrain or modify the model. Its results are diagnostic evidence only, not proof of leakage or generalisation.
+
+
+## Similarity diagnostic findings (12 November 2026)
+The validation-only nearest-training audit reported:
+
+| Diagnostic | Result |
+|---|---:|
+| Mean maximum similarity | 0.9062 |
+| Median maximum similarity | 0.9512 |
+| P90 | 0.9743 |
+| P95 | 0.9788 |
+| Validation rows with similarity >= 0.90 | 74.2% |
+| Validation rows with similarity >= 0.95 | 50.8% |
+| Nearest-training label agreement | 99.91% |
+
+No exact group/hash overlap was detected. The very high nearest-neighbour similarity and same-label agreement are consistent with close generated-template or paraphrase families across partitions. They do not prove leakage, but they substantially limit what the near-perfect metric can tell us about generalisation.
+
+The model's strongest character fragments included `url`, `num`, `number`, `upi` and `domain`. The preparation pipeline substitutes regex candidates with explicit placeholders. A further validation-only script now audits these markers by source label and language:
+
+    python data/audit_multilingual_mask_tokens.py
+
+Do not remove or alter markers and then reuse the already-opened test set to compare alternatives. Any ablation or changed preprocessing requires a new experiment/split with a clearly separated evaluation protocol.
