@@ -376,3 +376,79 @@ This split prevents exact final masked-text leakage only. It does not group near
 The local split run produced 5,721 model rows from 5,797 prepared records. It collapsed 36 same-label masked-text groups (74 prepared rows) and quarantined one cross-label masked-text group (2 rows). Partition counts: train 4,004 (3,383 legitimate / 318 scam / 303 spam), validation 856 (724 / 68 / 64), test 861 (726 / 69 / 66). The splitter confirmed no identical masked text or split group crosses partitions. Backend tests passed locally: `24 passed in 1.16s`.
 
 The first text-only TF-IDF + Logistic Regression script is committed. It has not yet been run and no performance result is available. Keep the test set as a holdout; do not use it for tuning. Source and privacy approval of the third-party candidate remains a separate pending decision.
+
+## Additional multilingual candidates inspected (12 November 2026)
+
+These candidates were discovered after the local language audit. None has been downloaded into SOUL or approved for training by this review. A visible dataset-card licence is a starting point, not proof that every upstream component has compatible rights.
+
+### Candidate 8 — Indian Multilingual Scam & Ham SMS Dataset (14 languages)
+
+- **Publisher:** Hugging Face user anmolshrivastav.
+- **Dataset:** https://huggingface.co/datasets/anmolshrivastav/scam_ham_india_14_languages
+- **Declared licence:** MIT in the Hugging Face dataset metadata.
+- **Declared size:** 14,000 synthetic text samples; 7,000 labelled scam and 7,000 ham.
+- **Languages:** 14, with 1,000 rows per language: Assamese, Bengali, English, Gujarati, Hindi, Hinglish (hi-Latn), Kannada, Kashmiri, Malayalam, Marathi, Odia, Punjabi, Tamil and Telugu.
+- **Fields shown:** text, binary label (ham/scam) and language.
+- **Published split:** 12,600 train and 1,400 test, described as stratified by label. The reviewed card does not describe campaign/source-group isolation.
+- **Assessment:** Strong candidate for a synthetic multilingual development pilot and script/language stress tests. It is binary, so it cannot directly replace SOUL's three-class legitimate/spam/scam baseline. Because it is tagged Synthetic and has no evidence of campaign-group splitting in the reviewed card, its test partition must not be treated as a real-world or independent campaign benchmark.
+- **Decision:** **Conditional development candidate only.** Download locally, audit exact/near duplicates, language labels, message templates, privacy-like patterns and split leakage before use. Preserve it as a distinct source and do not merge its binary labels blindly into the historical three-class labels.
+
+Reviewed references:
+- Dataset card and sample rows: https://huggingface.co/datasets/anmolshrivastav/scam_ham_india_14_languages
+- Metadata declares MIT and Synthetic tag; the card describes 14,000 balanced records, 14 languages and a 90/10 train/test split.
+
+### Candidate 9 — ScamShield: Multilingual Smishing & Social Engineering Corpus
+
+- **Publisher:** Hugging Face user sidzzz07; linked project: https://github.com/Siddharthrane07/scamshield
+- **Dataset:** https://huggingface.co/datasets/sidzzz07/scamshield-dataset
+- **Declared licence:** MIT in the Hugging Face dataset metadata.
+- **Declared size:** 85,680 records; the viewer shows train (~69.3k) plus validation and test partitions.
+- **Fields shown:** id, text, language, source_dataset, is_scam, head1_social_engineering, head2_scam_intent, split_group and metadata.
+- **Languages claimed:** English, Hindi (including Devanagari) and Romanized Hinglish.
+- **Source labels visible in examples:** Smishing_Dataset, UCI_SMS_Spam, Indian_Telecom_SMS, Kaggle_Hindi_Merged and Synthetic_Tier_C.
+- **Assessment:** Potentially useful because it preserves source and split-group metadata and includes multilingual and synthetic examples. However, the dataset card is very short and does not give a complete source-by-source licence/provenance explanation. Sample rows also show General Spam / Telemarketing under the positive is_scam class, so the binary target may combine spam and scams. That distinction matters to SOUL's three-class task. Overlap with UCI, Mendeley and other known sources must be measured.
+- **Decision:** **Hold for lineage, label-semantics and privacy audit.** Do not treat the declared MIT tag as sufficient to settle upstream dataset licensing. Do not use its pre-made test split as SOUL's independent test until its grouping, source overlap and synthetic/real composition are checked.
+
+Reviewed references:
+- Dataset card and schema: https://huggingface.co/datasets/sidzzz07/scamshield-dataset
+- Viewer sample rows show source_dataset, split_group, binary is_scam and scam-intent classes including General Spam / Telemarketing.
+
+### Candidate 10 — Indian Scam SMS (synthetic, audited), 1,580 rows
+
+- **Publisher:** Hugging Face user Ridham115.
+- **Dataset:** https://huggingface.co/datasets/Ridham115/indian-scam-sms-synthetic-audited
+- **Declared licence:** CC BY 4.0. The card also warns that third-party model-provider terms may apply to generated outputs.
+- **Size and labels:** 1,580 messages; 797 scam and 783 safe.
+- **Styles:** Hinglish 639, English 262, Hindi 167, Bengali-English 135, Marathi-English 127, Telugu-English 125 and Tamil-English 125.
+- **Provenance fields:** row_id, text, label, original_label, scam_type, language, generator, topic and audit_action.
+- **Generation and audit:** All rows were LLM-generated. The card reports multiple automated label-noise signals and additional rule checks. It says 304 rows were reviewed by AI assistance/rules, with 74 removed and 35 labels flipped. It explicitly states that the AI assistant—not human annotators—made the main row-level audit decisions; the author's human check was partial. It also states that 1,350 of 1,580 rows were not read individually.
+- **Limitations:** Synthetic; generated scam domains/phone numbers; style/topic/label correlations; regional code-mixed messages were not checked by native speakers; some rows may remain mislabelled. The card warns that Google Gemini and Groq-hosted model terms apply to their respective generated outputs and may restrict some uses.
+- **Decision:** **Conditional hard-negative/stress-test candidate only.** Do not use it as real-world accuracy evidence or ground truth. Any future use must preserve generator, audit_action and licence/provider metadata and filter out rows whose provider terms are incompatible with the intended model-development use.
+
+Reviewed reference:
+- Full dataset card, composition, audit method, limitations and provider-term warning: https://huggingface.co/datasets/Ridham115/indian-scam-sms-synthetic-audited
+
+### Candidate 11 — INDICA / IndiF multilingual telecom-fraud benchmark
+
+- **Repository:** https://github.com/nitinc24009/IndiF
+- **Hugging Face dataset:** https://huggingface.co/datasets/vikrant-vikram/INDICA
+- **Declared repository licence:** BSD-2-Clause on the GitHub repository. The dataset page has DOI 10.57967/hf/8492; the dataset-level data terms should still be checked separately.
+- **Task and modalities:** Telecom-conversation fraud analysis using audio and text, not an SMS-only corpus.
+- **Languages listed:** Assamese, Bengali, English, Gujarati, Hindi, Kannada, Malayalam, Odia, Tamil and Telugu.
+- **Reported scope:** The project repository describes 189,420 samples across 10 languages, while the Hugging Face viewer currently reports about 2.42 million rows and a very large audio/text package. These figures may count different units and require clarification before estimating storage or sample size.
+- **Tasks listed:** Scenario classification, fraud vs non-fraud and fraud-type classification.
+- **Limitations stated by the project:** Audio is TTS-generated, speaker diversity is limited and distribution is uniform.
+- **Decision:** **Future voice/call-analysis research candidate, not part of the current SMS branch.** Check dataset data terms, actual text-only subset, size and lineage before any download.
+
+Reviewed references:
+- Repository, BSD-2-Clause link, languages, tasks and limitations: https://github.com/nitinc24009/IndiF
+- Hugging Face dataset DOI and viewer metadata: https://huggingface.co/datasets/vikrant-vikram/INDICA
+
+## Updated multilingual-data decision
+
+1. Keep the existing Mendeley three-class baseline, its original train/validation/test partitions and reported metrics frozen.
+2. Treat the 14-language synthetic dataset as the first candidate for a separate language/script development pilot, not as a source of real-world performance claims.
+3. Keep the 1,580-row AI-generated corpus as a possible hard-negative supplement only after provider terms and per-generator restrictions are resolved.
+4. Hold the 85,680-row ScamShield corpus until upstream source licences, real/synthetic proportions, source overlap, label semantics and split-group integrity are independently audited.
+5. Hold the Hindi IEEE DataPort dataset already described above until the actual dataset licence/terms are confirmed. Its ham/spam labels cannot simply be converted to scam/legitimate.
+6. Do not use AI-generated or synthetic samples as a final external test set. Reserve a separate, group/source-held-out evaluation set and report metrics per language and class.
