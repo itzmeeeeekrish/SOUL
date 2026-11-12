@@ -64,6 +64,18 @@ SOCIAL_FLAGS = (
     "reward_bait",
     "financial_pressure",
 )
+SCAM_INTENTS = {
+    "bank account freeze",
+    "courier scam",
+    "electricity disconnection",
+    "fake kyc",
+    "loan scam",
+    "lottery / prize",
+    "otp / credential theft",
+    "telegram job",
+    "traffic e-challan",
+    "upi fraud",
+}
 
 OUTPUT_COLUMNS = [
     "record_id",
@@ -79,12 +91,14 @@ OUTPUT_COLUMNS = [
     "masked_text_sha256",
     "script_profile",
     "source_type_hint",
+    "record_id_prefix_hint",
     "has_email_upi_candidate",
     "has_url_domain_candidate",
     "has_phone_long_number_candidate",
     "has_twelve_digit_candidate",
     "has_pan_like_candidate",
     "has_residual_candidate_after_mask",
+    *[f"residual_{name}_candidate" for name in PRIVACY_FIELDS],
     *[f"metadata_{name}" for name in METADATA_FLAGS],
     *[f"social_{name}" for name in SOCIAL_FLAGS],
 ]
@@ -130,6 +144,30 @@ def source_type_hint(source_dataset):
     if value:
         return "non_synthetic_named_source_unverified"
     return "unknown_source"
+
+
+def record_id_prefix_hint(source_id):
+    """Classify only the visible ID prefix; it is not verified provenance."""
+    value = str(source_id or "").strip().casefold()
+    if value.startswith("real_"):
+        return "real_prefix_unverified"
+    if value.startswith(("synth_", "synthetic_")):
+        return "synthetic_prefix_unverified"
+    if not value:
+        return "missing"
+    return "other_prefix_unverified"
+
+
+def taxonomy_label_preview(intent):
+    """Map only explicit source intent names to SOUL's three-class vocabulary."""
+    value = str(intent or "").strip().casefold()
+    if value == "legitimate / benign":
+        return "legitimate"
+    if value == "general spam / telemarketing":
+        return "spam"
+    if value in SCAM_INTENTS:
+        return "scam"
+    return "needs_review"
 
 
 def prepare_records(split_records):
@@ -182,6 +220,8 @@ def prepare_records(split_records):
             "masked_text_sha256": sha256_text(masked_text),
             "script_profile": script_profile(text),
             "source_type_hint": source_type_hint(source),
+            "record_id_prefix_hint": record_id_prefix_hint(source_id),
+            "taxonomy_label_preview": taxonomy_label_preview(intent),
             "has_email_upi_candidate": int(bool(flags["email_upi"])),
             "has_url_domain_candidate": int(bool(flags["url_domain"])),
             "has_phone_long_number_candidate": int(bool(flags["phone_long_number"])),
@@ -189,6 +229,8 @@ def prepare_records(split_records):
             "has_pan_like_candidate": int(bool(flags["pan_like"])),
             "has_residual_candidate_after_mask": int(any(residual.values())),
         }
+        for name in PRIVACY_FIELDS:
+            row[f"residual_{name}_candidate"] = int(bool(residual[name]))
 
         metadata = source_row.get("metadata")
         social = source_row.get("head1_social_engineering")
@@ -216,6 +258,13 @@ def audit_records(rows):
     intent_by_label = defaultdict(Counter)
     scripts = Counter()
     source_types = Counter()
+    id_prefixes = Counter()
+    taxonomy_preview = Counter()
+    source_language_labels = defaultdict(Counter)
+    source_intents = defaultdict(Counter)
+    residual_by_source = defaultdict(Counter)
+    residual_by_language = defaultdict(Counter)
+    residual_patterns = Counter()
     privacy = Counter()
     metadata = Counter()
     social = Counter()
@@ -242,6 +291,10 @@ def audit_records(rows):
         intent_by_label[str(label)][intent] += 1
         scripts[row["script_profile"]] += 1
         source_types[row["source_type_hint"]] += 1
+        id_prefixes[row["record_id_prefix_hint"]] += 1
+        taxonomy_preview[row["taxonomy_label_preview"]] += 1
+        source_language_labels[source][language] += 1
+        source_intents[source][intent] += 1
 
         raw_groups[row["content_sha256"]].append(row)
         masked_groups[row["masked_text_sha256"]].append(row)
@@ -259,6 +312,13 @@ def audit_records(rows):
             privacy["rows_with_any_candidate"] += 1
         if row["has_residual_candidate_after_mask"]:
             privacy["rows_with_residual_candidate_after_mask"] += 1
+            residual_by_source[source]["rows"] += 1
+            residual_by_language[language]["rows"] += 1
+        for name in PRIVACY_FIELDS:
+            if row[f"residual_{name}_candidate"]:
+                residual_patterns[name] += 1
+                residual_by_source[source][name] += 1
+                residual_by_language[language][name] += 1
 
         for name in METADATA_FLAGS:
             metadata[name] += row[f"metadata_{name}"]
@@ -324,6 +384,25 @@ def audit_records(rows):
         },
         "script_profile_counts": dict(sorted(scripts.items())),
         "source_type_name_hints": dict(sorted(source_types.items())),
+        "record_id_prefix_hints_unverified": dict(sorted(id_prefixes.items())),
+        "taxonomy_three_class_preview_unverified": dict(sorted(taxonomy_preview.items())),
+        "source_language_counts": {
+            source: dict(sorted(counts.items()))
+            for source, counts in sorted(source_language_labels.items())
+        },
+        "source_intent_counts": {
+            source: dict(sorted(counts.items()))
+            for source, counts in sorted(source_intents.items())
+        },
+        "residual_pattern_counts_after_mask": dict(sorted(residual_patterns.items())),
+        "residual_rows_by_source": {
+            source: dict(sorted(counts.items()))
+            for source, counts in sorted(residual_by_source.items())
+        },
+        "residual_rows_by_language": {
+            language: dict(sorted(counts.items()))
+            for language, counts in sorted(residual_by_language.items())
+        },
         "raw_text_duplicate_audit": duplicate_summary(raw_groups),
         "masked_text_duplicate_audit": duplicate_summary(masked_groups),
         "publisher_split_group_cardinality_by_source": source_group_cardinality,
@@ -471,6 +550,13 @@ def print_summary(summary):
     print("\nSource scam-intent taxonomy:")
     for intent, count in summary["source_scam_intent_counts"].items():
         print(f"  {intent}: {count}")
+    print("  Intent counts by source binary label:")
+    for label, counts in summary["source_intent_counts_by_is_scam"].items():
+        print(f"    is_scam={label}: {counts}")
+    print("  Three-class taxonomy preview (NOT approved training labels):",
+          summary["taxonomy_three_class_preview_unverified"])
+    print("  Unverified source ID prefix hints:",
+          summary["record_id_prefix_hints_unverified"])
     print(
         "Positive rows labelled General Spam / Telemarketing:",
         summary["positive_general_spam_telemarketing_rows"],
@@ -505,6 +591,12 @@ def print_summary(summary):
     print("\nPrivacy-pattern candidates:")
     for name, count in summary["privacy_candidate_counts"].items():
         print(f"  {name}: {count}")
+    print("  Residual pattern matches after masking:",
+          summary["residual_pattern_counts_after_mask"])
+    print("  Residual rows by source:",
+          summary["residual_rows_by_source"])
+    print("  Residual rows by language:",
+          summary["residual_rows_by_language"])
 
     print("\nOutputs:")
     print("  Masked row-level CSV:", OUTPUT_CSV)
