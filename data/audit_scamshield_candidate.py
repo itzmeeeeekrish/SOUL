@@ -92,6 +92,7 @@ OUTPUT_COLUMNS = [
     "script_profile",
     "source_type_hint",
     "record_id_prefix_hint",
+    "taxonomy_label_preview",
     "has_email_upi_candidate",
     "has_url_domain_candidate",
     "has_phone_long_number_candidate",
