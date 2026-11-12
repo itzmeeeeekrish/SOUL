@@ -452,3 +452,8 @@ Reviewed references:
 4. Hold the 85,680-row ScamShield corpus until upstream source licences, real/synthetic proportions, source overlap, label semantics and split-group integrity are independently audited.
 5. Hold the Hindi IEEE DataPort dataset already described above until the actual dataset licence/terms are confirmed. Its ham/spam labels cannot simply be converted to scam/legitimate.
 6. Do not use AI-generated or synthetic samples as a final external test set. Reserve a separate, group/source-held-out evaluation set and report metrics per language and class.
+
+
+## Multilingual follow-up implementation
+
+The source evaluation and staged decision process are documented in [multilingual_data_strategy.md](multilingual_data_strategy.md), with a separate [multilingual_dataset_schema.md](multilingual_dataset_schema.md). A local aggregate-only importer/auditor is available at data/audit_multilingual_candidate.py for Candidate 8. It preserves the binary scam-vs-ham task and original publisher split as metadata. It does not train a model or modify the historical baseline.
