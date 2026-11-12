@@ -251,3 +251,14 @@ Update this section after each meaningful development session.
 - Added an aggregate-only importer/auditor for the 14-language synthetic candidate. It preserves publisher source labels, language/script tags, original train/test partition, exact-text hashes and privacy-pattern flags. It does not train a model, create a new split or print message text.
 - The previous local full suite passed **93 tests in 4.95s** before this new audit module was added. The 12 new audit tests are pending local verification.
 - Next: pull the changes, run the full test suite, install the optional Hugging Face Datasets package, then run the candidate audit. Use its aggregate output to decide whether to create a separate multilingual binary development experiment; do not merge it into the current three-class model.
+
+
+## 12 November 2026 — 14-language candidate audit results and safe preparation
+
+- The user ran `data/audit_multilingual_candidate.py` successfully. It imported 14,000 synthetic rows: 7,000 ham and 7,000 scam, with 1,000 per each of 14 publisher language tags.
+- Script profiles: 2,000 Latin-only, 1,352 Devanagari, 1,082 Bengali/Assamese, 681 Gujarati, 661 Gurmukhi, 525 Kannada, 525 Malayalam, 525 Telugu, 519 Arabic, 463 Tamil, 418 Odia and 5,249 mixed Latin/non-Latin.
+- Exact normalized texts: 12,889 unique; 272 duplicate groups; 87 duplicate groups cross the publisher train/test partitions; no duplicate group has conflicting original labels.
+- Broad privacy-pattern indicators: 4,356 rows with at least one candidate, including phone/long-number 2,231, URL/domain 2,199, 12-digit 756 and email/UPI 76. These counts are not confirmed personal-data findings; the source is labelled synthetic.
+- Added a separate preparation utility to mask candidate values, regroup by final masked model text, quarantine any post-mask label conflict and create deterministic approximately 80/10/10 StratifiedGroupKFold partitions by language x source label.
+- The new preparation utility does not train a model or alter the original Mendeley baseline/test split. Twelve new preparation tests are pending local verification.
+- Next: pull, rerun the complete suite, run the local preparation utility, and inspect its aggregate split/quarantine/residual-pattern report before training a separate multilingual binary model.
