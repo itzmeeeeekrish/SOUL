@@ -67,7 +67,7 @@ Still inside the `backend` folder:
 python -m pytest -q
 ```
 
-The health test checks the HTTP status and the important response fields. The suite also covers data auditing, preparation, split generation, ML helpers, AI silver-label export and the message-analysis API. The previously verified full run passed 57 tests in 14.21s. Sixteen focused tests for the newest components passed in an isolated workspace; run the combined suite locally after pulling. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
+The health test checks the HTTP status and the important response fields. The suite also covers data auditing, preparation, split generation, ML helpers, AI silver-label export and the message-analysis API. The previously verified full run passed 57 tests in 14.21s. Twenty-four focused tests for the newest components passed in an isolated workspace; run the combined suite locally after pulling. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
 
 ## 4. Configuration
 
@@ -163,3 +163,12 @@ The endpoint returns a candidate label, per-class model scores, a short safety m
 The endpoint returns 503 when the local model artifact is missing or incompatible, and 422 for blank or oversized input. It never downloads a model from the internet. Keep the joblib artifact local and load only the model created by your own trusted training run.
 
 See data/ai_annotation_policy.md for the silver-label workflow and its safeguards.
+
+
+## 10. Optional resumable AI annotation of the prepared dataset
+
+The AI batch runner is documented in [data/ai_annotation_policy.md](../data/ai_annotation_policy.md). Configure SOUL_LLM_BASE_URL, SOUL_LLM_API_KEY and SOUL_LLM_MODEL in the local root .env, then run from the repository root:
+
+    python data\ai_annotate_prepared_dataset.py --allow-external-processing
+
+This sends the locally prepared message text to the configured external provider. Do not run it until you have checked the provider's data retention and processing terms. The runner sends record_id and text only, never source_label or baseline label; it stores only AI labels/rationales and a run manifest under Git-ignored data/private/ai_annotations/. It saves progress after each batch and resumes safely. Low-confidence outputs become needs_review. This is an AI silver-label dataset, not verified ground truth.
