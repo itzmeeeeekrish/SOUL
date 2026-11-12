@@ -1,14 +1,15 @@
 """Approximate template-family audit across train and validation only.
 
-This audit uses a sparse character-TF-IDF k-nearest-neighbour graph to find
-candidate near-duplicate/template clusters. It does not read the initial
-holdout test partition, train a classifier, or change model artifacts.
+This audit creates a bipartite character-TF-IDF k-nearest-neighbour graph:
+each validation row is connected to its closest training rows. It does not
+compare every pair in the combined 10k+ corpus, read the initial holdout test,
+train a classifier, or change model artifacts.
 
 Run from repository root:
     python data/audit_multilingual_template_families.py
 
-The graph is approximate because only each row's closest K neighbours are
-considered. Similarity thresholds are diagnostic heuristics, not ground truth.
+The graph is approximate because only each validation row's closest K training
+neighbours are considered. Similarity thresholds are diagnostic heuristics.
 Only aggregate statistics are printed/saved; message text is never output.
 """
 
@@ -57,35 +58,41 @@ class UnionFind:
             self.rank[root_left] += 1
 
 
-def build_knn_edges(matrix, neighbour_count=NEIGHBOUR_COUNT):
-    """Return directed top-K neighbour edges as (left, right, cosine similarity)."""
-    row_count = matrix.shape[0]
-    if row_count < 2:
-        raise ValueError("At least two rows are required for a neighbour graph.")
+def build_knn_edges(
+    train_matrix,
+    validation_matrix,
+    neighbour_count=NEIGHBOUR_COUNT,
+):
+    """Return validation-to-training top-K edges with combined row indices."""
+    train_count = train_matrix.shape[0]
+    validation_count = validation_matrix.shape[0]
+
+    if train_count < 1 or validation_count < 1:
+        raise ValueError("Train and validation matrices must both be non-empty.")
     if neighbour_count < 1:
         raise ValueError("neighbour_count must be at least one.")
 
-    requested = min(neighbour_count + 1, row_count)
+    requested = min(neighbour_count, train_count)
     model = NearestNeighbors(
         n_neighbors=requested,
         metric="cosine",
         algorithm="brute",
         n_jobs=1,
     )
-    model.fit(matrix)
-    distances, indices = model.kneighbors(matrix)
+    model.fit(train_matrix)
+    distances, indices = model.kneighbors(validation_matrix)
 
     edges = []
-    for row_index in range(row_count):
-        for distance, neighbour_index in zip(
-            distances[row_index],
-            indices[row_index],
+    for validation_index in range(validation_count):
+        combined_validation_index = train_count + validation_index
+        for distance, train_index in zip(
+            distances[validation_index],
+            indices[validation_index],
         ):
-            neighbour_index = int(neighbour_index)
-            if neighbour_index == row_index:
-                continue
             similarity = float(1.0 - distance)
-            edges.append((row_index, neighbour_index, similarity))
+            edges.append(
+                (combined_validation_index, int(train_index), similarity)
+            )
     return edges
 
 
@@ -148,13 +155,11 @@ def summarise_similarity_graph(rows, edges, threshold):
             }
         )
 
-    cross_split_edges = 0
     cross_label_edges = 0
     cross_language_edges = 0
     for left, right, _similarity in selected_edges:
         left_row = rows[left]
         right_row = rows[right]
-        cross_split_edges += int(left_row["split"] != right_row["split"])
         cross_label_edges += int(left_row["label"] != right_row["label"])
         cross_language_edges += int(
             left_row["language"] != right_row["language"]
@@ -174,8 +179,7 @@ def summarise_similarity_graph(rows, edges, threshold):
 
     return {
         "threshold": float(threshold),
-        "directed_knn_edges_at_or_above_threshold": len(selected_edges),
-        "cross_split_knn_edges": int(cross_split_edges),
+        "validation_to_train_knn_edges_at_or_above_threshold": len(selected_edges),
         "cross_label_knn_edges": int(cross_label_edges),
         "cross_language_knn_edges": int(cross_language_edges),
         "similarity_connected_components": len(components),
@@ -202,30 +206,41 @@ def summarise_similarity_graph(rows, edges, threshold):
     }
 
 
-def build_report(rows, edges):
+def build_report(train_rows, validation_rows, edges):
+    combined_rows = [
+        {**row, "split": "train"}
+        for row in train_rows
+    ] + [
+        {**row, "split": "validation"}
+        for row in validation_rows
+    ]
     return {
         "experiment": "approximate_train_validation_template_family_audit",
-        "rows": len(rows),
-        "train_rows": sum(row["split"] == "train" for row in rows),
-        "validation_rows": sum(row["split"] == "validation" for row in rows),
+        "rows": len(combined_rows),
+        "train_rows": len(train_rows),
+        "validation_rows": len(validation_rows),
         "test_partition_read": False,
         "model_trained": False,
         "model_artifact_modified": False,
         "method": {
             "representation": "saved model character TF-IDF",
-            "neighbours_per_row": NEIGHBOUR_COUNT,
+            "neighbours_per_validation_row": NEIGHBOUR_COUNT,
             "similarity": "cosine",
-            "graph": "undirected connected components from directed top-K neighbour edges",
+            "graph": "bipartite connected components from validation-to-train top-K edges",
             "thresholds": list(SIMILARITY_THRESHOLDS),
             "approximate": True,
         },
         "results": [
-            summarise_similarity_graph(rows, edges, threshold)
+            summarise_similarity_graph(
+                combined_rows,
+                edges,
+                threshold,
+            )
             for threshold in SIMILARITY_THRESHOLDS
         ],
         "limitations": [
             "Only train and validation partitions are read; the initial test partition is not read.",
-            "Only each row's top-K neighbours are used, so the graph is approximate.",
+            "Only each validation row's top-K training neighbours are used, so the graph is approximate.",
             "Connected components can join rows through similarity chains.",
             "Character similarity can reflect language/script and common phrases, not only shared templates.",
             "Thresholds are exploratory and do not define verified campaign families.",
@@ -246,23 +261,20 @@ def main():
         validation_rows = read_split(SPLIT_DIRECTORY / "validation.csv")
         model = joblib.load(MODEL_PATH)
 
-        combined_rows = [
-            {**row, "split": "train"}
-            for row in train_rows
-        ] + [
-            {**row, "split": "validation"}
-            for row in validation_rows
-        ]
-
-        exact_texts = [row["model_text_sha256"] for row in combined_rows]
-        if len(exact_texts) != len(set(exact_texts)):
+        train_hashes = {row["model_text_sha256"] for row in train_rows}
+        validation_hashes = {row["model_text_sha256"] for row in validation_rows}
+        if train_hashes & validation_hashes:
             raise ValueError("Exact masked-text duplicates found across train/validation.")
 
-        features = model.named_steps["tfidf"].transform(
-            [row["text"] for row in combined_rows]
+        vectorizer = model.named_steps["tfidf"]
+        train_matrix = vectorizer.transform(
+            [row["text"] for row in train_rows]
         )
-        edges = build_knn_edges(features)
-        report = build_report(combined_rows, edges)
+        validation_matrix = vectorizer.transform(
+            [row["text"] for row in validation_rows]
+        )
+        edges = build_knn_edges(train_matrix, validation_matrix)
+        report = build_report(train_rows, validation_rows, edges)
     except (OSError, ValueError, KeyError, TypeError) as error:
         raise SystemExit(f"Template-family audit failed: {error}") from error
 
@@ -276,8 +288,7 @@ def main():
     print("Test partition read: no")
     print("Model trained: no")
     print("Model artifact modified: no")
-    print("Character-TF-IDF rows:", len(combined_rows))
-    print("Directed neighbour edges:", len(edges))
+    print("Top-K validation-to-train edges:", len(edges))
 
     for result in report["results"]:
         print(f"\nSIMILARITY THRESHOLD >= {result['threshold']:.2f}")
@@ -301,9 +312,7 @@ def main():
             result["components_with_multiple_languages"],
         )
         print(
-            "  Cross-split / cross-label / cross-language edges:",
-            result["cross_split_knn_edges"],
-            "/",
+            "  Cross-label / cross-language edges:",
             result["cross_label_knn_edges"],
             "/",
             result["cross_language_knn_edges"],
