@@ -13,9 +13,10 @@ Only aggregate statistics are printed/saved; message text is never output.
 """
 
 import json
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 
+import joblib
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
@@ -243,7 +244,7 @@ def main():
     try:
         train_rows = read_split(SPLIT_DIRECTORY / "train.csv")
         validation_rows = read_split(SPLIT_DIRECTORY / "validation.csv")
-        model = __import__("joblib").load(MODEL_PATH)
+        model = joblib.load(MODEL_PATH)
 
         combined_rows = [
             {**row, "split": "train"}
