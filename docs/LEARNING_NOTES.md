@@ -1147,3 +1147,24 @@ A new local helper creates two separate files from the 31 known validation error
 Run `python data\build_validation_label_review_queue.py` from the repository root after running the tests. Review the blind file first; do not open the key until independent labels are complete. This is an error-focused sample, not a representative sample of the dataset. Keep both files local and private.
 
 The new queue builder has 12 unit tests. The previous 45-test result does not include these new tests; run the full suite again after pulling (expected 57 tests).
+
+
+## 40. Assistant-assisted preliminary review of the 31 blind errors
+
+I inspected the uploaded blind CSV without seeing its source-label/model-prediction key. Based only on the visible message text, I prepared an advisory suggestion sheet:
+
+| Suggested SOUL category | Count |
+|---|---:|
+| Spam | 15 |
+| Legitimate | 6 |
+| Scam | 3 |
+| Needs review | 7 |
+| **Total** | **31** |
+
+The delivered file is `validation_label_review_assistant_suggestions.csv`. It preserves the message text, adds `assistant_suggested_label` and `assistant_assessment_note`, and intentionally leaves `soul_label` blank, `review_status=pending`, and `annotation_note` blank.
+
+**Important:** These are assistant-generated suggestions based only on short SMS text. They are not verified human labels or ground truth. Seven messages are too context-poor to classify responsibly. Some suggested `legitimate` or `scam` decisions are conditional on whether a service/registration was initiated by the recipient. A human reviewer should accept, edit or leave every suggestion pending.
+
+The key containing original source labels and baseline predictions was not inspected. The 31 records were selected because the model misclassified them, so the counts must not be interpreted as class distribution or general dataset quality.
+
+Do not train a new model from this suggestion sheet. Keep the initial baseline and test set frozen. The next comparison can happen only after human review and, separately, after the source/model key is intentionally opened to compare disagreements.
