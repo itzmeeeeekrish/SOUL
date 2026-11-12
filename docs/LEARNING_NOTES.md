@@ -1388,3 +1388,26 @@ Run:
     python data/ablate_multilingual_mask_markers.py
 
 A performance drop would indicate that marker tokens contribute predictive information under this recipe. It would not prove they are the only cause, nor would unchanged near-perfect performance resolve the separate high template-similarity concern. The validation data has already been used for development diagnostics, so it must not be described as a fresh independent test.
+
+
+## 16. Placeholder ablation result and what it means
+The user ran the marker ablation with no change to validation metrics:
+
+| Metric | Original | Without markers |
+|---|---:|---:|
+| Accuracy | 0.9991 | 0.9991 |
+| Balanced accuracy | 0.9990 | 0.9990 |
+| Macro F1 | 0.9991 | 0.9991 |
+| Weighted F1 | 0.9991 | 0.9991 |
+
+Per-language accuracy and scam recall were unchanged as well. This indicates that explicit SOUL placeholders such as `[URL]`, `[DOMAIN]` and `[LONG_NUMBER]` are not measurably responsible for the near-perfect validation score under this model recipe.
+
+It does **not** resolve the high nearest-neighbour similarity. The earlier diagnostic found median validation-to-training similarity 0.9512, with 50.8% of validation messages at or above 0.95 and 99.91% nearest-label agreement.
+
+A new approximate similarity graph audit is available:
+
+    python data/audit_multilingual_template_families.py
+
+It examines only train + validation and builds connected components from each row's five nearest character-TF-IDF neighbours at thresholds 0.90, 0.95 and 0.98. It reports aggregate candidate-family sizes and whether components cross partitions, labels or languages. It does not inspect the initial test set, train a classifier or alter model artifacts.
+
+This graph is approximate: top-five edges can miss neighbours, and connected components can join rows through chains. A cluster is only a candidate template family, not a verified campaign or common source. No result from this audit will turn the synthetic corpus into an independent real-world evaluation.
