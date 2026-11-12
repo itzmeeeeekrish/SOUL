@@ -1,5 +1,6 @@
 """Tests for safe preparation and group-level splitting of multilingual SMS."""
 
+import hashlib
 import sys
 from pathlib import Path
 
@@ -18,9 +19,13 @@ from prepare_multilingual_candidate import (
 
 
 def row(record_id, text, label="ham", language="english", split="train"):
+    normalised = " ".join(text.casefold().split())
+    text_hash = hashlib.sha256(normalised.encode("utf-8")).hexdigest()
     return {
         "record_id": record_id,
         "text": text,
+        "model_text_sha256": text_hash,
+        "group_id": f"TESTG_{text_hash[:16]}",
         "source_dataset": "test/source",
         "source_split": split,
         "source_label": label,
