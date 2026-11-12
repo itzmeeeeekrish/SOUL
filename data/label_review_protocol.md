@@ -98,3 +98,16 @@ It adds:
 It intentionally leaves the official SOUL review fields unchanged: `soul_label` blank, `review_status=pending`, `annotation_note` blank. These suggestions are not human annotation, verified ground truth, or proof about a sender. A human reviewer must independently accept, amend or reject each suggestion before changing the official fields. Do not train a model using assistant suggestions without that review.
 
 The current suggestion counts are spam 15, legitimate 6, scam 3, needs_review 7. Since these 31 were selected because the baseline misclassified them, these counts are not representative of the full dataset.
+
+
+## Key comparison after a blind text-only suggestion pass
+
+The assistant's blind text-only suggestions were created before the separate source/model key was opened. The key was subsequently joined to the suggestions by `review_id`; all 31 rows matched one-to-one.
+
+Comparison summary:
+- Source-mapped classes in the error subset: legitimate 7, scam 5, spam 19.
+- Assistant suggestions: legitimate 6, scam 3, spam 15, needs_review 7.
+- Among 24 definite suggestions, 11 matched the source-mapped class and 13 differed; seven remained unresolved.
+- All five source `smishing` records in this subset were mapped to `scam`, predicted by the model as `spam`, and suggested as `spam` by the assistant.
+
+This pattern may indicate a source-label/definition mismatch for some examples, but it does not prove the source labels are wrong. The text-only suggestions are not human ground truth. A human reviewer or independent annotator must adjudicate each case before setting official `soul_label` or `review_status` values. Keep the assistant suggestion, source label and model prediction in separate columns. Do not train on assistant suggestions or change the frozen baseline based on this comparison.
