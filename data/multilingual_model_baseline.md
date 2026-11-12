@@ -134,3 +134,24 @@ The model's strongest character fragments included `url`, `num`, `number`, `upi`
     python data/audit_multilingual_mask_tokens.py
 
 Do not remove or alter markers and then reuse the already-opened test set to compare alternatives. Any ablation or changed preprocessing requires a new experiment/split with a clearly separated evaluation protocol.
+
+
+## Redaction-marker prevalence audit
+A train/validation-only audit found these placeholder rates:
+
+| Marker | Train ham | Train scam | Validation ham | Validation scam |
+|---|---:|---:|---:|---:|
+| URL | 0.0% | 17.4% | 0.0% | 18.6% |
+| DOMAIN | 0.0% | 6.3% | 0.0% | 6.5% |
+| LONG_NUMBER | 3.0% | 12.1% | 2.6% | 11.5% |
+| 12_DIGIT_NUMBER | 1.3% | 3.6% | 2.5% | 2.6% |
+| EMAIL_OR_UPI | 0.0% | 0.0% | 0.0% | 0.0% |
+| PAN_LIKE | 0.0% | 0.0% | 0.0% | 0.0% |
+
+These associations repeat across train and validation. The marker categories occur in a subset of scam messages and can be useful shortcuts, but their presence alone does not explain the near-perfect score.
+
+Run the controlled validation-only ablation:
+
+    python data/ablate_multilingual_mask_markers.py
+
+It retrains the same fixed recipe on training text with only the six explicit placeholder tokens removed, then compares validation metrics against the existing saved model on original validation text. It does not read the initial holdout test, overwrite the saved baseline artifact or save an ablation model. This is a diagnostic, not independent evaluation or causal proof.
