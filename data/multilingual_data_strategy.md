@@ -167,3 +167,24 @@ The script writes:
 - data/private/multilingual_candidates/anmolshrivastav_14lang_candidate_summary.json — aggregate-only report with class/language/script counts, duplicate and source-split overlap counts, and privacy-pattern totals.
 
 The script does not print messages or IDs, train a model, make a new split, alter the current model, or approve the candidate for use. Keep both outputs local/private. Review aggregate results before deciding whether to build a separate group-safe binary development split.
+
+
+## 10. Prepare the audited candidate and create a leakage-aware split
+
+After the aggregate audit has completed, run:
+
+    python data/prepare_multilingual_candidate.py
+
+This reads only the local candidate audit CSV and writes:
+- data/private/multilingual_candidates/prepared/anmolshrivastav_14lang_prepared.csv — masked model text and provenance fields.
+- data/private/multilingual_candidates/prepared/anmolshrivastav_14lang_quarantine.csv — groups whose final masked text has conflicting binary labels.
+- data/private/multilingual_candidates/prepared/splits/train.csv
+- data/private/multilingual_candidates/prepared/splits/validation.csv
+- data/private/multilingual_candidates/prepared/splits/test.csv
+- data/private/multilingual_candidates/prepared/anmolshrivastav_14lang_split_summary.json — aggregate counts only.
+
+The script masks candidate URLs/domains, email/UPI patterns, phone/long-number patterns, 12-digit sequences and PAN-like patterns using the existing local SOUL utility. It then groups by the *final masked model text*. If masking causes two different source labels to collapse to the same final text, the whole group is quarantined. Identical final text cannot cross splits.
+
+The split uses StratifiedGroupKFold with 10 folds: one fold for test, one for validation and eight for training (approximately 80/10/10). Stratification is approximate and uses language x source label. The script preserves the original binary scam-vs-ham task and publisher split as provenance; it does not use the publisher test partition as SOUL's test split.
+
+This remains a **synthetic binary development dataset**. A successful split check does not make it real-world data, independent evidence or a three-class SOUL dataset. No model is trained and the original Mendeley baseline/test files remain unchanged.
