@@ -1,6 +1,6 @@
 # SOUL Text-Only Baseline — TF-IDF + Logistic Regression
 
-**Status:** First local training and evaluation completed; the previously verified full test suite passed 57 tests. Twenty-five focused tests for the newly added detector/API/exporter passed in an isolated workspace; the combined suite still requires local verification. Results below are exploratory dataset results, not real-world fraud-detection accuracy.
+**Status:** First local training and evaluation completed; the complete backend suite now passes **82 tests in 5.05s** on 12 November 2026, including the detector, endpoint, silver-label exporter and batch-annotation tests. Results below are exploratory dataset results, not real-world fraud-detection accuracy.
 
 ## Goal
 
