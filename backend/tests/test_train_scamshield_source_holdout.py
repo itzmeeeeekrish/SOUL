@@ -8,9 +8,11 @@ DATA_DIRECTORY = Path(__file__).resolve().parents[2] / "data"
 if str(DATA_DIRECTORY) not in sys.path:
     sys.path.insert(0, str(DATA_DIRECTORY))
 
-from split_scamshield_candidate import DEFAULT_HELDOUT_SOURCE
 from train_scamshield_baseline import LABEL_ORDER
-from train_scamshield_source_holdout import partition_source_holdout
+from train_scamshield_source_holdout import (
+    DEFAULT_HELDOUT_SOURCE,
+    partition_source_holdout,
+)
 
 
 def make_rows(per_class=12, holdout_per_class=5, include_overlap=True):
