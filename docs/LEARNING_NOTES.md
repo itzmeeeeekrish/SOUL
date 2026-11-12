@@ -1198,3 +1198,38 @@ Among 24 definite suggestions, 11 matched the original source-to-baseline mappin
 For the 14 `spam → scam` model errors, assistant suggestions were: spam 7, needs_review 4, scam 2, legitimate 1. This confirms the group is mixed; there is no single safe rule to relabel all of them.
 
 **Next decision:** Keep the 31 assistant suggestions separate from official `soul_label` values. A human reviewer or independent second annotator must accept, edit or reject them with reasons. Do not train on the assistant suggestions and do not alter the initial baseline split/test set.
+
+
+## 42. SOUL Master Dataset v1 consolidated
+
+The six uploaded data/split CSVs and the previous validation-review files were joined into one master dataset and a quarantine register. The downloadable bundle is generated locally; no source message data was committed to GitHub.
+
+### Row reconciliation
+
+- Prepared source-level records: **5,797** (unique `record_id`).
+- Original source occurrences represented by prepared data: **5,903**.
+- Source-stage quarantine: **34 exact-text conflict groups / 68 occurrences**.
+- Baseline split model rows: train **4,004**, validation **856**, test **861**.
+- The baseline split collapsed **74 same-label prepared duplicates** into existing masked-text groups.
+- One post-redaction masked-text conflict quarantines **2 prepared records / 2 occurrences**.
+- All prepared records reconcile: 5,795 assigned to baseline partitions + 2 split-quarantined = 5,797.
+- All source occurrences reconcile: 5,903 prepared + 68 source-quarantined = 5,971.
+
+### Review join
+
+- Unique validation review IDs: **31**.
+- The uploaded completion file marks **24 reviewed** and **7 needs_review**.
+- These 31 review IDs correspond to **33 prepared rows** because two prepared records share the same masked-text model group.
+- All 31 submitted SOUL labels match the assistant suggestion column; 30/31 annotation notes match.
+- Consequently, preserve the uploaded review status, but do not claim these are independent human ground-truth labels. The assistant suggestion and source/model labels remain separate columns.
+
+### Output bundle
+
+`SOUL_master_dataset_v1_package.zip` contains:
+- `SOUL_master_dataset_v1.csv` — one row per prepared record, with source/baseline/SOUL labels, review provenance, model prediction for the targeted validation-error sample, split mapping and source metadata.
+- `SOUL_source_quarantine_v1.csv` — source-level exact-text label conflicts.
+- `SOUL_split_quarantine_v1.csv` — post-redaction cross-label collision.
+- `baseline_train_v1.csv`, `baseline_validation_v1.csv`, `baseline_test_v1.csv` — copies of the original baseline partitions.
+- `SOUL_dataset_manifest_v1.json` and a README with hashes and limitations.
+
+The initial baseline test partition was copied unchanged. The master package is a local research artifact, not approval to publish or redistribute the Mendeley dataset. Regex masking is not guaranteed anonymisation. Source licence/privacy approval and campaign-independent external validation remain open requirements.
