@@ -1327,3 +1327,36 @@ Possible explanations still to test:
 A new validation-only diagnostic measures each validation message's nearest character-TF-IDF similarity to training and lists the model's strongest alphabetic character fragments. It does not read the initial test partition, retrain, or modify the model. High similarity is a clue for template overlap, not proof of leakage. Low similarity is not proof of real-world generalisation.
 
 **Decision:** Preserve this model and its initial results as an experimental benchmark. Do not integrate it into the live SOUL detector, report 99.91% as real-world scam detection accuracy, or use the initial test partition for tuning. Stronger evaluation needs independently sourced real-world or independently curated messages, with provenance/licence/privacy review and campaign/template-separated test data.
+
+
+## 14. Interpreting the multilingual nearest-neighbour diagnostic
+The validation-only shortcut audit completed without reading the test partition or changing the model.
+
+Results:
+- Mean nearest-training character-TF-IDF similarity: 0.9062.
+- Median: 0.9512.
+- 90th percentile: 0.9743.
+- 95th percentile: 0.9788.
+- 74.2% of validation messages had a nearest training message at similarity >= 0.90.
+- 50.8% were >= 0.95.
+- The nearest training message had the same label in 99.91% of validation cases.
+
+This is strong evidence that validation examples have very close same-label neighbours in training, consistent with paraphrased/generated template families. It is not proof of a train/test bug: exact text/group overlap was checked and not found. Near-duplicate or template overlap can remain even when exact duplicate grouping works.
+
+The model's strongest alphabetic character cues included `url`, `num`, `number`, `upi` and `domain`. The privacy preparation script uses explicit placeholders:
+- `[URL]`
+- `[DOMAIN]`
+- `[EMAIL_OR_UPI]`
+- `[PAN_LIKE]`
+- `[12_DIGIT_NUMBER]`
+- `[LONG_NUMBER]`
+
+The classifier may therefore be learning a combination of message structure, generated wording and whether regex masking fired. These markers can be legitimate signals, but a very strong class correlation would make this synthetic benchmark less representative of real inboxes.
+
+A new aggregate-only audit measures these marker rates by label and language, using train/validation only:
+
+    python data/audit_multilingual_mask_tokens.py
+
+It does not print message text, read the test partition, train a model or change the artifacts.
+
+**Current interpretation:** the 99.91% synthetic benchmark result is likely aided by highly similar same-label message templates and potentially class-associated redaction markers. This is a working explanation, not a proven cause. No live detector integration or real-world accuracy claim is justified.
