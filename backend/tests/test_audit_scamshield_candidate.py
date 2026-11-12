@@ -18,6 +18,8 @@ from audit_scamshield_candidate import (
     prepare_records,
     safe_flag,
     source_type_hint,
+    taxonomy_label_preview,
+    record_id_prefix_hint,
     write_outputs,
 )
 
@@ -105,6 +107,8 @@ def test_prepare_records_preserves_label_intent_and_masks_candidate_text():
     assert "https://example.com" not in row["text"]
     assert row["has_url_domain_candidate"] == 1
     assert row["source_type_hint"] == "non_synthetic_named_source_unverified"
+    assert row["record_id_prefix_hint"] == "real_prefix_unverified"
+    assert row["taxonomy_label_preview"] == "scam"
 
 
 def test_prepare_records_rejects_blank_or_oversized_text_and_invalid_label():
@@ -190,6 +194,10 @@ def test_audit_records_keeps_source_label_and_intent_dimensions_separate():
         "legitimate / benign"
     ] == 1
     assert summary["source_labels_reinterpreted"] is False
+    assert summary["taxonomy_three_class_preview_unverified"] == {
+        "legitimate": 1,
+        "spam": 1,
+    }
 
 
 def test_write_outputs_creates_private_row_csv_and_aggregate_json(tmp_path):
@@ -210,6 +218,8 @@ def test_write_outputs_creates_private_row_csv_and_aggregate_json(tmp_path):
     assert set(saved_rows[0]) == set(OUTPUT_COLUMNS)
     assert saved_summary["dataset_id"] == DATASET_ID
     assert saved_summary["summary"]["model_trained"] is False
+    assert saved_rows[0]["taxonomy_label_preview"] == "legitimate"
+    assert "residual_url_domain_candidate" in saved_rows[0]
 
 
 class FakeSplit(list):
@@ -292,3 +302,17 @@ def test_load_huggingface_candidate_requires_train_validation_and_test():
 
     with pytest.raises(ValueError, match="missing required splits"):
         load_huggingface_candidate(loader=lambda *args, **kwargs: fake)
+
+
+def test_taxonomy_preview_preserves_ambiguous_intents_for_review():
+    assert taxonomy_label_preview("Legitimate / Benign") == "legitimate"
+    assert taxonomy_label_preview("General Spam / Telemarketing") == "spam"
+    assert taxonomy_label_preview("Fake KYC") == "scam"
+    assert taxonomy_label_preview("Unmapped / Unknown Intent") == "needs_review"
+
+
+def test_record_id_prefix_hint_is_explicitly_unverified():
+    assert record_id_prefix_hint("real_123") == "real_prefix_unverified"
+    assert record_id_prefix_hint("synth_ind_123") == "synthetic_prefix_unverified"
+    assert record_id_prefix_hint("custom_123") == "other_prefix_unverified"
+    assert record_id_prefix_hint("") == "missing"
