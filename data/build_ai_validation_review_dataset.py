@@ -129,6 +129,10 @@ def build_ai_review_rows(blind_rows, suggestion_rows, created_date=None):
         status = (suggestion.get("ai_review_status") or "").strip().casefold()
         note = (suggestion.get("ai_annotation_note") or "").strip()
 
+        # The sidecar deliberately leaves the class blank when the model abstains.
+        # Convert that explicit abstention into the shared needs_review state.
+        if not label and status == "needs_more_context":
+            label = "needs_review"
         if label not in AI_LABELS:
             raise ValueError(f"AI sidecar contains an unsupported label for {review_id}.")
         if not note:
