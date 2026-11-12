@@ -58,6 +58,8 @@ CANDIDATE_COLUMNS = [
     "cross_publisher_split_duplicate_group",
 ]
 
+REVIEW_COLUMNS = CANDIDATE_COLUMNS + ["curation_reasons"]
+
 QUARANTINE_COLUMNS = [
     "record_id",
     "text",
@@ -377,10 +379,12 @@ def write_curation_outputs(
         ("review", review),
         ("quarantine", quarantine),
     ):
-        columns = (
-            CANDIDATE_COLUMNS if key in {"candidate", "review"}
-            else QUARANTINE_COLUMNS
-        )
+        if key == "candidate":
+            columns = CANDIDATE_COLUMNS
+        elif key == "review":
+            columns = REVIEW_COLUMNS
+        else:
+            columns = QUARANTINE_COLUMNS
         with outputs[key].open("w", encoding="utf-8-sig", newline="") as target:
             writer = csv.DictWriter(target, fieldnames=columns)
             writer.writeheader()
