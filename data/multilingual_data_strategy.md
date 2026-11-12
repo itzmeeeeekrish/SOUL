@@ -188,3 +188,20 @@ The script masks candidate URLs/domains, email/UPI patterns, phone/long-number p
 The split uses StratifiedGroupKFold with 10 folds: one fold for test, one for validation and eight for training (approximately 80/10/10). Stratification is approximate and uses language x source label. The script preserves the original binary scam-vs-ham task and publisher split as provenance; it does not use the publisher test partition as SOUL's test split.
 
 This remains a **synthetic binary development dataset**. A successful split check does not make it real-world data, independent evidence or a three-class SOUL dataset. No model is trained and the original Mendeley baseline/test files remain unchanged.
+
+
+## 11. ScamShield multilingual corpus — audit candidate only
+
+A second candidate has been identified: https://huggingface.co/datasets/sidzzz07/scamshield-dataset.
+
+The current Hugging Face page reports 85,680 rows and exposes id, text, language, source_dataset, is_scam, head1_social_engineering, head2_scam_intent, split_group and metadata. It lists train, val and test files and displays English, Hindi and Hinglish examples. The dataset card declares MIT, but that top-level declaration is not proof that upstream source data can all be redistributed or reused under MIT. Verify source-specific rights and attribution before redistribution or product use.
+
+**Important semantic issue:** displayed positive examples include the intent General Spam / Telemarketing. This means is_scam=1 must not automatically be interpreted as confirmed fraud or mapped to SOUL's scam label. Preserve source is_scam and head2_scam_intent separately; classify the latter's ambiguous categories before any model experiment.
+
+The audit utility is:
+
+    python data/audit_scamshield_candidate.py
+
+It downloads the candidate into the Hugging Face cache, writes a masked row-level CSV and aggregate JSON only under Git-ignored data/private/scamshield_candidate/, and does not train a model or approve the publisher split. It reports source/language/intent composition, duplicate overlap, split_group integrity, privacy-pattern candidates and source metadata flags. Zero residual regex matches, if observed, is not proof of anonymisation.
+
+**Current status:** audit code and tests committed; local execution and source/licence/label approval pending. No ScamShield rows have been merged into the SOUL training pipeline.
