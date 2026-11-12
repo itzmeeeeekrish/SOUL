@@ -1,113 +1,68 @@
 # SOUL Label Review Protocol
 
-**Version:** 0.1  
-**Status:** Proposed human-review workflow; no third-party records have been relabelled.
+**Version:** 1.0  
+**Status:** AI-led silver-label workflow; manual annotation is not required for routine project progress.
 
-## Why this exists
+## Current policy
 
-The first baseline maps the Mendeley source labels to SOUL's three working categories:
+SOUL uses AI-assisted text review to create provisional message labels and identify uncertain cases. AI-generated labels are treated as **silver labels**, not independently verified ground truth. This lets development proceed without asking the user to manually classify individual messages.
 
-| Original source label | Provisional baseline label |
+The complete workflow, label definitions, provenance rules, privacy constraints and limitations are documented in [ai_annotation_policy.md](ai_annotation_policy.md).
+
+## Preserve source and AI labels separately
+
+| Field | Meaning |
 |---|---|
-| `ham` | `legitimate` |
-| `smishing` | `scam` |
-| `spam` | `spam` |
+| source_label | Original publisher category, unchanged |
+| label | Provisional mapping used by the frozen historical baseline |
+| soul_label | Reserved for separately adjudicated labels; do not fill it with AI output |
+| review_status | Existing independent-review state; AI must not change it |
+| ai_suggested_label | AI label: legitimate, spam, scam or needs_review |
+| ai_annotation_status | provisional or needs_review |
+| ai_annotation_note | AI's text-based rationale and uncertainty |
+| ai_annotator / ai_model / ai_method | Annotation provenance |
 
-Manual review of 31 validation mistakes found 19 errors between the provisional `spam` and `scam` categories. Some source `smishing` examples resemble commercial promotions or premium-service solicitations, while some source `spam` examples resemble ordinary service messages. These observations justify a careful review; they do not prove which individual labels are correct.
+Never overwrite the original source label or the historical baseline target. Do not turn AI output into human-reviewed ground truth.
 
-## Preserve four separate pieces of information
+## Current 31-message pilot
 
-The local prepared CSV contains these label and review fields:
+The error-focused pilot has 31 messages. The AI assessment produced 7 legitimate, 14 spam, 3 scam and 7 needs_review suggestions. This subset was selected because the baseline misclassified these messages; its class counts are not representative of the full dataset.
 
-| Field | Meaning | Initial value |
-|---|---|---|
-| `source_label` | Original category supplied by Mendeley, normalised only for case/whitespace | `ham`, `smishing`, or `spam` |
-| `label` | Provisional mapping used by the historical baseline and existing split | `legitimate`, `scam`, or `spam` |
-| `soul_label` | SOUL's independently reviewed label | Blank until a human review |
-| `review_status` | Human-review state | `pending` |
-| `annotation_note` | Short reason supporting a human decision | Blank until review |
+Among the 24 non-abstained suggestions, 14 match the original source-label mapping and 9 match the baseline model prediction. The source mapping, baseline and AI assessment can all be wrong. This comparison is diagnostic only.
 
-**Compatibility rule:** The first baseline continues to use `label`. Do not replace it with `soul_label` or edit the existing split/model artefacts. The historical baseline must remain reproducible.
+## Rebuild the local AI silver-label file
 
-## SOUL annotation definitions
+The assistant suggestion sidecar must be saved locally as:
 
-- **`legitimate`:** Expected or benign communication without deceptive or unsolicited promotional intent.
-- **`spam`:** Unsolicited bulk/promotion/marketing or unwanted commercial solicitation without a clear deceptive attempt to steal credentials, obtain money under false pretences, or compromise an account/device.
-- **`scam`:** Deceptive or manipulative communication intended to obtain money, credentials, account access, personal secrets, or another harmful action. Impersonation, fake payment/KYC demands and malicious login destinations may support this label.
-- **`needs_review`:** The available message and context do not support a defensible decision. This is a review state, not a fourth model class.
+    data/private/model_artifacts/validation_label_ai_suggestions_sidecar.csv
 
-A prize offer, paid service, shortened URL, urgent phrase, bank name, or unknown sender alone is not enough to establish a scam. Assess the message's claim, context and requested action. An advertisement can be spam without being fraud. A message that impersonates a trusted party or tricks the recipient into paying/revealing secrets may be a scam.
+The blind validation queue remains:
 
-## Review-state rules
+    data/private/model_artifacts/validation_label_review_blind.csv
 
-| `review_status` | `soul_label` | `annotation_note` |
-|---|---|---|
-| `pending` | Blank | Blank |
-| `reviewed` | One of `legitimate`, `spam`, `scam` | Required; concise evidence-based reason |
-| `needs_review` | `needs_review` | Required; explain what context is missing or ambiguous |
+Run from the repository root:
 
-Do not infer a SOUL label from the model prediction. Keep the predicted label as a separate model-output field in any review queue. If two reviewers disagree, preserve the disagreement and use `needs_review` until adjudicated.
+    python data/build_ai_validation_review_dataset.py
 
-## Safe review sequence
+The script writes:
 
-1. Regenerate the local prepared derivative with the updated preparation utility.
-2. Run the prepared-data validator. All new label-provenance and review-state checks should pass.
-3. Review a small, prioritised queue of validation errors locally. Do not publish the SMS text or private working CSV.
-4. Add SOUL labels only after applying the definitions above; leave ambiguous examples as `needs_review`.
-5. Keep the first model's `label`, the existing train/validation/test split, the model artifact and the initial test metrics frozen.
-6. Only after a separate reviewed dataset version is available should a new experiment use `soul_label` as the target. Create a new, campaign-aware split and report its metrics separately from the original baseline.
+    data/private/model_artifacts/validation_label_review_ai_silver.csv
 
-## Privacy and source limitations
+It joins by review_id, checks for missing/duplicate IDs and invalid label/status pairs, neutralises formula-like CSV text, and preserves the official review fields as blank/pending. It deliberately does not read the separate source/model key. All message-level files stay local/private and Git-ignored.
 
-- The prepared text uses regex-based masking, which is not guaranteed anonymisation.
-- Keep raw archive, prepared records, review queues and row-level labels in Git-ignored `data/private/`.
-- Never put SMS content, contact information, OTPs, bank details or other personal information in GitHub issues, commits, documentation examples or public chats.
-- A human label is an annotation decision, not proof that a real message sender committed fraud.
-- Source licensing and privacy approval are separate gates; this workflow does not approve redistribution of the dataset.
+## Model and evaluation safeguards
 
+- The original train/validation/test partitions, baseline artifact and initial test metrics remain frozen.
+- Do not add AI-labelled validation or test messages to training and then reuse them as an independent evaluation.
+- A future AI-labelled training corpus must be a new version with its own group-aware split and separate metrics.
+- Keep needs_review messages out of ordinary supervised training.
+- Record AI model, method, date and rationale. Do not claim human verification.
+- AI suggestions must not independently trigger account freezes, payment blocks or accusations.
 
-## Blinded review of baseline validation errors
+## Historical compatibility
 
-A helper script creates a review sheet for the 31 known validation misclassifications:
+The first baseline maps the publisher labels as ham to legitimate, smishing to scam and spam to spam. This historical mapping remains unchanged for reproducibility. The AI labels are generated from message text and may differ. The difference is a reason for further analysis, not automatic proof that either label is correct.
 
-```powershell
-python data\analyze_baseline_errors.py
-python data\build_validation_label_review_queue.py
-```
+## Privacy
 
-The builder verifies the validation split hash, checks every error row against its exact validation text and label, maps the masked text back to the prepared source-label provenance, and rejects ambiguous source-label matches.
-
-It creates two local files under `data/private/model_artifacts/`:
-
-- `validation_label_review_blind.csv`: `review_id`, text, blank `soul_label`, `review_status=pending`, blank `annotation_note`. It deliberately excludes original source labels and model predictions.
-- `validation_label_review_key.csv`: review ID, source label, provisional baseline label, model prediction, top-class score and source-occurrence count. It deliberately contains no message text.
-
-**Review the blind file first. Do not open the key until you have completed independent labels.** Enter one of `legitimate`, `spam`, `scam`, or `needs_review` in `soul_label`; set `review_status` to `reviewed` or `needs_review`; add a concise evidence-based `annotation_note`. If uncertain, use `needs_review`.
-
-This is an error-focused sample selected because the baseline got it wrong. It is not representative of the full dataset and must not be used to estimate class proportions or model performance. It is a targeted annotation exercise to investigate confusing examples. Keep both files private; the blind file contains message text. Do not commit, upload or share it.
-
-
-## Assistant-generated label suggestions are advisory
-
-The 31-row blind validation error file was additionally assessed from text alone by an assistant, without opening the separate source/model key. The generated local file is `validation_label_review_assistant_suggestions.csv`.
-
-It adds:
-- `assistant_suggested_label`: a proposed category (`legitimate`, `spam`, `scam`, or `needs_review`).
-- `assistant_assessment_note`: short text-only rationale.
-
-It intentionally leaves the official SOUL review fields unchanged: `soul_label` blank, `review_status=pending`, `annotation_note` blank. These suggestions are not human annotation, verified ground truth, or proof about a sender. A human reviewer must independently accept, amend or reject each suggestion before changing the official fields. Do not train a model using assistant suggestions without that review.
-
-The current suggestion counts are spam 15, legitimate 6, scam 3, needs_review 7. Since these 31 were selected because the baseline misclassified them, these counts are not representative of the full dataset.
-
-
-## Key comparison after a blind text-only suggestion pass
-
-The assistant's blind text-only suggestions were created before the separate source/model key was opened. The key was subsequently joined to the suggestions by `review_id`; all 31 rows matched one-to-one.
-
-Comparison summary:
-- Source-mapped classes in the error subset: legitimate 7, scam 5, spam 19.
-- Assistant suggestions: legitimate 6, scam 3, spam 15, needs_review 7.
-- Among 24 definite suggestions, 11 matched the source-mapped class and 13 differed; seven remained unresolved.
-- All five source `smishing` records in this subset were mapped to `scam`, predicted by the model as `spam`, and suggested as `spam` by the assistant.
-
-This pattern may indicate a source-label/definition mismatch for some examples, but it does not prove the source labels are wrong. The text-only suggestions are not human ground truth. A human reviewer or independent annotator must adjudicate each case before setting official `soul_label` or `review_status` values. Keep the assistant suggestion, source label and model prediction in separate columns. Do not train on assistant suggestions or change the frozen baseline based on this comparison.
+The prepared text uses pattern-based masking, which is not guaranteed anonymisation. Keep raw data, prepared messages, AI outputs, review files, partitions and joblib model files outside Git. Do not send the entire prepared dataset to an external model provider without a separate privacy and data-processing assessment.
