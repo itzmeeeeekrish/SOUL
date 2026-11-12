@@ -262,3 +262,13 @@ Update this section after each meaningful development session.
 - Added a separate preparation utility to mask candidate values, regroup by final masked model text, quarantine any post-mask label conflict and create deterministic approximately 80/10/10 StratifiedGroupKFold partitions by language x source label.
 - The new preparation utility does not train a model or alter the original Mendeley baseline/test split. Twelve new preparation tests are pending local verification.
 - Next: pull, rerun the complete suite, run the local preparation utility, and inspect its aggregate split/quarantine/residual-pattern report before training a separate multilingual binary model.
+
+
+## 12 November 2026 — Multilingual preparation test-fixture correction
+
+- The first local test run after adding multilingual preparation returned 113 passed and 4 failed.
+- All four failures came from the grouped-split test helper passing source-like rows directly into a function whose contract requires prepared rows containing record_id, group_id, model_text_sha256, language and source_label.
+- Updated test fixtures to include deterministic group IDs and final-text hashes, matching the prepared-row schema.
+- Improved split input validation so missing prepared fields produce an explicit ValueError, and the minimum-group check is evaluated before split construction.
+- No model, real dataset, original Mendeley split or production detector logic was changed.
+- Fix is committed; rerun the targeted preparation tests and full backend suite locally. Expected full suite: 117 tests.
