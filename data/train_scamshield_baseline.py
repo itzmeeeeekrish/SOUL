@@ -24,13 +24,7 @@ import joblib
 import sklearn
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (
-    accuracy_score,
-    balanced_accuracy_score,
-    confusion_matrix,
-    f1_score,
-    precision_recall_fscore_support,
-)
+from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.pipeline import Pipeline
 
 
@@ -234,52 +228,87 @@ def build_pipeline():
 
 
 def calculate_metrics(y_true, y_pred):
+    """Compute metrics without warnings for subgroup slices missing a class.
+
+    Macro-F1 and balanced accuracy average only over classes present in
+    y_true. Class-level metrics still report all three classes with support,
+    so a missing class is visible rather than silently treated as evaluated.
+    """
     if not y_true or len(y_true) != len(y_pred):
         raise ValueError("True and predicted label counts must match and be non-empty.")
 
-    precision, recall, f1_values, support = precision_recall_fscore_support(
-        y_true,
-        y_pred,
-        labels=list(LABEL_ORDER),
-        zero_division=0,
-    )
-    matrix = confusion_matrix(
-        y_true, y_pred, labels=list(LABEL_ORDER)
-    )
+    matrix = confusion_matrix(y_true, y_pred, labels=list(LABEL_ORDER))
     total = int(matrix.sum())
     class_metrics = {}
+    supported_indices = []
 
     for index, label in enumerate(LABEL_ORDER):
         true_positive = int(matrix[index, index])
         false_positive = int(matrix[:, index].sum() - true_positive)
         false_negative = int(matrix[index, :].sum() - true_positive)
         true_negative = total - true_positive - false_positive - false_negative
-        denominator = false_positive + true_negative
+        support = int(matrix[index, :].sum())
+        predicted_count = int(matrix[:, index].sum())
+
+        precision = (
+            true_positive / predicted_count if predicted_count else 0.0
+        )
+        recall = true_positive / support if support else 0.0
+        f1_denominator = precision + recall
+        f1_value = (
+            2 * precision * recall / f1_denominator
+            if f1_denominator else 0.0
+        )
+        fpr_denominator = false_positive + true_negative
+        false_positive_rate = (
+            false_positive / fpr_denominator if fpr_denominator else 0.0
+        )
+
+        if support:
+            supported_indices.append(index)
+
         class_metrics[label] = {
-            "precision": float(precision[index]),
-            "recall": float(recall[index]),
-            "f1": float(f1_values[index]),
-            "support": int(support[index]),
-            "false_positive_rate": (
-                float(false_positive / denominator) if denominator else 0.0
-            ),
+            "precision": float(precision),
+            "recall": float(recall),
+            "f1": float(f1_value),
+            "support": support,
+            "false_positive_rate": float(false_positive_rate),
         }
+
+    supported_f1 = [
+        class_metrics[LABEL_ORDER[index]]["f1"]
+        for index in supported_indices
+    ]
+    supported_recall = [
+        class_metrics[LABEL_ORDER[index]]["recall"]
+        for index in supported_indices
+    ]
+    macro_f1 = (
+        sum(supported_f1) / len(supported_f1) if supported_f1 else 0.0
+    )
+    balanced_accuracy = (
+        sum(supported_recall) / len(supported_recall)
+        if supported_recall else 0.0
+    )
+    weighted_f1 = (
+        sum(
+            class_metrics[label]["f1"] * class_metrics[label]["support"]
+            for label in LABEL_ORDER
+        ) / total
+        if total else 0.0
+    )
 
     return {
         "accuracy": float(accuracy_score(y_true, y_pred)),
-        "balanced_accuracy": float(balanced_accuracy_score(y_true, y_pred)),
-        "macro_f1": float(
-            f1_score(
-                y_true, y_pred, labels=list(LABEL_ORDER),
-                average="macro", zero_division=0,
-            )
+        "balanced_accuracy": float(balanced_accuracy),
+        "macro_f1": float(macro_f1),
+        "macro_f1_classes_included": [
+            LABEL_ORDER[index] for index in supported_indices
+        ],
+        "macro_f1_excludes_absent_true_classes": (
+            len(supported_indices) != len(LABEL_ORDER)
         ),
-        "weighted_f1": float(
-            f1_score(
-                y_true, y_pred, labels=list(LABEL_ORDER),
-                average="weighted", zero_division=0,
-            )
-        ),
+        "weighted_f1": float(weighted_f1),
         "class_metrics": class_metrics,
         "confusion_matrix": matrix.astype(int).tolist(),
         "confusion_matrix_labels": list(LABEL_ORDER),
