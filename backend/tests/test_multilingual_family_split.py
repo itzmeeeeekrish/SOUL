@@ -154,11 +154,15 @@ def test_validate_family_holdout_rejects_family_overlap():
     row_b = make_row(2, "scam")
     row_a["family_group_id"] = "shared"
     row_b["family_group_id"] = "shared"
+    train_other = make_row(3, "scam")
+    validation_other = make_row(4, "ham")
+    train_other["family_group_id"] = "train_other"
+    validation_other["family_group_id"] = "validation_other"
 
     with pytest.raises(ValueError, match="similarity family crosses"):
         validate_family_holdout(
-            {"train": [row_a, make_row(3, "scam")],
-             "validation": [row_b, make_row(4, "ham")]}
+            {"train": [row_a, train_other],
+             "validation": [row_b, validation_other]}
         )
 
 
@@ -168,11 +172,15 @@ def test_validate_family_holdout_rejects_exact_text_overlap():
     row_b["model_text_sha256"] = row_a["model_text_sha256"]
     row_a["family_group_id"] = "family_train"
     row_b["family_group_id"] = "family_val"
+    train_other = make_row(3, "scam")
+    validation_other = make_row(4, "ham")
+    train_other["family_group_id"] = "train_other"
+    validation_other["family_group_id"] = "validation_other"
 
     with pytest.raises(ValueError, match="Exact model text crosses"):
         validate_family_holdout(
-            {"train": [row_a, make_row(3, "scam")],
-             "validation": [row_b, make_row(4, "ham")]}
+            {"train": [row_a, train_other],
+             "validation": [row_b, validation_other]}
         )
 
 
