@@ -282,3 +282,13 @@ Update this section after each meaningful development session.
 - Added language-wise evaluation, per-class false-positive rates, support warnings and split/hash integrity checks, plus a dedicated test module and experiment documentation.
 - The user has locally confirmed the full pre-baseline suite: **117 passed in 5.67s**. The new 15 baseline tests have not yet been run locally; expected suite total after pulling is **132 tests**.
 - Next: pull, run the complete test suite, then run `python data/train_multilingual_baseline.py` from the repository root. Preserve the test set as a fixed initial holdout; do not tune against test results.
+
+
+## 12 November 2026 — First multilingual binary baseline result and shortcut audit
+- The user ran `data/train_multilingual_baseline.py` successfully. Training used 9,091 rows; validation 1,138; initial holdout test 1,136. The saved model uses 129,265 character n-gram features.
+- Validation: accuracy **0.9991**, balanced accuracy **0.9990**, macro F1 **0.9991**. Initial test: accuracy **0.9991**, balanced accuracy **0.9990**, macro F1 **0.9991**. The test partition had one error. These are results on a synthetic binary dataset only—not real-world accuracy.
+- Per-language results were near-perfect, with low support for Odia (4 scam test examples) and Tamil (5 scam test examples). Their subgroup scores are preliminary. The candidate is explicitly tagged synthetic; public examples show strong class contrasts such as direct OTP/PIN/payment demands versus ordinary reminders and safety advisories.
+- These unusually high scores trigger a synthetic-template/shortcut investigation. Exact-text group separation does not eliminate paraphrased-template overlap or generator-specific label cues.
+- Added `data/audit_multilingual_baseline.py`, a validation-only diagnostic that reads train and validation partitions plus the saved model, but does not read the test partition, retrain, tune or alter artifacts. It reports validation-to-training nearest character-TF-IDF similarity and the model's top alphabetic character n-gram coefficients without printing message text.
+- Added 5 automated diagnostic tests. Previously 117 tests were locally verified; the 15 baseline tests and 5 diagnostic tests have not yet been locally verified. Expected full suite after pulling: **137 tests**.
+- Next: pull, run the complete backend suite, then run `python data/audit_multilingual_baseline.py`. Interpret similarity and coefficient patterns as diagnostic clues, not proof of leakage. Keep this model separate from the existing three-class detector pending stronger evaluation on independently sourced, non-synthetic data.
