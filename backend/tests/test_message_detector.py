@@ -67,3 +67,48 @@ def test_analyze_message_rejects_unexpected_model_labels():
 
     with pytest.raises(RuntimeError, match="unexpected label schema"):
         analyze_message("Some message", InvalidPipeline())
+
+
+def test_analyze_message_abstains_for_devanagari_before_model_call():
+    class MustNotRun:
+        classes_ = ["legitimate", "scam", "spam"]
+
+        def predict(self, _texts):
+            raise AssertionError("The baseline must not classify Devanagari text.")
+
+        def predict_proba(self, _texts):
+            raise AssertionError("The baseline must not score Devanagari text.")
+
+    result = analyze_message("आपका बैंक खाता आज बंद हो जाएगा।", MustNotRun())
+
+    assert result["analysis_status"] == "abstained_unsupported_language"
+    assert result["candidate_label"] == "needs_review"
+    assert result["model_scores"] == {}
+    assert result["review_required"] is True
+    assert result["language_assessment"]["script_profile"] == "non_latin"
+
+
+def test_analyze_message_abstains_for_romanized_hinglish_before_model_call():
+    class MustNotRun:
+        classes_ = ["legitimate", "scam", "spam"]
+
+        def predict(self, _texts):
+            raise AssertionError("The baseline must not classify Romanized Hinglish.")
+
+        def predict_proba(self, _texts):
+            raise AssertionError("The baseline must not score Romanized Hinglish.")
+
+    result = analyze_message("Aapka bank khata band hai. OTP bheje.", MustNotRun())
+
+    assert result["analysis_status"] == "abstained_unsupported_language"
+    assert result["candidate_label"] == "needs_review"
+    assert result["review_required"] is True
+    assert result["language_assessment"]["baseline_eligible"] is False
+
+
+def test_analyze_message_returns_language_assessment_for_latin_text():
+    result = analyze_message("Your delivery is scheduled for tomorrow.", FakePipeline())
+
+    assert result["analysis_status"] == "provisional_model_suggestion"
+    assert result["language_assessment"]["script_profile"] == "latin"
+    assert result["language_assessment"]["baseline_eligible"] is True
