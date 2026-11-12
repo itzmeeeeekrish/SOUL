@@ -1,6 +1,6 @@
 # SOUL Text-Only Baseline — TF-IDF + Logistic Regression
 
-**Status:** First local training and evaluation completed; the complete backend suite now passes **82 tests in 5.05s** on 12 November 2026, including the detector, endpoint, silver-label exporter and batch-annotation tests. Results below are exploratory dataset results, not real-world fraud-detection accuracy.
+**Status:** First local training and evaluation completed; the complete backend suite now passes **93 tests in 4.95s** on 12 November 2026, including the detector, endpoint, silver-label exporter, batch-annotation, language-guard and audit tests. Results below are exploratory dataset results, not real-world fraud-detection accuracy.
 
 ## Goal
 
@@ -264,3 +264,16 @@ Run the aggregate-only language coverage audit from the repository root:
     python data\audit_language_coverage.py
 
 The audit reads the local prepared CSV and prints counts only. It does not print or export message text. Its lexical/script buckets are heuristic indicators, not ground-truth language labels. Hindi/Hinglish support requires a separate, suitable dataset and external evaluation; synthetic examples alone are not enough.
+
+
+Latest local language coverage audit (12 November 2026):
+
+| Heuristic bucket | Rows |
+|---|---:|
+| Latin script without selected Romanized-Hindi markers | 5,785 |
+| Romanized-Hindi lexical signals | 11 |
+| Mixed Latin/non-Latin script | 1 |
+| Non-Latin-only script | 0 |
+| **Total** | **5,797** |
+
+These are lexical/script indicators only. They are not reliable language labels: Latin text may include English, Hinglish without a selected marker, or another language. No multilingual training or evaluation claim follows from these counts.
