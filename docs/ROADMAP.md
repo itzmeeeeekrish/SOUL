@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector. The prepared dataset, grouped split, fixed TF-IDF + Logistic Regression baseline, validation-only error analysis, source-label provenance workflow, blinded review-queue builder and SOUL Master Dataset v1 consolidation are documented. Latest local backend test suite: **57 passed in 14.21s** (12 new blinded-review-queue tests included). The blind review queue-generation script itself has not yet been confirmed as run locally. Source/privacy approval, independent human adjudication and external campaign-independent validation remain pending. The original baseline test split remains frozen; assistant suggestions are not human ground truth. Milestones 0 and 1 are complete.
+**Current stage:** Milestone 2 – Data and baseline communication detector, with the first local message-analysis API increment implemented. The prepared dataset, grouped split, fixed TF-IDF + Logistic Regression baseline, validation-only error analysis, source-label provenance, AI silver-label pilot and SOUL Master Dataset v1 are documented. The previously verified full suite passed **57 tests in 14.21s**; 16 focused tests for the new API and AI-silver exporter passed in an isolated workspace, while the combined repository suite still needs local verification. The 31-message AI pilot produced 24 provisional labels and 7 abstentions. Manual annotation is not a routine project requirement; AI outputs remain silver labels, not independent ground truth. Source/privacy approval and campaign-independent external validation remain pending. The original baseline test split remains frozen. Milestones 0 and 1 are complete.
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -213,3 +213,12 @@ Update this section after each meaningful development session.
 
 
 | 2026-11-12 | Verified all 57 backend tests locally and checked repository privacy hygiene | `python -m pytest -q` → **57 passed in 14.21s**. `git status --short` was empty; `git check-ignore` confirmed the prepared dataset, train split and model artifact are ignored. The blinded review queue generator itself has not yet been confirmed as run. | Generate the two local review-queue files and inspect the blind sheet before opening the separate key; keep all message-level artifacts private |
+
+## 12 November 2026 — AI-led workflow and local message API
+
+- Added an AI annotation policy with explicit silver-label provenance, abstention rules and safeguards against contaminating the frozen validation/test partitions.
+- Added a local exporter for the 31-row AI review pilot. It keeps the original source label and official SOUL review fields unchanged; it does not read the separate source/model key.
+- Added POST /v1/messages/analyze, which loads only the local TF-IDF + Logistic Regression artifact and returns a provisional text-only suggestion with uncalibrated scores and safe next-step guidance.
+- Added 16 focused tests for the detector, API endpoint and silver-label exporter. They passed in an isolated workspace; the full repository suite must be rerun locally after pulling.
+- The AI silver-label pilot contains 7 legitimate, 14 spam, 3 scam and 7 needs_review rows. It is an error-selected sample and must not be used as an independent evaluation set.
+- Next: pull the changes, run the complete backend test suite, build the local silver-label CSV from the supplied sidecar, and smoke-test the API against the locally stored model artifact.
