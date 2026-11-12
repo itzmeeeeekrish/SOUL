@@ -254,3 +254,37 @@ def test_load_huggingface_candidate_rejects_missing_required_columns():
 
     with pytest.raises(ValueError, match="missing columns"):
         load_huggingface_candidate(loader=lambda *args, **kwargs: fake)
+
+
+def test_audit_records_reports_split_group_cardinality_per_source():
+    rows = prepare_records(
+        [
+            ("train", 0, make_source_row(
+                record_id="a", text="First unique message", split_group="source_marker"
+            )),
+            ("val", 0, make_source_row(
+                record_id="b", text="Second unique message", split_group="source_marker"
+            )),
+            ("test", 0, make_source_row(
+                record_id="c", text="Third unique message", split_group="campaign_2"
+            )),
+        ]
+    )
+
+    summary = audit_records(rows)
+    values = summary["publisher_split_group_cardinality_by_source"]["UCI_SMS_Spam"]
+
+    assert values["rows_with_group_id"] == 3
+    assert values["unique_group_ids"] == 2
+    assert values["repeated_group_ids"] == 1
+    assert values["largest_group_size"] == 2
+
+
+def test_load_huggingface_candidate_requires_train_validation_and_test():
+    fake = {
+        "train": FakeSplit([make_source_row()]),
+        "test": FakeSplit([make_source_row(record_id="test")]),
+    }
+
+    with pytest.raises(ValueError, match="missing required splits"):
+        load_huggingface_candidate(loader=lambda *args, **kwargs: fake)
