@@ -178,7 +178,7 @@ def test_run_annotation_is_resumable_and_writes_a_manifest(tmp_path):
 
 def test_run_annotation_rejects_mismatched_batch_response_ids(tmp_path):
     source = tmp_path / "prepared.csv"
-    source.write_text("record_id,text\\nR1,Message\\n", encoding="utf-8")
+    source.write_text("record_id,text\nR1,Message\n", encoding="utf-8")
 
     with pytest.raises(ValueError, match="batch response IDs"):
         run_annotation(
