@@ -197,3 +197,13 @@ Run it only after the backend tests pass:
     python data/train_multilingual_baseline.py
 
 Model and metrics remain local under the Git-ignored `data/private/model_artifacts/` directory. The test partition is for the initial fixed-recipe evaluation only and must not be used for tuning.
+
+
+### First multilingual experiment result
+The first fixed-recipe run returned 99.91% accuracy on validation and 99.91% on the initial synthetic holdout (1,136 rows). Treat these as synthetic benchmark results, not real-world fraud-detection accuracy. Strong scores may reflect generated-template similarity or label-specific wording. Odia and Tamil scam test supports are especially small (4 and 5 examples respectively).
+
+Before considering any integration, run the validation-only shortcut diagnostic:
+
+    python data/audit_multilingual_baseline.py
+
+It checks nearest training-message similarity and top character n-gram cues without reading the test partition or changing the trained model. The model remains an isolated binary experiment.
