@@ -223,6 +223,7 @@ def audit_records(rows):
     masked_groups = defaultdict(list)
     split_groups = defaultdict(list)
     source_split_groups = defaultdict(list)
+    group_counts_by_source = defaultdict(Counter)
 
     for row in rows:
         label = row["source_label_is_scam"]
@@ -249,6 +250,7 @@ def audit_records(rows):
             source_split_groups[
                 (row["source_dataset"], row["source_split_group"])
             ].append(row)
+            group_counts_by_source[source][row["source_split_group"]] += 1
 
         for name in PRIVACY_FIELDS:
             if row[f"has_{name}_candidate"]:
@@ -290,6 +292,16 @@ def audit_records(rows):
     positive_benign = intent_by_label["1"].get(
         "legitimate / benign", 0
     )
+    source_group_cardinality = {}
+    for source, group_counts in sorted(group_counts_by_source.items()):
+        sizes = list(group_counts.values())
+        source_group_cardinality[source] = {
+            "rows_with_group_id": int(sum(sizes)),
+            "unique_group_ids": len(group_counts),
+            "repeated_group_ids": sum(size > 1 for size in sizes),
+            "largest_group_size": max(sizes, default=0),
+            "groups_with_at_least_1000_rows": sum(size >= 1000 for size in sizes),
+        }
 
     return {
         "total_records": len(rows),
@@ -314,6 +326,7 @@ def audit_records(rows):
         "source_type_name_hints": dict(sorted(source_types.items())),
         "raw_text_duplicate_audit": duplicate_summary(raw_groups),
         "masked_text_duplicate_audit": duplicate_summary(masked_groups),
+        "publisher_split_group_cardinality_by_source": source_group_cardinality,
         "publisher_split_group_audit": {
             "nonempty_group_ids": len(split_groups),
             "repeated_groups": len(repeated_split_groups),
@@ -391,6 +404,19 @@ def load_huggingface_candidate(loader=None):
         raise ValueError(
             "Unexpected publisher split names: " + ", ".join(sorted(available))
         )
+    has_validation = "val" in available or "validation" in available
+    missing_partitions = []
+    if "train" not in available:
+        missing_partitions.append("train")
+    if not has_validation:
+        missing_partitions.append("val/validation")
+    if "test" not in available:
+        missing_partitions.append("test")
+    if missing_partitions:
+        raise ValueError(
+            "Publisher dataset is missing required splits: "
+            + ", ".join(missing_partitions)
+        )
 
     required = {
         "id",
@@ -449,6 +475,10 @@ def print_summary(summary):
         "Positive rows labelled General Spam / Telemarketing:",
         summary["positive_general_spam_telemarketing_rows"],
     )
+    print(
+        "Positive rows labelled Legitimate / Benign:",
+        summary["positive_legitimate_benign_intent_rows"],
+    )
 
     print("\nDuplicate audit:")
     for name in ("raw_text_duplicate_audit", "masked_text_duplicate_audit"):
@@ -464,6 +494,13 @@ def print_summary(summary):
             "repeated_groups_crossing_publisher_splits"
         ],
     )
+    print("  Split-group cardinality by source:")
+    for source, values in summary["publisher_split_group_cardinality_by_source"].items():
+        print(
+            f"    {source}: {values['unique_group_ids']} unique IDs / "
+            f"{values['rows_with_group_id']} rows; "
+            f"largest group={values['largest_group_size']}"
+        )
 
     print("\nPrivacy-pattern candidates:")
     for name, count in summary["privacy_candidate_counts"].items():
