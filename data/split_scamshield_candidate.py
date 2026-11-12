@@ -47,7 +47,7 @@ DEFAULT_SEED = 42
 MIN_LANGUAGE_CLASS_GROUP_SIZE = 10
 
 
-def _json_string_list(value, field_name):
+def _json_string_list(value, field_name, casefold=True):
     try:
         parsed = json.loads(value)
     except (TypeError, json.JSONDecodeError) as error:
@@ -56,7 +56,9 @@ def _json_string_list(value, field_name):
         raise ValueError(f"{field_name} must be a non-empty JSON list.")
     if any(not isinstance(item, str) or not item.strip() for item in parsed):
         raise ValueError(f"{field_name} must contain non-empty strings only.")
-    return sorted(set(item.strip().casefold() for item in parsed))
+    cleaned = [item.strip().casefold() if casefold else item.strip()
+               for item in parsed]
+    return sorted(set(cleaned))
 
 
 def load_candidate_rows(input_path=DEFAULT_INPUT):
@@ -114,7 +116,7 @@ def load_candidate_rows(input_path=DEFAULT_INPUT):
             )
         row["_language"] = languages[0]
         row["_sources"] = _json_string_list(
-            row["source_datasets_json"], "source_datasets_json"
+            row["source_datasets_json"], "source_datasets_json", casefold=False
         )
 
     return rows, fieldnames
@@ -131,13 +133,18 @@ def build_stratification_keys(rows):
         for row in rows
     ]
     counts = Counter(raw_keys)
-    keys = []
-    for label, language in raw_keys:
-        if counts[(label, language)] >= MIN_LANGUAGE_CLASS_GROUP_SIZE:
-            keys.append(f"{label}::{language}")
-        else:
-            keys.append(f"{label}::__rare_language__")
-    return keys, counts
+    # If even one class/language slice is too small, stratify the whole
+    # dataset by class only. This avoids a tiny rare-language bucket being
+    # impossible to distribute across both validation and test.
+    if any(
+        count < MIN_LANGUAGE_CLASS_GROUP_SIZE
+        for count in counts.values()
+    ):
+        return [row["label"] for row in rows], counts
+    return [
+        f"{row['label']}::{row['_language']}"
+        for row in rows
+    ], counts
 
 
 def make_splits(rows, seed=DEFAULT_SEED):
@@ -223,8 +230,8 @@ def build_manifest(splits, raw_strata_counts, seed, input_path):
         "split_method": (
             "Deterministic 80/10/10 stratified random split over unique "
             "masked-text groups; stratification uses label+language when "
-            "the slice has at least 10 groups, otherwise a per-label "
-            "rare-language bucket."
+            "every label+language slice has at least 10 groups; otherwise "
+            "stratification falls back to label only."
         ),
         "random_seed": seed,
         "split_group_unit": "unique masked_text_sha256",
