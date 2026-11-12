@@ -467,7 +467,7 @@ The source evaluation and staged decision process are documented in [multilingua
 - Viewer examples identify source families such as Smishing_Dataset, UCI_SMS_Spam, Kaggle_Hindi_Merged, and Synthetic_Tier_C.
 - At least one displayed positive row has intent General Spam / Telemarketing. Therefore the binary is_scam label is not yet approved as a fraud-only target.
 - Audit tool: data/audit_scamshield_candidate.py. It preserves source label and intent, masks likely identifiers, and writes outputs only below data/private/scamshield_candidate/.
-- Status: audit implementation and 15 tests committed; local audit, source-specific licence review and label-semantics assessment pending. The audit reports split-group cardinality by source so source-level bucket IDs are not mistaken for campaign groups. No model training or data integration approved.
+- Status: audit implementation and 19 tests committed; local audit, source-specific licence review and label-semantics assessment pending. The audit reports split-group cardinality by source so source-level bucket IDs are not mistaken for campaign groups. No model training or data integration approved.
 
 Do not claim this dataset is entirely real or entirely synthetic. Source-specific provenance must be verified from the audit and upstream documentation.
 
@@ -498,4 +498,4 @@ The ScamShield audit now adds:
 
 This is necessary because publisher split_group is often only a source-level bucket. A real_ record ID prefix is not evidence that a message was personally received or independently verified. The dataset card declares both machine-generated and expert-annotated creators but does not document row-level source provenance or independent annotation procedure in sufficient detail. Do not treat the MIT dataset-card tag as per-upstream-source rights clearance.
 
-Two additional tests cover cross-source duplicate detection. Expected full backend suite after pulling: 188 tests. Local result pending.
+Two additional tests cover cross-source duplicate detection. Expected full backend suite after pulling: 192 tests. Local result pending.
