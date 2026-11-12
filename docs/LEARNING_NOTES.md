@@ -1168,3 +1168,33 @@ The delivered file is `validation_label_review_assistant_suggestions.csv`. It pr
 The key containing original source labels and baseline predictions was not inspected. The 31 records were selected because the model misclassified them, so the counts must not be interpreted as class distribution or general dataset quality.
 
 Do not train a new model from this suggestion sheet. Keep the initial baseline and test set frozen. The next comparison can happen only after human review and, separately, after the source/model key is intentionally opened to compare disagreements.
+
+
+## 41. Compare text-only suggestions with the source/model key
+
+After the blind text-only suggestion sheet had been prepared, the separate key was uploaded and matched by `review_id`. All 31 IDs matched exactly; there were no missing or duplicate IDs.
+
+**Source-mapped labels in this error-selected subset:**
+- Legitimate: 7 (source `ham`)
+- Scam: 5 (source `smishing`)
+- Spam: 19 (source `spam`)
+
+**Assistant suggestions:**
+- Spam: 15
+- Legitimate: 6
+- Scam: 3
+- Needs review: 7
+
+| Source-mapped label | Suggested legitimate | Suggested scam | Suggested spam | Needs review |
+|---|---:|---:|---:|---:|
+| Legitimate (7) | 3 | 0 | 2 | 2 |
+| Scam (5) | 0 | 0 | 5 | 0 |
+| Spam (19) | 3 | 3 | 8 | 5 |
+
+Among 24 definite suggestions, 11 matched the original source-to-baseline mapping and 13 differed; seven remained unresolved. The assistant suggestion also matched the model's predicted class in 11/31 cases. These are comparisons with an assistant's text-only advisory pass, not a second human annotation and not evidence that the source labels are wrong.
+
+**Most important lead:** All five examples whose source label was `smishing` (provisionally mapped to `scam`) but whose model prediction was `spam` received an assistant suggestion of `spam`. This is a strong reason to inspect the source's label definition and collect context; it is not permission to relabel those five automatically.
+
+For the 14 `spam → scam` model errors, assistant suggestions were: spam 7, needs_review 4, scam 2, legitimate 1. This confirms the group is mixed; there is no single safe rule to relabel all of them.
+
+**Next decision:** Keep the 31 assistant suggestions separate from official `soul_label` values. A human reviewer or independent second annotator must accept, edit or reject them with reasons. Do not train on the assistant suggestions and do not alter the initial baseline split/test set.
