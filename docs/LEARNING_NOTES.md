@@ -1268,3 +1268,21 @@ Ye sender ki identity, URL destination, bank transaction ya actual fraud prove n
 ### Latest language audit
 
 5,797 prepared rows mein 5,785 Latin/no selected Hinglish marker, 11 Romanized-Hindi signal, 1 mixed-script, 0 non-Latin-only the. Ye simple heuristic indicators hain; iska matlab ye nahi ki 5,785 messages confirmed English hain.
+
+
+## 11. Multilingual data — next research stage
+
+Current Mendeley dataset mostly contains Latin-script messages. The script/word audit is only heuristic; it cannot confirm that all Latin messages are English.
+
+Ab hum alag multilingual dataset branch banayenge. Iska matlab old model ya test set ko change nahi karenge.
+
+Important difference:
+- scam vs ham = fraud/scam detection ka binary task.
+- spam vs ham = unwanted/promotional message detection ka binary task.
+- legitimate vs spam vs scam = SOUL ka current three-class task.
+
+In teen tasks ko bina label definition check kiye mix nahi karna hai. Agar dataset sirf scam/ham deta hai, toh uske positive/negative labels ko original three-class target ke saath blindly merge nahi kar sakte.
+
+New research mein synthetic 14-language dataset ko sirf development pilot ke liye consider kiya hai. Synthetic messages model ko Hindi/Hinglish scripts samjhaane mein help kar sakte hain, lekin real-world accuracy prove nahi karte. Real Hindi dataset ka licence check pending hai, aur kuch big datasets mein upstream source overlap/label ambiguity hai.
+
+data/audit_multilingual_candidate.py local aggregate audit banata hai. Ye messages console par print nahi karta, model train nahi karta, aur old Mendeley baseline ko touch nahi karta.
