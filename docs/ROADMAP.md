@@ -241,3 +241,13 @@ Update this section after each meaningful development session.
 
 
 | 2026-11-12 | Verified language-aware abstention and audited prepared dataset language/script indicators | **93 passed in 4.95s**. Aggregate audit: 5,797 rows; 5,785 Latin/no selected Romanized-Hindi markers; 11 Romanized-Hindi lexical-signal rows; 1 mixed-script row; 0 non-Latin-only rows. Audit prints counts only. These indicators are heuristic and do not prove language identity. | Build a separately sourced, privacy-reviewed multilingual dataset and evaluate English, Hindi and Hinglish separately; preserve the historical test split |
+
+
+## 12 November 2026 — Multilingual source review and audit utility
+
+- Reviewed new public candidates for Hindi/Hinglish and broader Indic-language SMS/call text.
+- Added a source-by-source risk assessment for a 14-language synthetic scam/ham dataset, an 85,680-row mixed real/synthetic corpus, a 1,580-row AI-generated audited corpus, a Hindi IEEE DataPort dataset with licence still unverified, and the INDICA audio/text call-fraud benchmark.
+- Added a multilingual data strategy and provenance-aware schema. The existing Mendeley three-class baseline, split and metrics remain frozen. Binary scam/ham and spam/ham sources must not be silently collapsed into SOUL's legitimate/spam/scam categories.
+- Added an aggregate-only importer/auditor for the 14-language synthetic candidate. It preserves publisher source labels, language/script tags, original train/test partition, exact-text hashes and privacy-pattern flags. It does not train a model, create a new split or print message text.
+- The previous local full suite passed **93 tests in 4.95s** before this new audit module was added. The 12 new audit tests are pending local verification.
+- Next: pull the changes, run the full test suite, install the optional Hugging Face Datasets package, then run the candidate audit. Use its aggregate output to decide whether to create a separate multilingual binary development experiment; do not merge it into the current three-class model.
