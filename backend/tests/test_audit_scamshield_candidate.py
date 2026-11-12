@@ -316,3 +316,77 @@ def test_record_id_prefix_hint_is_explicitly_unverified():
     assert record_id_prefix_hint("synth_ind_123") == "synthetic_prefix_unverified"
     assert record_id_prefix_hint("custom_123") == "other_prefix_unverified"
     assert record_id_prefix_hint("") == "missing"
+
+
+def test_audit_records_reports_cross_source_duplicates_and_source_cross_tabs():
+    rows = prepare_records(
+        [
+            ("train", 0, make_source_row(
+                record_id="one",
+                text="Your account update is ready",
+                source="UCI_SMS_Spam",
+                language="English",
+                is_scam=0,
+                intent="Legitimate / Benign",
+            )),
+            ("test", 0, make_source_row(
+                record_id="two",
+                text="Your account update is ready",
+                source="Indian_Telecom_SMS",
+                language="English",
+                is_scam=0,
+                intent="Legitimate / Benign",
+            )),
+            ("train", 1, make_source_row(
+                record_id="three",
+                text="Different Hindi message",
+                source="Kaggle_Hindi_Merged",
+                language="Hindi",
+                is_scam=1,
+                intent="Fake KYC",
+            )),
+        ]
+    )
+
+    summary = audit_records(rows)
+
+    raw = summary["raw_text_duplicate_audit"]
+    assert raw["groups_spanning_source_datasets"] == 1
+    assert raw["rows_in_groups_spanning_source_datasets"] == 2
+    assert raw["cross_source_groups_with_conflicting_is_scam_labels"] == 0
+
+    assert summary["source_language_class_counts"][
+        "Kaggle_Hindi_Merged | hindi"
+    ] == {"1": 1}
+    assert summary["source_intent_counts_by_is_scam"][
+        "Kaggle_Hindi_Merged | is_scam=1"
+    ] == {"fake kyc": 1}
+
+
+def test_audit_records_detects_cross_source_duplicate_label_conflict():
+    rows = prepare_records(
+        [
+            ("train", 0, make_source_row(
+                record_id="one",
+                text="Your account update is ready",
+                source="UCI_SMS_Spam",
+                is_scam=0,
+                intent="Legitimate / Benign",
+            )),
+            ("test", 0, make_source_row(
+                record_id="two",
+                text="Your account update is ready",
+                source="Indian_Telecom_SMS",
+                is_scam=1,
+                intent="Fake KYC",
+            )),
+        ]
+    )
+
+    summary = audit_records(rows)
+    assert (
+        summary["raw_text_duplicate_audit"][
+            "cross_source_groups_with_conflicting_is_scam_labels"
+        ]
+        == 1
+    )
