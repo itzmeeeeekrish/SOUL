@@ -65,6 +65,25 @@ python data/validate_dataset.py
 
 The script checks required columns, blank fields, unique IDs, approved labels/languages/splits, class counts, campaign consistency, four variants per group and group isolation across splits.
 
+## Consolidated Master Dataset v1
+
+The local master dataset keeps the following labels and provenance separately:
+
+- `source_label`: original Mendeley publisher label.
+- `label` / `baseline_label`: historical provisional mapping used by the first baseline.
+- `soul_label`: label from the uploaded completion review sheet for the 31 targeted validation errors; blank elsewhere.
+- `assistant_suggested_label`: advisory assistant suggestion; never silently promote this to ground truth.
+- `review_status`, `annotation_note`, and `review_source`: submitted review state and provenance.
+- `model_prediction` and `model_top_class_probability`: present only for the targeted model-error subset. The score is not calibrated confidence.
+- `split`, `split_record_id`, and `split_group_id`: maps each prepared record to the original baseline group. Prepared duplicate rows share the same split record/group.
+- `split_quarantine_id`: identifies records excluded after masking caused a cross-label collision.
+
+The current master has 5,797 prepared rows. Two are post-redaction split-quarantined. The baseline partition CSVs remain unchanged. The 31 review IDs map to 33 prepared rows because two rows share a masked-text group.
+
+**Review limitation:** The submitted review labels match the assistant suggestions for all 31 IDs (30/31 notes match). Independent human adjudication is not established. Preserve the review provenance and do not treat these fields as verified ground truth without a separate independent review.
+
+The packaged dataset is a local research artifact. Regex masking is not guaranteed anonymisation, and this consolidation does not approve publication or redistribution of the source dataset.
+ 
 ## Future dataset extensions
 
 Document the need and privacy impact before adding fields. Possible audit fields include source dataset ID, coarse collection date, reviewer and second-review result. Do not add sender phone numbers or user identity fields without a specific approved need.
