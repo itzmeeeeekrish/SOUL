@@ -43,15 +43,20 @@ def make_rows(repeats=20):
                     "record_ids_json": json.dumps([f"record_{index}"]),
                     "cross_source_duplicate_group": "0",
                     "cross_publisher_split_duplicate_group": "0",
+                    "_language": language,
+                    "_sources": ["source_a"],
                 })
     return rows
 
 
 def write_candidate_csv(path, rows):
     with path.open("w", encoding="utf-8", newline="") as target:
-        writer = csv.DictWriter(target, fieldnames=list(rows[0]))
+        fieldnames = [key for key in rows[0] if not key.startswith("_")]
+        writer = csv.DictWriter(target, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows({
+            key: row[key] for key in fieldnames
+        } for row in rows)
 
 
 def test_make_splits_assigns_every_group_once_and_has_no_hash_overlap():
@@ -123,6 +128,7 @@ def test_small_language_class_slice_falls_back_to_label_only_stratification():
     for row in rows:
         if row["label"] == "scam" and row["languages_json"] == '["hindi"]':
             row["languages_json"] = '["assamese"]'
+            row["_language"] = "assamese"
             changed += 1
             if changed == 5:
                 break
@@ -181,7 +187,7 @@ def test_write_split_outputs_creates_three_csvs_and_manifest(tmp_path):
     rows = make_rows()
     splits, raw_counts = make_splits(rows)
     manifest = build_manifest(splits, raw_counts, 42, "private.csv")
-    fieldnames = list(rows[0])
+    fieldnames = [key for key in rows[0] if not key.startswith("_")]
 
     outputs = write_split_outputs(splits, manifest, fieldnames, tmp_path)
 
