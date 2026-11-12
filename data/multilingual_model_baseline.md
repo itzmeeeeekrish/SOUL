@@ -91,3 +91,24 @@ These artifacts remain under the Git-ignored `data/private/` directory. Joblib u
 - Per-language metrics are estimates on small held-out samples; support counts must always accompany the scores.
 - Regex masking is not proof of anonymisation.
 - No result from this experiment should be merged into, or used to replace, the existing Mendeley model or its frozen test results.
+
+
+## First run results (12 November 2026)
+The user successfully ran the initial fixed recipe:
+
+| Metric | Validation | Initial test |
+|---|---:|---:|
+| Accuracy | 0.9991 | 0.9991 |
+| Balanced accuracy | 0.9990 | 0.9990 |
+| Macro F1 | 0.9991 | 0.9991 |
+| Weighted F1 | 0.9991 | 0.9991 |
+
+The initial test partition contains 1,136 rows and one misclassification. The model has 129,265 character features. Per-language scores are also near-perfect, but Odia (4 scam test examples) and Tamil (5 scam test examples) are low-support estimates.
+
+These results are unusually high for an SMS scam task. The candidate is synthetic and its public examples show clear differences between many ham and scam messages. Template similarity and label-associated synthetic wording must be investigated before drawing further conclusions. These results are not real-world accuracy and do not justify detector integration.
+
+A validation-only diagnostic is now available:
+
+    python data/audit_multilingual_baseline.py
+
+It measures nearest-training-message character-TF-IDF similarity for validation rows and prints top alphabetic model-weighted character fragments. It does not read test rows, retrain or modify the model. Its results are diagnostic evidence only, not proof of leakage or generalisation.
