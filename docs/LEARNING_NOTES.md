@@ -1411,3 +1411,8 @@ A new approximate similarity graph audit is available:
 It examines only train + validation and builds connected components from each row's five nearest character-TF-IDF neighbours at thresholds 0.90, 0.95 and 0.98. It reports aggregate candidate-family sizes and whether components cross partitions, labels or languages. It does not inspect the initial test set, train a classifier or alter model artifacts.
 
 This graph is approximate: top-five edges can miss neighbours, and connected components can join rows through chains. A cluster is only a candidate template family, not a verified campaign or common source. No result from this audit will turn the synthetic corpus into an independent real-world evaluation.
+
+
+### Implementation detail
+
+The implementation uses a bipartite graph: each validation message is compared with its five nearest training messages. This is more targeted and cheaper than a full all-pairs graph over the combined corpus.
