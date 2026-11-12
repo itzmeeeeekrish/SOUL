@@ -272,3 +272,13 @@ Update this section after each meaningful development session.
 - Improved split input validation so missing prepared fields produce an explicit ValueError, and the minimum-group check is evaluated before split construction.
 - No model, real dataset, original Mendeley split or production detector logic was changed.
 - Fix is committed; rerun the targeted preparation tests and full backend suite locally. Expected full suite: 117 tests.
+
+
+## 12 November 2026 — Multilingual split audit and separate baseline implementation
+- The local preparation utility completed successfully: 14,000 source rows became 11,365 prepared records; 2,635 repeated rows were collapsed; no post-mask conflicting-label group was quarantined; 0 configured residual privacy-pattern matches remained. Regex checks are not proof of anonymity.
+- The grouped 80/10/10 partitions contain 9,091 train, 1,138 validation and 1,136 test rows. Exact masked text/group leakage check passed; the historical three-class Mendeley model/split was not modified.
+- The user inspected language-label counts. Odia has 4 scam examples in test and Tamil has 5; these subgroup estimates must be marked low-support. Other languages have more test examples, but all results remain synthetic-data experiments.
+- Added a separate character n-gram TF-IDF + Logistic Regression binary baseline. It uses message text only; language tags are used for subgroup reporting, not as model features. It preserves the source `ham` / `scam` task and writes separate local-only model/metrics artifacts.
+- Added language-wise evaluation, per-class false-positive rates, support warnings and split/hash integrity checks, plus a dedicated test module and experiment documentation.
+- The user has locally confirmed the full pre-baseline suite: **117 passed in 5.67s**. The new 15 baseline tests have not yet been run locally; expected suite total after pulling is **132 tests**.
+- Next: pull, run the complete test suite, then run `python data/train_multilingual_baseline.py` from the repository root. Preserve the test set as a fixed initial holdout; do not tune against test results.
