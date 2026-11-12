@@ -2,7 +2,7 @@
 
 Ye file tumhari revision notebook hai. Har naye module ke baad isme concept, code ka flow, testing aur viva questions add karenge.
 
-> **Current status (11 November 2026):** Repository/backend foundation complete; Mendeley 2022 candidate ka local audit, privacy screening, deduplication, redaction and grouped 70/15/15 split complete. First text-only TF-IDF + Logistic Regression baseline trained. Full backend test suite: 39 passed in 5.16s. Validation macro-F1: 0.8682; initial test macro-F1: 0.8915. Dataset source/privacy approval and external validation are still pending.
+> **Current status (12 November 2026):** Repository/backend foundation complete; Mendeley 2022 candidate ka local audit, privacy screening, deduplication, redaction and grouped 70/15/15 split complete. First text-only TF-IDF + Logistic Regression baseline trained. Latest full backend test suite: **57 passed in 14.21s**, including the 12 blinded-review-queue tests. Validation macro-F1: 0.8682; initial test macro-F1: 0.8915. The queue-generation script still needs a local run. Dataset source/privacy approval, independent human adjudication and external validation are still pending.
 
 ## 1. SOUL kya banane ki koshish kar raha hai?
 
@@ -1146,7 +1146,7 @@ A new local helper creates two separate files from the 31 known validation error
 
 Run `python data\build_validation_label_review_queue.py` from the repository root after running the tests. Review the blind file first; do not open the key until independent labels are complete. This is an error-focused sample, not a representative sample of the dataset. Keep both files local and private.
 
-The new queue builder has 12 unit tests. The previous 45-test result does not include these new tests; run the full suite again after pulling (expected 57 tests).
+The queue builder has 12 unit tests. The complete local suite was subsequently run on 12 November 2026 and passed: **57 passed in 14.21s**. This verifies the builder's tests, not yet the local generation of the blind and key CSV files.
 
 
 ## 40. Assistant-assisted preliminary review of the 31 blind errors
