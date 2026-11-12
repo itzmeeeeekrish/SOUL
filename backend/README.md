@@ -67,7 +67,7 @@ Still inside the `backend` folder:
 python -m pytest -q
 ```
 
-The health test checks the HTTP status and the important response fields. The broader suite also covers data auditing, preparation, split generation and ML baseline helpers. The latest full local run after source-label provenance changes passed: 45 passed in 5.25s. A new blinded validation-review queue and its 12 tests have since been added; run the suite again after pulling. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
+The health test checks the HTTP status and the important response fields. The suite also covers data auditing, preparation, split generation, ML helpers, AI silver-label export and the message-analysis API. The previously verified full run passed 57 tests in 14.21s. Sixteen focused tests for the newest components passed in an isolated workspace; run the combined suite locally after pulling. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
 
 ## 4. Configuration
 
@@ -136,7 +136,7 @@ This generates two local files under `data/private/model_artifacts/`:
 - `validation_label_review_blind.csv`: text and blank SOUL review fields; no source label or prediction.
 - `validation_label_review_key.csv`: original source label, provisional label, prediction and score; no message text.
 
-Review the blind CSV first. Do not open the key until labels have been entered independently. This is a targeted error sample, not a representative sample. Keep both files private and do not commit or upload them. See [data/label_review_protocol.md](../data/label_review_protocol.md).
+The blind queue is a targeted error sample, not a representative sample. Routine manual annotation is not required. Save the supplied AI suggestion sidecar as data/private/model_artifacts/validation_label_ai_suggestions_sidecar.csv, then run the AI silver-label exporter documented in data/label_review_protocol.md. The exporter does not read the separate source/model key and keeps official review fields pending. Keep all message-level files private and never commit them.
 
 
 ## 9. Local text-only message analysis endpoint
