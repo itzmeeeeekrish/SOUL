@@ -1416,3 +1416,38 @@ This graph is approximate: top-five edges can miss neighbours, and connected com
 ### Implementation detail
 
 The implementation uses a bipartite graph: each validation message is compared with its five nearest training messages. This is more targeted and cheaper than a full all-pairs graph over the combined corpus.
+
+
+## 12 November 2026 — Similarity-family split (new experiment)
+
+### Why are we doing this?
+
+The synthetic multilingual model scored 99.91% on its original validation and initial holdout. A nearest-neighbour audit found that 50.8% of validation messages had a training message at cosine similarity >= 0.95. This suggests similar generated wording may appear on both sides of the original split.
+
+### What changed?
+
+- New script: `data/create_multilingual_family_splits.py`.
+- It reads only the old `train.csv` and `validation.csv`; it does not open the original `test.csv`.
+- It uses the already-fitted training-only character TF-IDF vectorizer to find up to five nearest non-self messages per row.
+- Messages connected by thresholded similarity edges are treated as one approximate family. Whole families go into train or validation, never both.
+- Two thresholds can be tried: 0.95 and 0.98.
+- New trainer: `data/train_multilingual_family_baseline.py`. It reports validation-only metrics and does not save another model or modify the live detector.
+
+### Commands
+
+```powershell
+git pull origin main
+cd backend
+python -m pytest -q
+cd ..
+python data\create_multilingual_family_splits.py --threshold 0.95
+python data\train_multilingual_family_baseline.py --threshold 0.95
+```
+
+Then repeat the last two commands with threshold 0.98.
+
+### Important interpretation
+
+This is still a synthetic binary ham/scam experiment. The old validation partition has already been used in diagnostics, so this new validation is not a fresh final test. The original test partition remains untouched by these scripts. Similarity-connected components are approximate template families, not verified campaigns. A lower score would be evidence that the original split was easier because of similar wording, not proof of real-world performance.
+
+Fifteen new tests were added. Their local result is pending until the full suite is run after pulling.
