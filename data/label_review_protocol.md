@@ -85,3 +85,16 @@ It creates two local files under `data/private/model_artifacts/`:
 **Review the blind file first. Do not open the key until you have completed independent labels.** Enter one of `legitimate`, `spam`, `scam`, or `needs_review` in `soul_label`; set `review_status` to `reviewed` or `needs_review`; add a concise evidence-based `annotation_note`. If uncertain, use `needs_review`.
 
 This is an error-focused sample selected because the baseline got it wrong. It is not representative of the full dataset and must not be used to estimate class proportions or model performance. It is a targeted annotation exercise to investigate confusing examples. Keep both files private; the blind file contains message text. Do not commit, upload or share it.
+
+
+## Assistant-generated label suggestions are advisory
+
+The 31-row blind validation error file was additionally assessed from text alone by an assistant, without opening the separate source/model key. The generated local file is `validation_label_review_assistant_suggestions.csv`.
+
+It adds:
+- `assistant_suggested_label`: a proposed category (`legitimate`, `spam`, `scam`, or `needs_review`).
+- `assistant_assessment_note`: short text-only rationale.
+
+It intentionally leaves the official SOUL review fields unchanged: `soul_label` blank, `review_status=pending`, `annotation_note` blank. These suggestions are not human annotation, verified ground truth, or proof about a sender. A human reviewer must independently accept, amend or reject each suggestion before changing the official fields. Do not train a model using assistant suggestions without that review.
+
+The current suggestion counts are spam 15, legitimate 6, scam 3, needs_review 7. Since these 31 were selected because the baseline misclassified them, these counts are not representative of the full dataset.
