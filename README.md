@@ -63,6 +63,12 @@ The detection engine decides what signals are suspicious. RAG supplies relevant 
 The intended experience includes simple Hindi/Hinglish explanations, voice output, clear warnings, and optional trusted-family escalation with the user's consent.
 
 
+## Consolidated master dataset
+
+A local **SOUL Master Dataset v1** package has been assembled from the prepared derivative, original grouped baseline partitions, quarantine files and validation-review artifacts. The master contains 5,797 unique prepared records; the original baseline train/validation/test CSVs are included unchanged. It preserves source labels, provisional baseline labels, submitted SOUL review fields, assistant suggestions and split provenance separately.
+
+The review fields cover only 31 selected validation errors (33 prepared rows due to duplicate masked-text grouping). The uploaded completion file's labels match assistant suggestions for all 31 IDs, so independent human ground truth is not established. These annotations must not be treated as a representative or independently verified relabelled dataset. The master package and message content remain local/private; no message-level records are committed to this repository.
+
 ## Dataset and first baseline
 
 The repository contains the documented three-class schema, annotation guide, 24-row and 84-row synthetic development sets, and local-only scripts for auditing and preparing a Mendeley 2022 SMS candidate. The local prepared derivative contains 5,797 records before final masked-text grouping; 68 exact-text conflict rows are quarantined. The deterministic split contains 4,004 training, 856 validation and 861 test rows. The split is grouped by identical final masked text, not by near-duplicate campaign, so results will be exploratory only.
