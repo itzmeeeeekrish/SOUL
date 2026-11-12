@@ -236,3 +236,8 @@ A meaningful next evaluation needs independently sourced, privacy-reviewed, camp
 The local helper `data/build_validation_label_review_queue.py` creates a blind review CSV and a separate source/model key for the known validation misclassifications. It verifies the saved validation fingerprint and exact mapping back to the prepared data.
 
 The blind CSV contains message text and blank SOUL review fields, but no source label, provisional label or model prediction. The separate key contains labels and model score but no message text. Review the blind file first; do not open the key until independent labels are complete. The 31 examples were selected because the baseline misclassified them, so this queue is not a representative dataset sample. Both files remain in Git-ignored `data/private/model_artifacts/`. Never commit or share the message-level CSV.
+
+
+## Latest test-suite verification (12 November 2026)
+
+The complete backend test suite passed locally after adding the blinded validation-label review queue tests: **57 passed in 14.21 seconds**. The test run verifies the current code and the 12 new queue-builder tests. The queue-generation script itself has not yet been confirmed as run locally. This verification did not retrain the model, change the model artefact, or modify the frozen train/validation/test partitions.
