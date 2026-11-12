@@ -342,3 +342,17 @@ Updated the candidate-family audit to use a bipartite top-five validation-to-tra
 - Since high scores persisted after approximate family separation, cross-partition template similarity alone is not a sufficient explanation for the synthetic results. Strong label wording/source-generation regularities remain plausible. No real-world performance is established.
 - Added data/audit_scamshield_candidate.py and 17 tests. First local audit completed: 85,680 rows; 24,312 source-positive records are General Spam / Telemarketing; 6,770 source-positive records have specific scam-intent categories; 175 masked-text duplicate groups cross publisher splits; 6 masked-text duplicate groups have conflicting binary labels; 6 of 7 source buckets have only one split_group ID; and 4 rows have residual regex-pattern matches after masking. Follow-up audit fields now include unverified record-ID prefix hints, a three-class taxonomy preview, intent-by-source counts and residual-pattern breakdowns. Latest changes need local pytest and rerun of audit. No training approved. It preserves source intent taxonomy and split_group metadata, masks likely identifiers, reports source/intent/duplicate/split/privacy statistics, and does not train or merge data.
 - ScamShield's public card lists MIT metadata and source fields, but its displayed positive label taxonomy includes General Spam / Telemarketing. Source-specific upstream licence rights and label semantics remain unapproved. Local audit and new tests are pending.
+
+
+## 12 November 2026 — Cross-source audit enhancement (committed; local run pending)
+
+The ScamShield audit now adds:
+- source × language × original binary-label counts;
+- source × binary-label × intent counts;
+- source-wise unverified record-ID prefix counts;
+- exact and masked duplicate groups spanning distinct source_dataset values;
+- cross-source duplicate groups where original is_scam values conflict.
+
+This is necessary because publisher split_group is often only a source-level bucket. A real_ record ID prefix is not evidence that a message was personally received or independently verified. The dataset card declares both machine-generated and expert-annotated creators but does not document row-level source provenance or independent annotation procedure in sufficient detail. Do not treat the MIT dataset-card tag as per-upstream-source rights clearance.
+
+Two additional tests cover cross-source duplicate detection. Expected full backend suite after pulling: 188 tests. Local result pending.
