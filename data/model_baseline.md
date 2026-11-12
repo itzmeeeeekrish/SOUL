@@ -204,6 +204,20 @@ Notable observations:
 
 Official `soul_label` fields remain blank and `review_status` remains `pending`. Preserve the original source label, baseline target, model prediction and assistant suggestion as separate information. Human adjudication is still required.
 
+## SOUL Master Dataset v1 consolidation (12 November 2026)
+
+A master dataset package was assembled from the supplied prepared CSV, original train/validation/test partitions, both quarantine files and the validation-review artifacts. The package is local/private and is not committed to GitHub.
+
+- Master CSV: 5,797 unique prepared records.
+- Baseline model rows: train 4,004; validation 856; test 861. These original split CSVs are copied unchanged.
+- Master source-level rows mapped to the splits: train 4,049; validation 872; test 874. The difference is the 74 same-label prepared duplicates that map to existing split groups.
+- Two prepared records are separately marked as quarantined due to one cross-label masked-text collision.
+- Source-stage quarantine: 34 groups representing 68 occurrences.
+- 31 unique validation review IDs were joined to 33 prepared rows. The uploaded completion file marks 24 IDs reviewed and 7 needs_review.
+- The uploaded review labels match assistant suggestions for all 31 IDs; 30/31 notes also match. Independent human adjudication is therefore not established. The master records provenance and keeps the assistant suggestion separate from `soul_label`.
+
+The original test partition was not changed or used for tuning. See the manifest included with the local package for input hashes and detailed integrity checks.
+
 ## Important limitations
 
 - This is an exploratory source-derived baseline, not production validation.
