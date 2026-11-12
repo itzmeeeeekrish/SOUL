@@ -324,3 +324,12 @@ Update this section after each meaningful development session.
 ### Implementation detail
 
 Updated the candidate-family audit to use a bipartite top-five validation-to-training neighbour graph rather than an all-pairs graph over the combined corpus. This reduces the comparison workload and focuses directly on near-similar messages crossing the train/validation boundary.
+
+
+## 12 November 2026 — Similarity-family-separated multilingual development experiment
+
+- Added `data/create_multilingual_family_splits.py`: reads only the original multilingual train and validation partitions, uses the saved training-only character TF-IDF representation to form approximate top-K cosine-similarity components, then allocates whole components to a new 90/10 train/validation split at thresholds 0.95 or 0.98.
+- Added `data/train_multilingual_family_baseline.py`: runs the same fixed binary character n-gram + Logistic Regression recipe on the new family-separated development split. It reports validation-only overall and language-wise metrics; it does not write another model, read a test partition or modify the live three-class detector.
+- Added 15 tests in `backend/tests/test_multilingual_family_split.py` and a dedicated protocol note in `data/template_family_validation.md`.
+- The original initial-holdout test partition is intentionally not read or changed by this experiment. The original validation rows have appeared in previous diagnostics, so the new family-separated validation is a development diagnostic, not an untouched independent final evaluation.
+- These new scripts/tests have been committed but still require a local `git pull`, full pytest run and local execution. Do not mark the experiment complete until the user reports those results.
