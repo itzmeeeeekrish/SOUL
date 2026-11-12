@@ -252,8 +252,17 @@ def prepare_rows(source_rows):
 
 def create_grouped_splits(rows, seed=RANDOM_SEED):
     """Assign groups to 80/10/10 folds, stratified approximately by language x label."""
-    if len(rows) < N_SPLITS:
-        raise ValueError("At least 10 prepared rows are required for 10-fold splitting.")
+    if not rows:
+        raise ValueError("No prepared rows were supplied for grouped splitting.")
+
+    required_fields = {"record_id", "group_id", "model_text_sha256", "language", "source_label"}
+    for row in rows:
+        missing = required_fields - set(row)
+        if missing:
+            raise ValueError(
+                "A prepared row is missing required split fields: "
+                + ", ".join(sorted(missing))
+            )
 
     group_ids = [row["group_id"] for row in rows]
     strata = [f'{row["language"]}|{row["source_label"]}' for row in rows]
