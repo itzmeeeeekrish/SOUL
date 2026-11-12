@@ -81,10 +81,12 @@ def test_similarity_graph_reports_cross_partition_candidate_component():
         make_row("validation", "scam", "hindi"),
         make_row("validation", "ham", "tamil"),
     ]
+    # Combined indexing: training row 0; validation rows 1, 2 and 3.
+    # Every edge must link a validation row back to the training row.
     edges = [
-        (0, 1, 0.97),
-        (1, 2, 0.96),
-        (2, 3, 0.91),
+        (1, 0, 0.97),
+        (2, 0, 0.96),
+        (3, 0, 0.91),
     ]
 
     result = summarise_similarity_graph(rows, edges, 0.95)
@@ -102,9 +104,10 @@ def test_similarity_graph_counts_mixed_labels_and_languages_at_lower_threshold()
         make_row("validation", "ham", "tamil"),
         make_row("validation", "scam", "english"),
     ]
+    # Validation rows 1 and 2 each connect to training row 0.
     edges = [
-        (0, 1, 0.92),
-        (1, 2, 0.91),
+        (1, 0, 0.92),
+        (2, 0, 0.91),
     ]
 
     result = summarise_similarity_graph(rows, edges, 0.90)
