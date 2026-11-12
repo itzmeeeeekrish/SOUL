@@ -11,6 +11,8 @@ from pathlib import Path
 
 import joblib
 
+from app.services.language_guard import inspect_language_support
+
 LABEL_ORDER = ("legitimate", "scam", "spam")
 MODEL_NAME = "tfidf_logistic_regression_v1"
 MAX_MESSAGE_LENGTH = 5000
@@ -86,6 +88,33 @@ def analyze_message(text, model=None):
             f"Message text must be at most {MAX_MESSAGE_LENGTH} characters."
         )
 
+    language_assessment = inspect_language_support(cleaned_text)
+    if not language_assessment["baseline_eligible"]:
+        return {
+            "analysis_status": "abstained_unsupported_language",
+            "model": MODEL_NAME,
+            "candidate_label": "needs_review",
+            "model_candidate_label": None,
+            "model_scores": {},
+            "top_model_score": None,
+            "top_two_score_margin": None,
+            "low_score_separation": True,
+            "review_required": True,
+            "abstention_reason": (
+                "The current baseline is not validated for this script or "
+                "Romanized-Hindi signal, so SOUL did not issue a text-model label."
+            ),
+            "language_assessment": language_assessment,
+            "guidance": (
+                "SOUL cannot reliably assess this language with its current "
+                "message model. Do not assume the message is safe or fraudulent. "
+                "Verify unexpected requests independently through an official channel."
+            ),
+            "limitations": LIMITATIONS + [
+                "The language/script guard is heuristic and is not a full language detector."
+            ],
+        }
+
     active_model = model if model is not None else load_model()
     classes = [str(label) for label in active_model.classes_]
     if set(classes) != set(LABEL_ORDER) or len(classes) != len(LABEL_ORDER):
@@ -120,6 +149,7 @@ def analyze_message(text, model=None):
         "top_two_score_margin": score_margin,
         "low_score_separation": score_margin < 0.10,
         "review_required": True,
+        "language_assessment": language_assessment,
         "guidance": GUIDANCE[predicted],
         "limitations": LIMITATIONS,
     }
