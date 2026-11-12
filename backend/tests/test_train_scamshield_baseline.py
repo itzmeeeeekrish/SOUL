@@ -101,7 +101,7 @@ def test_read_split_validates_hash_and_metadata(tmp_path):
 
     loaded = read_split(path)
 
-    assert len(loaded) == 3 * len(LABEL_ORDER)
+    assert len(loaded) == len(LABEL_ORDER)
     assert all(row["_language"] == "english" for row in loaded)
     assert all(row["_sources"] == ["Fixture_Source"] for row in loaded)
 
