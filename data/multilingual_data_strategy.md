@@ -148,3 +148,22 @@ Audit the 14-language synthetic candidate as a separate pilot before any trainin
 - preserve the binary target as binary and keep it separate from the original three-class model.
 
 Only after that audit should SOUL choose whether to run a separate Hindi/Hinglish binary experiment or continue sourcing a three-class multilingual corpus.
+
+
+## 9. Run the first candidate audit locally
+
+The first candidate audit utility is available at data/audit_multilingual_candidate.py.
+
+It uses the optional Hugging Face Datasets package to download the 14-language synthetic candidate into the local cache. From the active project virtual environment, install the optional package:
+
+    python -m pip install datasets
+
+Then run from the repository root:
+
+    python data/audit_multilingual_candidate.py
+
+The script writes:
+- data/private/multilingual_candidates/anmolshrivastav_14lang_candidate_audit.csv — row-level synthetic records with source split, original binary source label, language, script profile, exact-text hash and privacy-candidate flags.
+- data/private/multilingual_candidates/anmolshrivastav_14lang_candidate_summary.json — aggregate-only report with class/language/script counts, duplicate and source-split overlap counts, and privacy-pattern totals.
+
+The script does not print messages or IDs, train a model, make a new split, alter the current model, or approve the candidate for use. Keep both outputs local/private. Review aggregate results before deciding whether to build a separate group-safe binary development split.
