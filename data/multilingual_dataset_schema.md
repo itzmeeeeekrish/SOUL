@@ -55,3 +55,18 @@
 - needs_review — abstention, not an ordinary training class.
 
 A source with only binary classes must remain a separate task until its labels can be mapped with evidence.
+
+
+## Candidate 8 local derivative fields
+
+The first local candidate derivative additionally stores:
+- source_splits: publisher partitions represented by collapsed source occurrences.
+- source_occurrences: number of identical masked text/language/label occurrences collapsed into this prepared row.
+- original_content_sha256: hash of normalised source text, used only for local duplicate analysis.
+- model_text_sha256: hash of final masked text used for group isolation.
+- group_id: stable local grouping key derived from model_text_sha256.
+- has_*_candidate: presence flags computed from source text before masking.
+- has_residual_candidate_after_mask: whether known regex candidates remain after masking.
+- split: SOUL-created group-safe partition.
+
+The prepared and split files remain Git-ignored under data/private/. Quarantine groups with conflicting labels after masking are excluded from all three partitions.
