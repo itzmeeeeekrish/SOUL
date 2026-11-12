@@ -1466,7 +1466,7 @@ Fifteen new tests were added. Their local result is pending until the full suite
 
 ### New candidate audit
 
-A separate dataset, ScamShield, is being audited before any training. Its current public card reports 85,680 rows and fields for source dataset, language, source scam label, scam intent, split group and metadata. A displayed positive row is labelled General Spam / Telemarketing, so positive does not necessarily mean confirmed fraud. Preserve the source taxonomy and do not map it directly to SOUL's scam class.
+A separate dataset, ScamShield, is being audited before any training. The audit also checks split_group cardinality by source, because a group ID repeated across thousands of records may identify the source collection rather than a single campaign or message family. Its current public card reports 85,680 rows and fields for source dataset, language, source scam label, scam intent, split group and metadata. A displayed positive row is labelled General Spam / Telemarketing, so positive does not necessarily mean confirmed fraud. Preserve the source taxonomy and do not map it directly to SOUL's scam class.
 
 Run after pulling the new commit:
 
