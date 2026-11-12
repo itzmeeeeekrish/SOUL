@@ -36,29 +36,42 @@ def test_union_find_merges_and_compresses_components():
     assert structure.find(0) != structure.find(3)
 
 
-def test_build_knn_edges_returns_neighbours_without_self_edges():
-    matrix = csr_matrix(
+def test_build_knn_edges_returns_validation_to_train_neighbours():
+    train_matrix = csr_matrix(
         np.array(
             [
                 [1.0, 0.0, 0.0],
-                [0.9, 0.1, 0.0],
                 [0.0, 1.0, 0.0],
             ]
         )
     )
+    validation_matrix = csr_matrix(
+        np.array(
+            [
+                [0.95, 0.05, 0.0],
+                [0.0, 0.9, 0.1],
+            ]
+        )
+    )
 
-    edges = build_knn_edges(matrix, neighbour_count=1)
+    edges = build_knn_edges(train_matrix, validation_matrix, neighbour_count=1)
 
-    assert edges
-    assert all(left != right for left, right, _ in edges)
+    assert len(edges) == 2
+    assert all(left >= train_matrix.shape[0] for left, _, _ in edges)
+    assert all(right < train_matrix.shape[0] for _, right, _ in edges)
     assert all(0.0 <= similarity <= 1.0 for _, _, similarity in edges)
 
 
-def test_build_knn_edges_rejects_too_few_rows_or_invalid_neighbour_count():
-    with pytest.raises(ValueError, match="At least two rows"):
-        build_knn_edges(csr_matrix([[1.0, 0.0]]))
+def test_build_knn_edges_rejects_empty_matrices_or_invalid_neighbour_count():
+    empty = csr_matrix((0, 2))
+    nonempty = csr_matrix([[1.0, 0.0]])
+
+    with pytest.raises(ValueError, match="must both be non-empty"):
+        build_knn_edges(empty, nonempty)
+    with pytest.raises(ValueError, match="must both be non-empty"):
+        build_knn_edges(nonempty, empty)
     with pytest.raises(ValueError, match="at least one"):
-        build_knn_edges(csr_matrix([[1.0, 0.0], [0.0, 1.0]]), 0)
+        build_knn_edges(nonempty, nonempty, 0)
 
 
 def test_similarity_graph_reports_cross_partition_candidate_component():
@@ -111,15 +124,15 @@ def test_similarity_graph_rejects_invalid_threshold_and_edge_indices():
         summarise_similarity_graph(rows, [(0, 2, 0.99)], 0.9)
 
 
-def test_build_report_documents_validation_only_approximate_method():
-    rows = [
-        make_row("train"),
-        make_row("validation"),
-    ]
-    report = build_report(rows, [(0, 1, 0.95)])
+def test_build_report_documents_validation_only_bipartite_method():
+    train = [make_row("train")]
+    validation = [make_row("validation")]
+
+    report = build_report(train, validation, [(1, 0, 0.95)])
 
     assert report["test_partition_read"] is False
     assert report["model_trained"] is False
     assert report["model_artifact_modified"] is False
     assert report["method"]["approximate"] is True
+    assert report["method"]["graph"].startswith("bipartite")
     assert [item["threshold"] for item in report["results"]] == [0.90, 0.95, 0.98]
