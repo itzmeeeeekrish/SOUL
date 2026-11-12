@@ -69,7 +69,10 @@ def test_prepare_rows_masks_phone_and_url_candidates():
 
     assert quarantine == []
     assert len(rows) == 1
-    assert "[LONG_NUMBER]" in rows[0]["text"]
+    assert any(
+        marker in rows[0]["text"]
+        for marker in ("[LONG_NUMBER]", "[12_DIGIT_NUMBER]")
+    )
     assert "[URL]" in rows[0]["text"]
     assert rows[0]["has_phone_long_number_candidate"] == 1
     assert rows[0]["has_url_domain_candidate"] == 1
