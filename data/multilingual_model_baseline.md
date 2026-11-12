@@ -167,3 +167,8 @@ An approximate top-five neighbour graph diagnostic is available:
     python data/audit_multilingual_template_families.py
 
 It reads train and validation only, uses character-TF-IDF cosine similarity at 0.90, 0.95 and 0.98, and reports aggregate connected components/cross-partition links. It is not a verified campaign detector and does not read the initial holdout test.
+
+
+### Implementation detail
+
+The graph is bipartite: each validation message is connected to up to five nearest training messages. This targets cross-partition similarity without calculating all pairwise distances across the combined corpus.
