@@ -399,9 +399,9 @@ def audit_records(rows):
         },
         "publisher_split_counts": dict(sorted(splits.items())),
         "source_scam_intent_counts": dict(sorted(intents.items())),
-        "source_intent_counts_by_is_scam": {
-            key: dict(sorted(value.items()))
-            for key, value in sorted(intent_by_label.items())
+        "intent_counts_by_is_scam": {
+            label: dict(sorted(value.items()))
+            for label, value in sorted(intent_by_label.items())
         },
         "script_profile_counts": dict(sorted(scripts.items())),
         "source_type_name_hints": dict(sorted(source_types.items())),
