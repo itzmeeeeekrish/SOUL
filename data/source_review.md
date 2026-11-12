@@ -470,3 +470,18 @@ The source evaluation and staged decision process are documented in [multilingua
 - Status: audit implementation and 15 tests committed; local audit, source-specific licence review and label-semantics assessment pending. The audit reports split-group cardinality by source so source-level bucket IDs are not mistaken for campaign groups. No model training or data integration approved.
 
 Do not claim this dataset is entirely real or entirely synthetic. Source-specific provenance must be verified from the audit and upstream documentation.
+
+
+## 12 November 2026 — First ScamShield corpus audit results (local)
+
+- Prepared and masked rows: 85,680. Language counts: English 76,323; Hindi 6,352; Hinglish 3,005.
+- Source binary labels: is_scam=0: 54,598; is_scam=1: 31,082.
+- The is_scam=1 positives include 24,312 General Spam / Telemarketing records and 6,770 rows with specific scam-intent categories. Do not train directly on the binary source label for SOUL's scam detector.
+- Raw exact duplicates: 78 groups, 27 crossing publisher splits, 1 with conflicting binary labels.
+- Masked-text duplicate groups: 582, 175 crossing publisher splits, 6 with conflicting labels.
+- Publisher split_group values are not generally campaign-level: six of seven source_dataset buckets have one repeated group ID for the entire source. Synthetic_Tier_C has 172 group IDs for 3,720 rows.
+- Four rows have residual regex-pattern candidates after masking. They must be excluded/quarantined from any future training/evaluation until the categories and safety are investigated. Zero residual regex matches would not prove complete anonymisation.
+- The dataset card declares MIT and lists machine-generated and expert-annotated creators, but per-source upstream reuse rights and label provenance are not established by the card metadata alone.
+- A new audit enhancement adds unverified source-ID prefix hints, source-intent-by-source counts, a three-class taxonomy preview (legitimate / spam / scam / needs_review), and residual-pattern counts by source/language. These are diagnostics only; no labels are approved or training performed.
+- A separate public implementation using this corpus likewise separates promotional spam from fraud and describes some public-data labels as keyword-assigned/spot-checked. It is a methodological reference, not independent ground truth.
+- Local tests and rerun of the enhanced audit are pending.
