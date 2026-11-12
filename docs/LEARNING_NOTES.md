@@ -1305,3 +1305,25 @@ A separate character n-gram TF-IDF + Logistic Regression baseline is now impleme
 - Model and metrics are saved separately under `data/private/model_artifacts/`.
 
 **Important:** this dataset is synthetic, binary and uneven after deduplication. A high score would not establish real-world fraud detection, Hindi/Indic language mastery or SOUL's three-class performance. Do not merge it into the Mendeley baseline. Keep the test split as a fixed initial evaluation set and never tune against it. Run the full test suite before training.
+
+
+## 13. First multilingual model result — why 99.91% is not a deployment result
+The separate character n-gram model trained successfully on the prepared 14-language synthetic scam/ham dataset.
+
+Reported results:
+- Validation: accuracy 0.9991, balanced accuracy 0.9990, macro F1 0.9991.
+- Initial holdout test: accuracy 0.9991, balanced accuracy 0.9990, macro F1 0.9991.
+- Test size: 1,136 rows, with one error.
+- Model vocabulary: 129,265 character features.
+- The lowest-support test subgroups are Odia (4 scam examples) and Tamil (5 scam examples); do not interpret their subgroup scores as stable estimates.
+
+A score this high can happen when generated messages have consistent label-specific language. The public dataset card marks the corpus synthetic and its examples include clear scams asking for OTP/PIN sharing, advance fees or urgent link clicks, while ham examples include ordinary personal messages and safety reminders. This can make the task much easier than real inbox triage.
+
+Possible explanations still to test:
+1. Synthetic message templates or paraphrases occur across the random grouped partitions.
+2. Some words, phrases, punctuation or message structures are strongly associated with one label in the generator.
+3. The generated labels are unusually clean and examples are less ambiguous than real messages.
+
+A new validation-only diagnostic measures each validation message's nearest character-TF-IDF similarity to training and lists the model's strongest alphabetic character fragments. It does not read the initial test partition, retrain, or modify the model. High similarity is a clue for template overlap, not proof of leakage. Low similarity is not proof of real-world generalisation.
+
+**Decision:** Preserve this model and its initial results as an experimental benchmark. Do not integrate it into the live SOUL detector, report 99.91% as real-world scam detection accuracy, or use the initial test partition for tuning. Stronger evaluation needs independently sourced real-world or independently curated messages, with provenance/licence/privacy review and campaign/template-separated test data.
