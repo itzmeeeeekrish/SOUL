@@ -266,6 +266,8 @@ def test_output_files_are_created_with_explicit_private_preview_status(tmp_path)
     assert len(candidate_rows) == 1
     assert set(candidate_rows[0]) == set(CANDIDATE_COLUMNS)
     assert len(review_rows) == 1
+    assert "curation_reasons" in review_rows[0]
+    assert "unmapped_or_ambiguous_source_intent" in review_rows[0]["curation_reasons"]
     assert len(quarantine_rows) == 1
     assert set(quarantine_rows[0]) == set(QUARANTINE_COLUMNS)
     assert manifest["summary"]["model_trained"] is False
