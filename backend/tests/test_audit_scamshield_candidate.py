@@ -250,7 +250,11 @@ def test_load_huggingface_candidate_rejects_missing_required_columns():
     class IncompleteSplit(list):
         column_names = ["text", "is_scam"]
 
-    fake = {"train": IncompleteSplit([{"text": "x", "is_scam": 0}])}
+    fake = {
+        "train": IncompleteSplit([{"text": "x", "is_scam": 0}]),
+        "val": FakeSplit([make_source_row(record_id="val")]),
+        "test": FakeSplit([make_source_row(record_id="test")]),
+    }
 
     with pytest.raises(ValueError, match="missing columns"):
         load_huggingface_candidate(loader=lambda *args, **kwargs: fake)
