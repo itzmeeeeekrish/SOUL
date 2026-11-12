@@ -1286,3 +1286,22 @@ In teen tasks ko bina label definition check kiye mix nahi karna hai. Agar datas
 New research mein synthetic 14-language dataset ko sirf development pilot ke liye consider kiya hai. Synthetic messages model ko Hindi/Hinglish scripts samjhaane mein help kar sakte hain, lekin real-world accuracy prove nahi karte. Real Hindi dataset ka licence check pending hai, aur kuch big datasets mein upstream source overlap/label ambiguity hai.
 
 data/audit_multilingual_candidate.py local aggregate audit banata hai. Ye messages console par print nahi karta, model train nahi karta, aur old Mendeley baseline ko touch nahi karta.
+
+
+## 12. Separate multilingual binary baseline — design decision
+The 14-language candidate was prepared as a separate synthetic binary dataset. Its grouped partitions contain 9,091 train, 1,138 validation and 1,136 test rows. Exact masked-text/group leakage checks passed. The original three-class Mendeley split and its results remain separate.
+
+The language-wise audit highlighted a support problem:
+- Odia test set: 19 ham, 4 scam.
+- Tamil test set: 23 ham, 5 scam.
+- These scam supports are too small for stable standalone performance claims. The new metrics report marks a language as low-support when either class has fewer than 20 examples in that split.
+
+A separate character n-gram TF-IDF + Logistic Regression baseline is now implemented:
+- Input: message text only.
+- Character n-grams: 2–5.
+- Target: source `ham` / `scam`.
+- Language metadata is for evaluation breakdown only, not a model feature.
+- Validation and test metrics include overall scores, per-class precision/recall/F1/FPR, confusion matrix and per-language scores/support.
+- Model and metrics are saved separately under `data/private/model_artifacts/`.
+
+**Important:** this dataset is synthetic, binary and uneven after deduplication. A high score would not establish real-world fraud detection, Hindi/Indic language mastery or SOUL's three-class performance. Do not merge it into the Mendeley baseline. Keep the test split as a fixed initial evaluation set and never tune against it. Run the full test suite before training.
