@@ -137,3 +137,29 @@ This generates two local files under `data/private/model_artifacts/`:
 - `validation_label_review_key.csv`: original source label, provisional label, prediction and score; no message text.
 
 Review the blind CSV first. Do not open the key until labels have been entered independently. This is a targeted error sample, not a representative sample. Keep both files private and do not commit or upload them. See [data/label_review_protocol.md](../data/label_review_protocol.md).
+
+
+## 9. Local text-only message analysis endpoint
+
+The backend now exposes a development endpoint that loads the local TF-IDF + Logistic Regression artifact:
+
+    POST http://127.0.0.1:8000/v1/messages/analyze
+
+The model file must already exist at data/private/model_artifacts/tfidf_logistic_regression.joblib. If it does not exist, run the fixed baseline training script from the repository root:
+
+    python data\train_text_baseline.py
+
+Start the backend from the backend folder:
+
+    python -m uvicorn app.main:app --reload
+
+Example PowerShell request:
+
+    $body = @{ text = "Your bank account will be blocked. Share your OTP now." } | ConvertTo-Json
+    Invoke-RestMethod -Uri "http://127.0.0.1:8000/v1/messages/analyze" -Method Post -ContentType "application/json" -Body $body
+
+The endpoint returns a candidate label, per-class model scores, a short safety message and explicit limitations. Model scores are uncalibrated outputs, not probabilities of fraud. Every response remains provisional and sets review_required to true. The detector analyses text only; it does not inspect sender history, URL destinations, app state, device location or bank records.
+
+The endpoint returns 503 when the local model artifact is missing or incompatible, and 422 for blank or oversized input. It never downloads a model from the internet. Keep the joblib artifact local and load only the model created by your own trusted training run.
+
+See data/ai_annotation_policy.md for the silver-label workflow and its safeguards.
