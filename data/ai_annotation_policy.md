@@ -73,6 +73,23 @@ In the 24 non-abstained suggestions, 14 agree with the original source-label map
 - A future AI-labelled training dataset must have a new version, a new leakage-aware split, separate metrics and a clear record of how labels were generated.
 - Never present AI labels as human-verified, regulator-approved or proof that a sender committed fraud.
 
+
+## Optional full-dataset AI annotation
+
+A resumable batch annotator is available at data/ai_annotate_prepared_dataset.py. It reads the local prepared derivative and sends only record_id and text to a configurable OpenAI-compatible chat-completions provider. It does not send the publisher's source_label or the baseline label, and it does not modify the prepared CSV, historical splits or model.
+
+The script is disabled unless the explicit flag is present:
+
+    python data/ai_annotate_prepared_dataset.py --allow-external-processing
+
+Before running it, configure SOUL_LLM_BASE_URL, SOUL_LLM_API_KEY and SOUL_LLM_MODEL in the local .env file. The endpoint and model are chosen by the project owner; the repository does not select a provider or model on the user's behalf.
+
+The script uses batches, validates that every requested record ID is returned exactly once, converts low self-assessed confidence to needs_review, saves an atomic checkpoint after each batch, and resumes only when the prepared-data fingerprint, endpoint and model match the run manifest. Outputs remain under data/private/ai_annotations/ and are Git-ignored.
+
+**Privacy and cost gate:** The prepared text is pattern-masked but not guaranteed anonymous. The explicit flag permits sending text to the configured external provider. Review that provider's retention, training and data-processing terms first. No request has been sent by this repository change. A provider's self-reported confidence is not calibrated ground truth.
+
+The generated corpus is AI silver data. Do not use its labels as independent validation/test truth or claim accuracy based on agreement with the same model that was trained from the source mapping.
+
 ## Privacy and data handling
 
 - The existing prepared text was masked using known patterns; this does not guarantee anonymisation.
