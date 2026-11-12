@@ -277,3 +277,6 @@ Latest local language coverage audit (12 November 2026):
 | **Total** | **5,797** |
 
 These are lexical/script indicators only. They are not reliable language labels: Latin text may include English, Hinglish without a selected marker, or another language. No multilingual training or evaluation claim follows from these counts.
+
+
+The multilingual candidate importer/auditor is a separate data-research utility. It does not alter this baseline, its source labels, partitions, model artifact or metrics.
