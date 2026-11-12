@@ -237,3 +237,8 @@ An approximate top-five character-TF-IDF template-family audit is available:
     python data/audit_multilingual_template_families.py
 
 It reads train and validation only, not the initial holdout test, and reports aggregate similarity-connected components at cosine thresholds 0.90, 0.95 and 0.98.
+
+
+### Multilingual data research
+
+A separate audit utility for the ScamShield multilingual candidate has been added at data/audit_scamshield_candidate.py. It preserves source labels, scam-intent taxonomy, source dataset and source split-group metadata; masks likely identifiers; and reports aggregate data-quality and split-integrity statistics. No ScamShield data is approved for training yet. Its dataset card declares MIT, but upstream rights require source-by-source verification and the positive class includes General Spam / Telemarketing in displayed rows.
