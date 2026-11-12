@@ -79,8 +79,9 @@ The presence of one indicator should be assessed in context. A risk indicator is
 - Use the same rules for English, Hindi and Hinglish.
 - Do not infer a label from language, spelling quality, sender identity, or brand name alone.
 - Keep a short `annotation_note` explaining the deciding evidence.
-- Borderline examples should be reviewed by a second annotator before inclusion in an evaluation set.
-- When reviewers disagree, record the disagreement and revise the guide; do not silently force a label.
+- Borderline examples should use needs_review when the text does not support a defensible decision.
+- AI-generated labels are silver labels, not gold evaluation labels. Do not use them to claim independent model accuracy.
+- When automated methods disagree, preserve both outputs and their provenance; do not silently force a label.
 - Never include unmasked personal or financial information in examples.
 
 ## Campaign groups and splits
@@ -98,8 +99,9 @@ For third-party source examples, preserve the publisher's original label separat
 
 - `source_label`: original source class (`ham`, `smishing`, or `spam`).
 - `label`: provisional mapping used by the historical baseline.
-- `soul_label`: blank until a human review is completed.
-- `review_status`: `pending`, `reviewed`, or `needs_review`.
-- `annotation_note`: reason for a completed review.
+- `soul_label`: reserved for separately adjudicated labels; AI workflows must leave it unchanged.
+- `review_status`: existing independent-review state; AI workflows must leave it unchanged.
+- `annotation_note`: reason for a separately adjudicated review.
+- AI sidecars: `ai_suggested_label`, `ai_annotation_status`, `ai_annotation_note`, `ai_model`, `ai_method` and creation date.
 
-Never copy the model prediction into `soul_label` automatically. Read the label review protocol before adjudicating borderline promotional, premium-rate or service messages. The initial model/split remains frozen and continues to use the original provisional `label`.
+Routine manual annotation is not required for project progress. The AI-led workflow writes silver labels to a separate sidecar and marks uncertainty as `needs_review`. Never copy a model prediction into `soul_label`. Read [the AI annotation policy](ai_annotation_policy.md) and [the label review protocol](label_review_protocol.md). The initial model/split remains frozen and continues to use the original provisional `label`.
