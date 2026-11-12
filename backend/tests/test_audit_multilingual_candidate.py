@@ -63,7 +63,8 @@ def test_audit_counts_languages_labels_scripts_and_duplicates():
     assert summary["duplicate_groups_crossing_publisher_splits"] == 1
     assert summary["duplicate_groups_with_conflicting_labels"] == 0
     assert summary["script_profile_counts"]["devanagari"] == 1
-    assert summary["script_profile_counts"]["mixed_latin_non_latin"] == 1
+    assert summary["script_profile_counts"]["latin_only"] == 3
+    assert "mixed_latin_non_latin" not in summary["script_profile_counts"]
 
 
 def test_audit_flags_duplicate_text_with_conflicting_labels():
