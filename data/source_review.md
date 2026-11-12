@@ -467,6 +467,6 @@ The source evaluation and staged decision process are documented in [multilingua
 - Viewer examples identify source families such as Smishing_Dataset, UCI_SMS_Spam, Kaggle_Hindi_Merged, and Synthetic_Tier_C.
 - At least one displayed positive row has intent General Spam / Telemarketing. Therefore the binary is_scam label is not yet approved as a fraud-only target.
 - Audit tool: data/audit_scamshield_candidate.py. It preserves source label and intent, masks likely identifiers, and writes outputs only below data/private/scamshield_candidate/.
-- Status: audit implementation committed; local audit, source-specific licence review and label-semantics assessment pending. No model training or data integration approved.
+- Status: audit implementation and 15 tests committed; local audit, source-specific licence review and label-semantics assessment pending. The audit reports split-group cardinality by source so source-level bucket IDs are not mistaken for campaign groups. No model training or data integration approved.
 
 Do not claim this dataset is entirely real or entirely synthetic. Source-specific provenance must be verified from the audit and upstream documentation.
