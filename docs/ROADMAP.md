@@ -319,3 +319,8 @@ Update this section after each meaningful development session.
 - Added seven unit tests for the graph, connected components, threshold validation and report scope.
 - The last user-provided test-count confirmation remains the earlier **117 passed**; later added diagnostic tests have not all been locally confirmed in a user-provided output. After pulling all additions from the placeholder audit, ablation and template-family audit stages, run the full backend suite; the expected count is 156 if all 39 added tests are present.
 - Next: pull, run full pytest, then run `python data/audit_multilingual_template_families.py`. Use these similarity clusters as candidate template families only—not verified campaigns. A truly independent evaluation still requires a new, separately sourced non-synthetic holdout.
+
+
+### Implementation detail
+
+Updated the candidate-family audit to use a bipartite top-five validation-to-training neighbour graph rather than an all-pairs graph over the combined corpus. This reduces the comparison workload and focuses directly on near-similar messages crossing the train/validation boundary.
