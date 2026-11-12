@@ -262,7 +262,10 @@ def audit_records(rows):
     id_prefixes = Counter()
     taxonomy_preview = Counter()
     source_language_labels = defaultdict(Counter)
+    source_language_class_labels = defaultdict(Counter)
     source_intents = defaultdict(Counter)
+    source_intent_class_labels = defaultdict(Counter)
+    source_id_prefix_counts = defaultdict(Counter)
     residual_by_source = defaultdict(Counter)
     residual_by_language = defaultdict(Counter)
     residual_patterns = Counter()
@@ -295,7 +298,10 @@ def audit_records(rows):
         id_prefixes[row["record_id_prefix_hint"]] += 1
         taxonomy_preview[row["taxonomy_label_preview"]] += 1
         source_language_labels[source][language] += 1
+        source_language_class_labels[(source, language)][str(label)] += 1
         source_intents[source][intent] += 1
+        source_intent_class_labels[(source, str(label))][intent] += 1
+        source_id_prefix_counts[source][row["record_id_prefix_hint"]] += 1
 
         raw_groups[row["content_sha256"]].append(row)
         masked_groups[row["masked_text_sha256"]].append(row)
@@ -337,6 +343,20 @@ def audit_records(rows):
             ),
             "groups_with_conflicting_is_scam_labels": sum(
                 len({row["source_label_is_scam"] for row in members}) > 1
+                for members in repeated
+            ),
+            "groups_spanning_source_datasets": sum(
+                len({row["source_dataset"] for row in members}) > 1
+                for members in repeated
+            ),
+            "rows_in_groups_spanning_source_datasets": sum(
+                len(members)
+                for members in repeated
+                if len({row["source_dataset"] for row in members}) > 1
+            ),
+            "cross_source_groups_with_conflicting_is_scam_labels": sum(
+                len({row["source_dataset"] for row in members}) > 1
+                and len({row["source_label_is_scam"] for row in members}) > 1
                 for members in repeated
             ),
         }
@@ -391,9 +411,21 @@ def audit_records(rows):
             source: dict(sorted(counts.items()))
             for source, counts in sorted(source_language_labels.items())
         },
+        "source_language_class_counts": {
+            f"{source} | {language}": dict(sorted(counts.items()))
+            for (source, language), counts in sorted(source_language_class_labels.items())
+        },
         "source_intent_counts": {
             source: dict(sorted(counts.items()))
             for source, counts in sorted(source_intents.items())
+        },
+        "source_intent_counts_by_is_scam": {
+            f"{source} | is_scam={label}": dict(sorted(counts.items()))
+            for (source, label), counts in sorted(source_intent_class_labels.items())
+        },
+        "source_record_id_prefix_hints_unverified": {
+            source: dict(sorted(counts.items()))
+            for source, counts in sorted(source_id_prefix_counts.items())
         },
         "residual_pattern_counts_after_mask": dict(sorted(residual_patterns.items())),
         "residual_rows_by_source": {
@@ -573,7 +605,10 @@ def print_summary(summary):
         print(
             f"  {name}: groups={values['duplicate_groups']}, "
             f"cross-split={values['groups_crossing_publisher_splits']}, "
-            f"mixed-label={values['groups_with_conflicting_is_scam_labels']}"
+            f"mixed-label={values['groups_with_conflicting_is_scam_labels']}, "
+            f"cross-source={values['groups_spanning_source_datasets']}, "
+            f"cross-source mixed-label="
+            f"{values['cross_source_groups_with_conflicting_is_scam_labels']}"
         )
     print(
         "  Publisher split groups crossing splits:",
