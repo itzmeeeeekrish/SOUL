@@ -333,3 +333,12 @@ Updated the candidate-family audit to use a bipartite top-five validation-to-tra
 - Added 15 tests in `backend/tests/test_multilingual_family_split.py` and a dedicated protocol note in `data/template_family_validation.md`.
 - The original initial-holdout test partition is intentionally not read or changed by this experiment. The original validation rows have appeared in previous diagnostics, so the new family-separated validation is a development diagnostic, not an untouched independent final evaluation.
 - These new scripts/tests have been committed but still require a local `git pull`, full pytest run and local execution. Do not mark the experiment complete until the user reports those results.
+
+
+## 12 November 2026 — Synthetic family split results and next data-source audit
+
+- User ran the new family-separated development experiments locally. At threshold 0.95: 9,206 train / 1,023 validation; validation accuracy 0.9990, balanced accuracy 0.9989. At threshold 0.98: same row counts; validation accuracy and balanced accuracy 1.0000. Original initial holdout test was not read or modified; neither experiment saved a model or changed the live detector.
+- The threshold 0.95 validation partition has language slices without both classes (Assamese has no ham; Odia has no scam) and Tamil is low support. Those subgroup figures are incomplete and must not be interpreted as balanced performance. At threshold 0.98, Odia has only 7 scam examples and Tamil 5; subgroup metrics remain preliminary.
+- Since high scores persisted after approximate family separation, cross-partition template similarity alone is not a sufficient explanation for the synthetic results. Strong label wording/source-generation regularities remain plausible. No real-world performance is established.
+- Added data/audit_scamshield_candidate.py and 13 tests to audit a separate 85,680-row mixed-provenance multilingual candidate. It preserves source intent taxonomy and split_group metadata, masks likely identifiers, reports source/intent/duplicate/split/privacy statistics, and does not train or merge data.
+- ScamShield's public card lists MIT metadata and source fields, but its displayed positive label taxonomy includes General Spam / Telemarketing. Source-specific upstream licence rights and label semantics remain unapproved. Local audit and new tests are pending.
