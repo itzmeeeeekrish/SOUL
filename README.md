@@ -227,3 +227,13 @@ The controlled validation-only ablation removes the six SOUL privacy placeholder
     python data/ablate_multilingual_mask_markers.py
 
 It never reads the already-used initial test partition and does not overwrite the original model.
+
+
+### Placeholder ablation result
+Removing all six explicit SOUL masking placeholders from the training/validation texts and retraining the same model recipe produced no change in validation metrics. The placeholders therefore do not measurably explain the 99.91% score by themselves. High train/validation nearest-neighbour similarity remains a concern.
+
+An approximate top-five character-TF-IDF template-family audit is available:
+
+    python data/audit_multilingual_template_families.py
+
+It reads train and validation only, not the initial holdout test, and reports aggregate similarity-connected components at cosine thresholds 0.90, 0.95 and 0.98.
