@@ -227,3 +227,13 @@ Update this section after each meaningful development session.
 
 
 | 2026-11-12 | Pulled latest AI workflow and endpoint changes and reran the complete backend suite locally | **82 passed in 5.05s**. The earlier malformed CSV test fixture was corrected; the targeted batch-response-ID check is now included in the passing suite. No full-dataset provider calls have been made. | Smoke-test the message-analysis endpoint against the local model artifact; then choose and configure a privacy-appropriate AI provider only if external processing is explicitly approved |
+
+
+## 12 November 2026 — First live detector smoke test and language guard
+
+- The user successfully called the local `POST /v1/messages/analyze` endpoint against the saved TF-IDF + Logistic Regression artifact. Swagger returned **HTTP 200** and a provisional `scam` candidate for the OTP-threat example. The displayed top model score was 0.6420 and score margin 0.3801; these are uncalibrated model outputs, not fraud probabilities.
+- Added a pre-classification script/lexical guard. Devanagari, mixed non-Latin text and a small list of Romanized-Hindi markers now cause the detector to abstain with `needs_review` instead of using the current model.
+- Added an aggregate-only language-coverage audit. It prints script/lexical indicator counts only and never outputs message text or IDs.
+- Added focused tests for English-like Latin text, Devanagari, Romanized Hinglish, mixed script and audit counts. These new language tests have not yet been run on the user's local environment; rerun the full suite after pulling.
+- This is not Hindi/Hinglish model support. The guard is heuristic, and Latin text without a detected marker can still be a non-English language. Do not train or claim multilingual support until language coverage and suitable training/evaluation data are established.
+- Next: run the language coverage audit locally, verify the new tests, then design a sourced and privacy-reviewed multilingual dataset without changing the frozen baseline/test set.
