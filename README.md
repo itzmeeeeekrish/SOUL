@@ -182,3 +182,18 @@ See [docs/LEARNING_NOTES.md](docs/LEARNING_NOTES.md).
 ## Disclaimer
 
 SOUL is an educational project and prototype under development. It must not be relied on as the sole basis for financial or security decisions. Users should verify suspicious activity directly through official bank, telecom or government channels.
+
+
+## Separate multilingual development experiment
+A separate binary multilingual pilot is prepared from the synthetic 14-language scam/ham candidate. Its local grouped split contains 9,091 train, 1,138 validation and 1,136 test rows with exact masked-text/group separation. The pilot keeps the source `ham` / `scam` labels and does not modify the existing three-class Mendeley baseline.
+
+The separate [multilingual baseline](data/multilingual_model_baseline.md) uses character n-gram TF-IDF + Logistic Regression, text-only model input and language-wise evaluation. Language metadata is not a model feature. Current test support is low for Odia (4 scam) and Tamil (5 scam), so those subgroup metrics must be labelled preliminary. The candidate is synthetic; its results cannot be presented as real-world fraud-detection accuracy.
+
+Run it only after the backend tests pass:
+
+    cd backend
+    python -m pytest -q
+    cd ..
+    python data/train_multilingual_baseline.py
+
+Model and metrics remain local under the Git-ignored `data/private/model_artifacts/` directory. The test partition is for the initial fixed-recipe evaluation only and must not be used for tuning.
