@@ -2,7 +2,7 @@
 
 Ye file tumhari revision notebook hai. Har naye module ke baad isme concept, code ka flow, testing aur viva questions add karenge.
 
-> **Current status (12 November 2026):** Repository/backend foundation complete; Mendeley 2022 candidate ka local audit, privacy screening, deduplication, redaction and grouped 70/15/15 split complete. First text-only TF-IDF + Logistic Regression baseline trained. Latest full backend test suite: **57 passed in 14.21s**, including the 12 blinded-review-queue tests. Validation macro-F1: 0.8682; initial test macro-F1: 0.8915. The queue-generation script still needs a local run. Dataset source/privacy approval, independent human adjudication and external validation are still pending.
+> **Current status (12 November 2026):** Repository/backend foundation complete; Mendeley 2022 candidate ka local audit, privacy screening, deduplication, redaction and grouped 70/15/15 split complete. First text-only TF-IDF + Logistic Regression baseline trained. Latest full backend test suite: **93 passed in 4.95s**. Validation macro-F1: 0.8682; initial test macro-F1: 0.8915. Language audit: 5,797 rows mein 5,785 Latin/no selected Hinglish markers, 11 Romanized-Hindi signal, 1 mixed-script and 0 non-Latin-only rows. Ye heuristic counts hain, language ground truth nahi. AI suggestions silver labels hain; original baseline/test split frozen hai. Dataset source/privacy approval and campaign-independent external validation are still pending.
 
 ## 1. SOUL kya banane ki koshish kar raha hai?
 
@@ -1233,3 +1233,38 @@ The six uploaded data/split CSVs and the previous validation-review files were j
 - `SOUL_dataset_manifest_v1.json` and a README with hashes and limitations.
 
 The initial baseline test partition was copied unchanged. The master package is a local research artifact, not approval to publish or redistribute the Mendeley dataset. Regex masking is not guaranteed anonymisation. Source licence/privacy approval and campaign-independent external validation remain open requirements.
+
+
+## Dataset aur problem statement (12 November 2026)
+
+### Source kahan se aaya?
+
+Initial SMS dataset Mendeley Data par published 2022 candidate hai: *SMS Phishing Dataset for Machine Learning and Pattern Recognition*. Isme original archive mein 5,971 SMS records the. Dataset ko local inspect kiya; raw archive aur message-level files Git-ignored private folders mein rakhe gaye.
+
+### Original columns ka meaning
+
+- `LABEL`: Publisher ka original class — `ham`, `spam`, ya `smishing`.
+- `TEXT`: SMS ka actual text. First ML model isi text ko input leta hai.
+- `URL`: URL presence ka YES/NO flag; actual URL list nahi.
+- `EMAIL`: Email presence ka YES/NO flag; actual email address nahi.
+- `PHONE`: Phone-number presence ka YES/NO flag; actual phone number nahi.
+
+### Preparation ke baad kya hua?
+
+- 34 exact-text label-conflict groups (68 source rows) quarantine kiye.
+- Same-label exact duplicates collapse kiye.
+- 5,797 prepared records bache.
+- Privacy-pattern candidates ko mask kiya; regex masking complete anonymity guarantee nahi karta.
+- Original class ko `source_label` mein preserve kiya.
+- Historical baseline compatibility ke liye provisional mapping rakhi: ham → legitimate, smishing → scam, spam → spam.
+- `soul_label` aur `review_status` original fields se separate hain. AI suggestions silver-label fields mein alag preserve hote hain; source labels overwrite nahi hote.
+
+### Exactly model kya predict karta hai?
+
+First baseline SMS text se teen working categories predict karta hai: `legitimate`, `scam`, `spam`. Model TF-IDF word unigrams/bigrams se text features banata hai aur Logistic Regression class choose karta hai.
+
+Ye sender ki identity, URL destination, bank transaction ya actual fraud prove nahi karta. Ye individual message text ka provisional classification hai. Ambiguous/non-validated script ko current API `needs_review` par abstain karta hai.
+
+### Latest language audit
+
+5,797 prepared rows mein 5,785 Latin/no selected Hinglish marker, 11 Romanized-Hindi signal, 1 mixed-script, 0 non-Latin-only the. Ye simple heuristic indicators hain; iska matlab ye nahi ki 5,785 messages confirmed English hain.
