@@ -4,8 +4,6 @@ This is a small rule-based retrieval prototype, not a full vector-search or
 LLM-based RAG pipeline. Content is paraphrased from official public sources.
 """
 
-from datetime import date
-
 
 KNOWLEDGE_BASE_VERSION = "soul-official-guidance-v0.1"
 RETRIEVED_DATE = "2026-11-14"
