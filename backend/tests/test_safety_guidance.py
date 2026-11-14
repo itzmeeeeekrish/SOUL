@@ -21,7 +21,7 @@ def test_kyc_and_url_indicators_retrieve_rbi_kyc_guidance():
 
 def test_credential_and_payment_indicators_retrieve_rbi_npci_and_reporting_cards():
     cards = retrieve_official_guidance(
-        ["credential_request", "payment_request"]
+        ["credential_request", "payment_request", "upi_context"]
     )
 
     ids = {card["id"] for card in cards}
