@@ -42,7 +42,7 @@ foreach ($Example in $Examples) {
 
         if ($Result.model_scores) {
             Write-Host "Uncalibrated model scores:"
-            $Result.model_scores.GetEnumerator() |
+            $Result.model_scores.PSObject.Properties |
                 Sort-Object Name |
                 ForEach-Object {
                     Write-Host ("  {0}: {1:N4}" -f $_.Name, [double]$_.Value)
