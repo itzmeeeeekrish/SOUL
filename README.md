@@ -246,7 +246,7 @@ A separate audit utility for the ScamShield multilingual candidate has been adde
 
 ### Safe message assessment and official guidance retrieval
 
-The text-only \`POST /v1/messages/analyze\` endpoint now includes category-level keyword indicators and curated official safety guidance cards. Indicators include credential-request language, urgency/threat wording, KYC/account-update wording, URL presence, remote-access wording and payment wording. The service does not echo matched message fragments, does not check URL reputation, and does not change the ML model's class prediction.
+The text-only \`POST /v1/messages/analyze\` endpoint now includes category-level keyword indicators and curated official safety guidance cards. Indicators include credential-request language, urgency/threat wording, KYC/account-update wording, URL presence, UPI context, remote-access wording and payment wording. The service does not echo matched message fragments, does not check URL reputation, and does not change the ML model's class prediction.
 
 The guidance catalogue paraphrases public information from RBI, NPCI, DoT / Chakshu and the National Cyber Crime Reporting Portal / I4C. Retrieval currently uses transparent keyword rules; it is **not yet full vector-search or LLM-based RAG**. The endpoint remains provisional, uses the historical Mendeley model artifact, and requires human review. The separate ScamShield three-class research model is not connected to the live endpoint.
 
