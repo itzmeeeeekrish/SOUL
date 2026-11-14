@@ -45,9 +45,8 @@ GUIDANCE_CARDS = [
         "trigger_codes": {
             "credential_request",
             "payment_request",
-            "remote_access_request",
         },
-        "condition": "Relevant when credentials, payments or remote access are mentioned.",
+        "condition": "Relevant when credential or payment wording is present.",
     },
     {
         "id": "npci_upi_faq",
@@ -59,7 +58,7 @@ GUIDANCE_CARDS = [
         ),
         "source_url": "https://www.npci.org.in/what-we-do/upi/faqs",
         "source_date": "Official NPCI UPI FAQ; accessed 14 November 2026",
-        "trigger_codes": {"credential_request", "payment_request"},
+        "trigger_codes": {"upi_context"},
         "condition": "Relevant when UPI, PIN or payment wording is present.",
     },
     {
