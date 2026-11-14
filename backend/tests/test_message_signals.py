@@ -18,6 +18,7 @@ def test_detects_credential_request_without_exposing_message_text():
     )
 
     assert "credential_request" in result["indicator_codes"]
+    assert "upi_context" in result["indicator_codes"]
     assert "urgency_or_threat" in result["indicator_codes"]
     assert all("OTP" not in item["explanation"] for item in result["indicators"])
     assert "not proof of fraud" in result["notice"]
