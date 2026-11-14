@@ -12,6 +12,8 @@ from pathlib import Path
 import joblib
 
 from app.services.language_guard import inspect_language_support
+from app.services.message_signals import extract_message_indicators
+from app.services.safety_guidance import retrieve_official_guidance
 
 LABEL_ORDER = ("legitimate", "scam", "spam")
 MODEL_NAME = "tfidf_logistic_regression_v1"
@@ -89,6 +91,21 @@ def analyze_message(text, model=None):
         )
 
     language_assessment = inspect_language_support(cleaned_text)
+    signal_assessment = extract_message_indicators(cleaned_text)
+    official_guidance = retrieve_official_guidance(
+        signal_assessment["indicator_codes"]
+    )
+    advisory_context = {
+        "risk_indicators": signal_assessment["indicators"],
+        "indicator_notice": signal_assessment["notice"],
+        "official_guidance": official_guidance,
+        "guidance_retrieval_note": (
+            "Guidance is retrieved from a small, curated official-source catalogue "
+            "using transparent keyword rules. This is not full vector-search or "
+            "LLM-based RAG, and source guidance does not verify the message."
+        ),
+    }
+
     if not language_assessment["baseline_eligible"]:
         return {
             "analysis_status": "abstained_unsupported_language",
@@ -105,6 +122,7 @@ def analyze_message(text, model=None):
                 "Romanized-Hindi signal, so SOUL did not issue a text-model label."
             ),
             "language_assessment": language_assessment,
+            **advisory_context,
             "guidance": (
                 "SOUL cannot reliably assess this language with its current "
                 "message model. Do not assume the message is safe or fraudulent. "
@@ -150,6 +168,7 @@ def analyze_message(text, model=None):
         "low_score_separation": score_margin < 0.10,
         "review_required": True,
         "language_assessment": language_assessment,
+        **advisory_context,
         "guidance": GUIDANCE[predicted],
         "limitations": LIMITATIONS,
     }
