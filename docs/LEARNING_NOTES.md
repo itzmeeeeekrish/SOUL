@@ -1532,5 +1532,5 @@ Safety limits:
 - Keyword signals can produce false positives and false negatives; they do not override the model class.
 - No automated blocking, account freezing, deletion or financial action.
 - Use only synthetic messages in a public/demo presentation.
-- Local full-suite test verification is pending after pull; 14 tests were added across indicator, guidance and integration coverage.
+- A synthetic-only PowerShell runner at `backend/demo_safe_message_assessment.ps1` demonstrates a suspicious KYC case, a safety-warning hard negative and Devanagari abstention through the local API. Local full-suite test verification is pending after pull; 14 tests were added across indicator, guidance and integration coverage.
 - See \`docs/SAFE_MESSAGE_ASSESSMENT.md\` for implementation detail and the demo request.
