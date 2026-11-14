@@ -242,3 +242,12 @@ It reads train and validation only, not the initial holdout test, and reports ag
 ### Multilingual data research
 
 A separate audit utility for the ScamShield multilingual candidate has been added at data/audit_scamshield_candidate.py, with 15 tests. It also measures split_group cardinality by source to help distinguish source-level grouping from campaign-level grouping. It preserves source labels, scam-intent taxonomy, source dataset and source split-group metadata; masks likely identifiers; and reports aggregate data-quality and split-integrity statistics. No ScamShield data is approved for training yet. Its dataset card declares MIT, but upstream rights require source-by-source verification and the positive class includes General Spam / Telemarketing in displayed rows.
+
+
+### Safe message assessment and official guidance retrieval
+
+The text-only \`POST /v1/messages/analyze\` endpoint now includes category-level keyword indicators and curated official safety guidance cards. Indicators include credential-request language, urgency/threat wording, KYC/account-update wording, URL presence, remote-access wording and payment wording. The service does not echo matched message fragments, does not check URL reputation, and does not change the ML model's class prediction.
+
+The guidance catalogue paraphrases public information from RBI, NPCI, DoT / Chakshu and the National Cyber Crime Reporting Portal / I4C. Retrieval currently uses transparent keyword rules; it is **not yet full vector-search or LLM-based RAG**. The endpoint remains provisional, uses the historical Mendeley model artifact, and requires human review. The separate ScamShield three-class research model is not connected to the live endpoint.
+
+See [Safe Message Assessment](docs/SAFE_MESSAGE_ASSESSMENT.md) for the exact source list, limitations and demo steps. Local full-suite test verification after this increment is pending.
