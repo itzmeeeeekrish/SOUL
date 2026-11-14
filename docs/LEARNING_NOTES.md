@@ -1507,7 +1507,7 @@ Two additional tests cover cross-source duplicate detection. Expected full backe
 ## 14 November 2026 — Safe message assessment and curated guidance retrieval
 
 The existing \`POST /v1/messages/analyze\` response now includes:
-- \`risk_indicators\`: transparent, category-level regex matches for credential-request wording, urgency/threat wording, KYC/account update, URL presence, remote-access wording and payment wording.
+- \`risk_indicators\`: transparent, category-level regex matches for credential-request wording, urgency/threat wording, KYC/account update, URL presence, UPI context, remote-access wording and payment wording.
 - \`indicator_notice\`: explains that pattern matches are not proof of fraud and are not model features.
 - \`official_guidance\`: source cards selected from a small curated catalogue using keyword rules.
 - \`guidance_retrieval_note\`: states that this is curated keyword retrieval, not full vector-search / LLM-based RAG.
