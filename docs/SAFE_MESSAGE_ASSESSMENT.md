@@ -6,7 +6,7 @@
 
 The existing \`POST /v1/messages/analyze\` endpoint now returns four additional fields alongside its existing text-only model suggestion:
 
-- \`risk_indicators\`: category-level keyword matches such as credential-request wording, urgency, KYC/account-update wording, URL presence, remote-access wording and payment wording.
+- \`risk_indicators\`: category-level keyword matches such as credential-request wording, urgency, KYC/account-update wording, URL presence, UPI context, remote-access wording and payment wording.
 - \`indicator_notice\`: explicitly states that these are simple text-pattern matches, not proof of fraud and not model features.
 - \`official_guidance\`: a small set of curated official safety guidance cards selected through transparent keyword rules.
 - \`guidance_retrieval_note\`: explicitly describes the retrieval method and its limitations.
