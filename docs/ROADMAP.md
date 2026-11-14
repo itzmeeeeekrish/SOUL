@@ -356,3 +356,24 @@ The ScamShield audit now adds:
 This is necessary because publisher split_group is often only a source-level bucket. A real_ record ID prefix is not evidence that a message was personally received or independently verified. The dataset card declares both machine-generated and expert-annotated creators but does not document row-level source provenance or independent annotation procedure in sufficient detail. Do not treat the MIT dataset-card tag as per-upstream-source rights clearance.
 
 Two additional tests cover cross-source duplicate detection. Expected full backend suite after pulling: 190 tests. Local result pending.
+
+
+## 14 November 2026 — Safe message assessment increment (implementation committed; local verification pending)
+
+Added a first safety-advisory increment to the existing text-only \`POST /v1/messages/analyze\` endpoint:
+- Category-level keyword indicators for credential-request language, urgency/account threats, KYC/account update, URL presence, remote access/app-install wording and payment wording.
+- A negation guard for common safety-warning phrases such as “Never share your OTP”.
+- Curated official-source guidance retrieval from RBI, NPCI, DoT/Chakshu and the National Cyber Crime Reporting Portal / I4C.
+- The response preserves the model candidate class; text indicators do not override the classifier.
+- The 1930 guidance explicitly applies only if money was actually lost or an unauthorised transaction occurred.
+
+New services: \`backend/app/services/message_signals.py\` and \`backend/app/services/safety_guidance.py\`. The message detector now adds \`risk_indicators\`, \`indicator_notice\`, \`official_guidance\` and \`guidance_retrieval_note\` to its existing response.
+
+This is curated keyword-based retrieval, not a completed vector-search / LLM RAG pipeline. URL reputation checking, OCR/QR, incident correlation, financial-record analysis and Android end-to-end integration remain future work. The live endpoint still loads the historical Mendeley model; the ScamShield three-class research artifact remains separate. Scores are uncalibrated; every result still requires review. Local full-suite tests are pending. Fourteen tests have been added for the indicator, guidance and response integration modules.
+
+Next acceptance checks:
+1. Pull and run the full backend test suite.
+2. Start FastAPI and verify \`/health\` plus \`POST /v1/messages/analyze\` in Swagger.
+3. Test safe wording (“Never share your OTP”), suspicious synthetic KYC wording, URL presence and unsupported Devanagari/Hinglish abstention.
+4. Confirm guidance cards show issuer, source URL, retrieval method and conditional 1930 text.
+5. Do not present the keyword indicators as proof or the guidance catalogue as full RAG.
