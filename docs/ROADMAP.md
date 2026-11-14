@@ -369,7 +369,7 @@ Added a first safety-advisory increment to the existing text-only \`POST /v1/mes
 
 New services: \`backend/app/services/message_signals.py\` and \`backend/app/services/safety_guidance.py\`. The message detector now adds \`risk_indicators\`, \`indicator_notice\`, \`official_guidance\` and \`guidance_retrieval_note\` to its existing response.
 
-This is curated keyword-based retrieval, not a completed vector-search / LLM RAG pipeline. URL reputation checking, OCR/QR, incident correlation, financial-record analysis and Android end-to-end integration remain future work. The live endpoint still loads the historical Mendeley model; the ScamShield three-class research artifact remains separate. Scores are uncalibrated; every result still requires review. Local full-suite tests are pending. Fourteen tests have been added for the indicator, guidance and response integration modules.
+This is curated keyword-based retrieval, not a completed vector-search / LLM RAG pipeline. URL reputation checking, OCR/QR, incident correlation, financial-record analysis and Android end-to-end integration remain future work. The live endpoint still loads the historical Mendeley model; the ScamShield three-class research artifact remains separate. Scores are uncalibrated; every result still requires review. Local full-suite tests are pending. Fourteen tests have been added for the indicator, guidance and response integration modules. A synthetic-only PowerShell runner `backend/demo_safe_message_assessment.ps1` demonstrates three repeatable API cases.
 
 Next acceptance checks:
 1. Pull and run the full backend test suite.
