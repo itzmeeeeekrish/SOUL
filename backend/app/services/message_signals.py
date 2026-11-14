@@ -40,6 +40,7 @@ PATTERNS = {
         r"(?:https?://|www\.)[^\s<>]+",
         re.IGNORECASE,
     ),
+    "upi_context": re.compile(r"\bupi\b", re.IGNORECASE),
     "remote_access_request": re.compile(
         r"\b(?:anydesk|teamviewer|remote access|screen share|"
         r"screen sharing|install (?:this|the) app|download (?:this|the) app|"
@@ -87,6 +88,14 @@ INDICATOR_DETAILS = {
         ),
         "severity_hint": "review",
     },
+    "upi_context": {
+        "title": "UPI-related wording",
+        "explanation": (
+            "The message refers to UPI. SOUL has not inspected a UPI transaction "
+            "or verified the intended payee."
+        ),
+        "severity_hint": "review",
+    },
     "remote_access_request": {
         "title": "Remote-access or app-install wording",
         "explanation": (
@@ -125,6 +134,7 @@ def extract_message_indicators(text):
         "urgency_or_threat",
         "kyc_or_account_update",
         "url_present",
+        "upi_context",
         "remote_access_request",
         "payment_request",
     ):
