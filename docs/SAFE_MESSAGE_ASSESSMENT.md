@@ -95,4 +95,4 @@ Demonstrate:
 3. Official guidance cards with issuer and clickable source URL.
 4. The explicit notice that indicators are not proof, the URL was not checked, and human review is required.
 
-Use only synthetic demonstration text. Do not send real OTPs, phone numbers, account identifiers or private messages to a public demo.
+Use only synthetic demonstration text. A repeatable three-case runner is available at `backend/demo_safe_message_assessment.ps1`. Do not send real OTPs, phone numbers, account identifiers or private messages to a public demo.
