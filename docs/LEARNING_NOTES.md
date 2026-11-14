@@ -1502,3 +1502,35 @@ The ScamShield audit now adds:
 This is necessary because publisher split_group is often only a source-level bucket. A real_ record ID prefix is not evidence that a message was personally received or independently verified. The dataset card declares both machine-generated and expert-annotated creators but does not document row-level source provenance or independent annotation procedure in sufficient detail. Do not treat the MIT dataset-card tag as per-upstream-source rights clearance.
 
 Two additional tests cover cross-source duplicate detection. Expected full backend suite after pulling: 190 tests. Local result pending.
+
+
+## 14 November 2026 — Safe message assessment and curated guidance retrieval
+
+The existing \`POST /v1/messages/analyze\` response now includes:
+- \`risk_indicators\`: transparent, category-level regex matches for credential-request wording, urgency/threat wording, KYC/account update, URL presence, remote-access wording and payment wording.
+- \`indicator_notice\`: explains that pattern matches are not proof of fraud and are not model features.
+- \`official_guidance\`: source cards selected from a small curated catalogue using keyword rules.
+- \`guidance_retrieval_note\`: states that this is curated keyword retrieval, not full vector-search / LLM-based RAG.
+
+New service files:
+- \`backend/app/services/message_signals.py\`
+- \`backend/app/services/safety_guidance.py\`
+
+The existing model output and artifact path are unchanged. The live message API still uses the historical Mendeley model; the separate ScamShield three-class model is not integrated. Model scores remain uncalibrated, and \`review_required\` remains true. Unsupported scripts/Romanized-Hindi still abstain through the existing language guard, although generic keyword indicators may also be returned.
+
+The official-source catalogue paraphrases:
+- RBI KYC-fraud public-awareness leaflet (Financial Literacy Week 2026).
+- RBI Financial Awareness Messages (FAME), fourth edition, February 2024.
+- NPCI UPI FAQ.
+- DoT / Sanchar Saathi Chakshu public information.
+- National Cyber Crime Reporting Portal / I4C (1930), only as conditional guidance if money was actually lost or an unauthorised transaction occurred.
+
+This is not full RAG: there is no automated crawling, document chunking, embeddings/vector store, LLM synthesis, or retrieval quality evaluation yet. The catalogue stores issuer, title, advice, source URL, source date/description, retrieval date, matched indicator codes and conditional-use text.
+
+Safety limits:
+- A URL is detected as text only; the destination is not opened, resolved, reputation-checked or verified.
+- Keyword signals can produce false positives and false negatives; they do not override the model class.
+- No automated blocking, account freezing, deletion or financial action.
+- Use only synthetic messages in a public/demo presentation.
+- Local full-suite test verification is pending after pull; 14 tests were added across indicator, guidance and integration coverage.
+- See \`docs/SAFE_MESSAGE_ASSESSMENT.md\` for implementation detail and the demo request.
