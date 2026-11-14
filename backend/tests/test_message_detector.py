@@ -112,3 +112,58 @@ def test_analyze_message_returns_language_assessment_for_latin_text():
     assert result["analysis_status"] == "provisional_model_suggestion"
     assert result["language_assessment"]["script_profile"] == "latin"
     assert result["language_assessment"]["baseline_eligible"] is True
+
+
+
+def test_analysis_includes_text_indicators_and_source_backed_guidance():
+    result = analyze_message(
+        "URGENT: Update KYC now at https://example.invalid and share your OTP.",
+        FakePipeline(),
+    )
+
+    codes = {item["code"] for item in result["risk_indicators"]}
+    guidance_ids = {item["id"] for item in result["official_guidance"]}
+
+    assert {"credential_request", "urgency_or_threat",
+            "kyc_or_account_update", "url_present"} <= codes
+    assert "rbi_kyc_fraud_2026" in guidance_ids
+    assert "dot_chakshu" in guidance_ids
+    assert "curated keyword rules" in result["guidance_retrieval_note"]
+    assert result["candidate_label"] == "scam"
+    assert result["review_required"] is True
+
+
+def test_indicator_rules_do_not_override_model_prediction():
+    class LegitimatePipeline(FakePipeline):
+        def predict(self, texts):
+            return ["legitimate"]
+
+        def predict_proba(self, texts):
+            return [[0.80, 0.10, 0.10]]
+
+    result = analyze_message(
+        "Share your OTP immediately.",
+        LegitimatePipeline(),
+    )
+
+    assert result["candidate_label"] == "legitimate"
+    assert any(
+        item["code"] == "credential_request"
+        for item in result["risk_indicators"]
+    )
+    assert result["review_required"] is True
+
+
+def test_unsupported_script_still_returns_keyword_indicators_and_guidance():
+    result = analyze_message(
+        "कृपया share your OTP now.",
+        FakePipeline(),
+    )
+
+    assert result["analysis_status"] == "abstained_unsupported_language"
+    assert result["candidate_label"] == "needs_review"
+    assert any(
+        item["code"] == "credential_request"
+        for item in result["risk_indicators"]
+    )
+    assert result["official_guidance"]
