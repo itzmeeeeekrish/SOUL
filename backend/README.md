@@ -217,7 +217,7 @@ The multilingual split utility requires prepared rows with group_id and model_te
 Optional repeatable PowerShell demo (three synthetic cases: suspicious KYC, safety-warning hard negative, and Devanagari abstention): run from the repository root after starting the API:
 
 ```powershell
-.\\backend\\demo_safe_message_assessment.ps1
+.\backend\demo_safe_message_assessment.ps1
 ```
 
 ## 12. Safe message assessment and official guidance
