@@ -161,6 +161,26 @@ def test_indicator_rules_do_not_override_model_prediction():
     assert "Do not share OTPs" in result["guidance"]
 
 
+def test_scam_model_with_only_limited_risk_evidence_gets_balanced_guidance():
+    class ScamPipeline(FakePipeline):
+        def predict(self, texts):
+            return ["scam"]
+
+        def predict_proba(self, texts):
+            return [[0.13, 0.62, 0.25]]
+
+    result = analyze_message(
+        "Your annual KYC review is due. Visit your bank branch or use the official mobile app for instructions.",
+        ScamPipeline(),
+    )
+
+    assert result["candidate_label"] == "scam"
+    assert result["risk_assessment"]["concern_level"] == "limited"
+    assert "only low-specificity signals" in result["guidance"]
+    assert "does not prove fraud" in result["guidance"]
+    assert "deceptive request" not in result["guidance"]
+
+
 def test_unsupported_script_still_returns_keyword_indicators_and_guidance():
     result = analyze_message(
         "कृपया share your OTP now.",
