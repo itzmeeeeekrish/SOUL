@@ -157,6 +157,8 @@ def test_indicator_rules_do_not_override_model_prediction():
     assert "credential_disclosure_request" in {
         item["code"] for item in result["risk_assessment"]["evidence"]
     }
+    assert "higher-concern warning signs" in result["guidance"]
+    assert "Do not share OTPs" in result["guidance"]
 
 
 def test_unsupported_script_still_returns_keyword_indicators_and_guidance():
