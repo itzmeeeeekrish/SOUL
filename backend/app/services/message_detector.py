@@ -54,6 +54,21 @@ LIMITATIONS = [
     "Every result is provisional and must not be treated as proof that fraud did or did not occur.",
 ]
 
+HIGH_RISK_GUIDANCE = (
+    "SOUL found a combination of higher-concern warning signs. Do not share OTPs, "
+    "PINs or passwords, approve an unexpected collect request, send money, or "
+    "install remote-access software because of this message. Contact the claimed "
+    "organisation or person using a number or app you already trust. This is a "
+    "precautionary warning based on text patterns, not proof of fraud."
+)
+
+ELEVATED_RISK_GUIDANCE = (
+    "SOUL found a combination of warning signs that deserves extra caution. "
+    "Do not use links or contact details supplied in the message. Verify the "
+    "request through the organisation's official app or a known contact channel. "
+    "This assessment does not prove fraud."
+)
+
 
 @lru_cache(maxsize=1)
 def load_model():
@@ -101,6 +116,15 @@ def analyze_message(text, model=None):
         signal_assessment=signal_assessment,
         language_supported=language_assessment["baseline_eligible"],
     )
+    # Keep the ML class untouched, but do not show benign model guidance when
+    # the independent evidence layer has matched a stronger warning pattern.
+    if risk_assessment["concern_level"] == "high":
+        user_guidance = HIGH_RISK_GUIDANCE
+    elif risk_assessment["concern_level"] == "elevated":
+        user_guidance = ELEVATED_RISK_GUIDANCE
+    else:
+        user_guidance = None
+
     advisory_context = {
         "risk_assessment": risk_assessment,
         "risk_indicators": signal_assessment["indicators"],
@@ -208,6 +232,8 @@ def analyze_message(text, model=None):
         "review_required": True,
         "language_assessment": language_assessment,
         **advisory_context,
-        "guidance": GUIDANCE[predicted],
-        "limitations": LIMITATIONS,
+        "guidance": user_guidance or GUIDANCE[predicted],
+        "limitations": LIMITATIONS + [
+            "The independent risk assessment uses finite English-oriented text rules and is not a fraud verdict."
+        ],
     }
