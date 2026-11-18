@@ -2,7 +2,7 @@
 
 This folder contains the first small backend increment: a FastAPI app, environment-based settings, and a health endpoint.
 
-> **Status:** Milestone 1's local verification is complete. The API was started successfully, the /health response was checked in a browser, and the automated test passed (1 passed, no warnings).
+> **Status:** The FastAPI message-analysis API, text-only model integration and safety-advisory layer have been run locally. The user reported 265 tests passing on 18 November 2026 before the synthetic benchmark evaluator tests were added. Run the full suite again after pulling the current changes.
 
 ## Requirements
 
@@ -67,7 +67,7 @@ Still inside the `backend` folder:
 python -m pytest -q
 ```
 
-The health test checks the HTTP status and the important response fields. The suite also covers data auditing, preparation, split generation, ML helpers, AI silver-label export and the message-analysis API. The combined local run passed **93 tests in 4.95s** before the latest multilingual candidate-audit module was added. That module adds 12 tests which must be included in the next local run. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
+The suite covers data auditing, preparation, split generation, ML helpers, AI silver-label export, the message-analysis API, safety signals, curated guidance and the synthetic benchmark evaluator. The latest user-reported local run was **265 passed in 19.31s on 18 November 2026**, before the new benchmark evaluator tests were committed. Rerun pytest to verify the latest branch. The test client uses the pinned httpx2 dependency required by the current Starlette TestClient.
 
 ## 4. Configuration
 
