@@ -98,3 +98,46 @@ Demonstrate:
 4. The explicit notice that indicators are not proof, the URL was not checked, scores are not fraud probabilities, and human review is required.
 
 Use only synthetic demonstration text. A repeatable three-case runner is available at `backend/demo_safe_message_assessment.ps1`. Do not send real OTPs, phone numbers, account identifiers or private messages to a public demo.
+
+
+## Independent risk evidence layer — 18 November 2026
+
+**Status:** Implemented in the repository; local Windows verification is pending.
+
+The API now returns a separate `risk_assessment` object from `backend/app/services/risk_assessment.py`. It is deliberately independent of the ML classifier: the engine does not overwrite `candidate_label`, `model_candidate_label` or model scores.
+
+The response contains:
+- `engine`: rule-set version identifier.
+- `status`: why the rule engine produced its advisory status.
+- `concern_level`: `high`, `elevated`, `limited`, `no_strong_signal` or `needs_review`.
+- `evidence`: category-level rule IDs, levels, titles and explanations. Matched message fragments and URLs are not echoed.
+- `matched_indicator_codes`: the existing low-level signal categories.
+- `summary` and `notice`: user-facing explanation and limitations.
+
+### Higher-concern combinations
+
+The first rules look for:
+- a request to disclose a credential;
+- remote-access wording combined with financial context;
+- a payment request combined with authority, delivery or essential-service pressure;
+- a new-number family identity claim combined with a transfer request and discouragement of independent contact;
+- an upfront fee linked to a job or promised benefit.
+
+An urgent KYC/account-update message with a URL is marked elevated, not automatically treated as a confirmed scam. A URL, payment word, KYC mention, UPI reference or urgency phrase alone can only produce a limited signal, not a high-concern result.
+
+Unsupported-language cases remain `needs_review`; English-oriented keyword rules are not treated as validated Hindi/Hinglish analysis. Protective-warning context also remains `needs_review`.
+
+### Non-negotiable safety boundaries
+
+- A `high` concern level means a configured combination warrants strong caution; it is **not** a fraud verdict or probability.
+- `no_strong_signal` does **not** mean the sender or message is safe.
+- Every result still requires independent verification and human judgement.
+- The engine does not inspect a URL, sender identity, transaction, phone call, app or device.
+- Rule coverage is English-oriented and finite. Paraphrases, obfuscation and other languages may be missed.
+- The ML label and the independent risk assessment must be read together; neither is proof by itself.
+
+### Regression coverage
+
+`backend/tests/test_risk_assessment.py` covers the known synthetic scam patterns from benchmark v1 and benign lookalikes, including routine KYC, payment receipts, salary notifications, promotions, URL-only messages and protective warnings. The fixed `data/synthetic/message_evaluation_v1.csv`, its expected labels, the trained model and the original Mendeley test partition are unchanged.
+
+After pulling, run `python -m pytest -q` from `backend/`. Inspect `risk_assessment` in the existing Swagger endpoint at `POST /v1/messages/analyze`. Local verification has not yet been reported.
