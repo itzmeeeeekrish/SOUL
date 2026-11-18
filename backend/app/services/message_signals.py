@@ -7,6 +7,16 @@ verify a URL, establish sender identity, or change the ML model prediction.
 import re
 
 
+PROTECTIVE_CREDENTIAL_WARNING = re.compile(
+    r"\\b(?:never|do not|don't|dont|please do not|please don't|avoid)\\s+"
+    r"(?:ever\\s+)?(?:share|send|provide|enter|submit|reply with|tell|"
+    r"disclose|reveal)\\s+(?:your\\s+)?"
+    r"(?:otp|one[ -]?time password|upi[ -]?pin|pin|cvv|password|passcode|"
+    r"banking credentials)\\b",
+    re.IGNORECASE,
+)
+
+
 PATTERNS = {
     "credential_request": re.compile(
         r"\b(?:otp|one[ -]?time password|upi[ -]?pin|pin|cvv|password|passcode|"
@@ -151,9 +161,27 @@ def extract_message_indicators(text):
         for code in found
     ]
 
+    protective_warning_only = bool(
+        PROTECTIVE_CREDENTIAL_WARNING.search(cleaned)
+    ) and not found
+    context_flags = []
+    if protective_warning_only:
+        context_flags.append(
+            {
+                "code": "protective_credential_warning",
+                "title": "Protective credential warning",
+                "explanation": (
+                    "The text tells the reader not to disclose sensitive credentials. "
+                    "This wording is not proof that the sender is legitimate; SOUL "
+                    "withholds a model suggestion and requires contextual review."
+                ),
+            }
+        )
+
     return {
         "indicators": indicators,
         "indicator_codes": found,
+        "context_flags": context_flags,
         "notice": (
             "Indicators are simple text-pattern matches, not proof of fraud. "
             "They are not model features and do not change the model's class."
