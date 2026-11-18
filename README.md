@@ -273,3 +273,12 @@ python data\evaluate_message_benchmark.py
 The evaluator reports raw-model classification separately from the final API label, status/abstention behaviour, text-indicator matching and context-flag matching. It writes an aggregate JSON report and a case-level CSV without message text under Git-ignored `data/private/evaluation/`. It does not train a model, read or alter the frozen Mendeley test partition, or change model artifacts.
 
 The benchmark is a constructed synthetic regression set. Expected labels and signal tags are scenario-defined annotations, not independently verified ground truth. Its metrics must not be presented as real-world detection accuracy or used alone to tune a model. Run the complete backend suite after pulling to verify the evaluator tests.
+
+
+### Independent risk evidence layer
+
+The message-analysis API now includes a separate rule-based `risk_assessment` alongside the existing ML suggestion. It reports concern levels and category-level evidence combinations such as credential disclosure, remote access with financial context, impersonation-linked payment pressure and upfront-fee requests.
+
+The independent assessment does not overwrite the ML label. Low-specificity signals such as a URL, payment term, KYC mention or urgency alone do not create a high-concern result. Rules are English-oriented and provisional; they do not prove fraud, verify a sender or inspect a URL. Unsupported-language and protective-warning cases remain `needs_review`.
+
+Implementation and safety boundaries are documented in [docs/SAFE_MESSAGE_ASSESSMENT.md](docs/SAFE_MESSAGE_ASSESSMENT.md). The new tests are committed but still require local verification with `python -m pytest -q` from `backend/`.
