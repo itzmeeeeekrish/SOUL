@@ -71,7 +71,7 @@ ELEVATED_RISK_GUIDANCE = (
 
 MODEL_SCAM_WITHOUT_STRONG_RULE_EVIDENCE_GUIDANCE = (
     "The text-only model suggests this message may be scam-like, but the "
-    "independent rules found only low-specificity signals. This disagreement "
+    "independent rules did not find a strong risk pattern. This disagreement "
     "does not prove fraud. Do not share OTPs, PINs or passwords or act on an "
     "unexpected request. Verify it through the organisation's official app, "
     "branch or a contact number you already trust. Model scores are uncalibrated."
