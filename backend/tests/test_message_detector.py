@@ -204,6 +204,21 @@ def test_payment_receipt_does_not_trigger_rule_signal_or_payment_guidance():
     assert "does not prove fraud" in result["guidance"]
 
 
+def test_routine_electricity_reminder_gets_balanced_model_disagreement_guidance():
+    result = analyze_message(
+        "Your electricity bill is due tomorrow. Please pay through the official "
+        "electricity board app to avoid a late fee or service disconnection.",
+        FakePipeline(),
+    )
+
+    assert result["candidate_label"] == "scam"
+    assert result["risk_assessment"]["concern_level"] == "limited"
+    assert result["risk_assessment"]["evidence"] == []
+    assert "only low-specificity signals" in result["risk_assessment"]["summary"]
+    assert "does not prove fraud" in result["guidance"]
+    assert "higher-concern warning signs" not in result["guidance"]
+
+
 def test_unsupported_script_still_returns_keyword_indicators_and_guidance():
     result = analyze_message(
         "कृपया share your OTP now.",
