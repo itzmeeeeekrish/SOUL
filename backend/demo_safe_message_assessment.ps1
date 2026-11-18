@@ -62,7 +62,7 @@ foreach ($Example in $Examples) {
                 }
         }
         else {
-            Write-Host "Model score: unavailable (language guard abstained)"
+            Write-Host "Model score: unavailable (SOUL abstained before classification)"
         }
 
         Write-Host "Text indicators:"
