@@ -1534,3 +1534,17 @@ Safety limits:
 - Use only synthetic messages in a public/demo presentation.
 - A synthetic-only PowerShell runner at `backend/demo_safe_message_assessment.ps1` demonstrates a suspicious KYC case, a safety-warning hard negative and Devanagari abstention through the local API. Local full-suite test verification is pending after pull; 14 tests were added across indicator, guidance and integration coverage.
 - See \`docs/SAFE_MESSAGE_ASSESSMENT.md\` for implementation detail and the demo request.
+
+
+## 18 November 2026 — Protective-warning abstention for the safe-message demo
+
+The local demo exposed a hard-negative failure: the existing Mendeley model returned a raw `scam` candidate for the synthetic safety warning “Never share your OTP or PIN with anyone. Use your bank's official app.” The keyword negation rule correctly emitted no credential-request indicator, but it did not alter the independent model output.
+
+Added a narrow protective-context safeguard:
+- `message_signals.py` detects a standalone warning against disclosing credentials, but only when no other configured risk indicators matched.
+- The response now includes `context_flags` and `model_candidate_label`.
+- For that standalone context, the API returns `analysis_status=abstained_protective_warning_context` and `candidate_label=needs_review`; the raw model candidate and uncalibrated scores are retained for debugging.
+- Mixed wording that also contains other configured risk indicators continues through normal provisional classification and mandatory human review.
+- The PowerShell demo now displays the raw model candidate, context flags and abstention reason.
+
+This does not retrain, calibrate or improve the underlying classifier. It does not label the message legitimate or establish sender trust. The safeguard is a narrow heuristic and remains subject to false positives/false negatives. New tests cover protective-context extraction, mixed-warning behaviour and API-level abstention. Local full-suite verification is pending after pulling the commits.
