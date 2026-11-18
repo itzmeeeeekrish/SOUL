@@ -4,9 +4,9 @@
 
 SOUL is a proposed Android-first assistant intended to help people—especially elderly and less technically confident smartphone users—recognise suspicious digital activity, understand the evidence, and take safer next steps.
 
-> **Project status: Milestone 2 — first text-only ML baseline trained and evaluated**
+> **Project status: Milestone 2 — text-only message-analysis API and safety-advisory prototype**
 >
-> Repository and backend foundations are complete. A Mendeley 2022 SMS candidate has been structurally inspected and processed into a local, redacted development derivative. Exact-text label conflicts are quarantined; a deterministic 70/15/15 grouped split has been generated locally. The first TF-IDF + Logistic Regression baseline has been trained and evaluated: validation macro-F1 0.8682; initial test macro-F1 0.8915. The backend suite passed **93 tests in 4.95s** before the latest multilingual candidate-audit module was added. That module adds 12 tests, so the current combined suite needs a fresh local run. An AI text-only pilot assessed 31 validation errors: 24 provisional labels and 7 abstentions. A resumable full-dataset AI annotator is also available but requires an explicit external-processing opt-in and provider configuration. Hindi/Hinglish model support is not yet claimed: the current API abstains on detected non-Latin/Romanized-Hindi signals. A separate multilingual data strategy, aggregate-only candidate importer/auditor, and masked group-safe preparation utility have been added. The candidate remains synthetic and binary; no multilingual candidate has been used for training. The local language audit counted 5,785 Latin-script rows without the selected Hinglish markers, 11 with Romanized-Hindi signals, 1 mixed-script row and 0 non-Latin-only rows; these are heuristic counts, not ground-truth language labels. AI suggestions are stored separately from source labels and are not ground truth. These exploratory results are not real-world fraud-detection accuracy. Source/privacy approval and campaign-independent external validation remain pending. Financial-integrity, RAG and Android features are not yet implemented.
+> The live API uses the historical Mendeley three-class TF-IDF + Logistic Regression model. It adds a language/script guard, transparent message indicators, curated official-source guidance and a narrow protective-warning abstention. The separate 14-language and ScamShield experiments are not integrated. The latest user-reported local verification was **265 tests passed in 19.31s on 18 November 2026**, before the synthetic evaluation benchmark and evaluator tests in the current commit series; rerun pytest to verify those additions. A new 72-case constructed benchmark measures raw classifier output, final API decisions, signal matching and abstention separately. Its scenario labels are constructed annotations, not independently verified ground truth or real-world accuracy. Dataset source/privacy approval and independent campaign/source-held-out evaluation remain pending. Full RAG, Android, QR/OCR, incident correlation and financial-record analysis are not implemented.
 
 ## The problem
 
@@ -153,16 +153,23 @@ Track detailed work in [docs/ROADMAP.md](docs/ROADMAP.md).
 ```text
 SOUL/
 ├── README.md
-├── .gitignore
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── ROADMAP.md
-│   └── LEARNING_NOTES.md
+├── .env.example
 ├── backend/
-├── ml/
-├── rag/
-├── android/
-└── research/
+│   ├── app/
+│   │   └── services/
+│   └── tests/
+├── data/
+│   ├── synthetic/
+│   ├── prepare_* / audit_* / train_* scripts
+│   └── evaluation and dataset protocols
+└── docs/
+    ├── ARCHITECTURE.md
+    ├── ROADMAP.md
+    ├── LEARNING_NOTES.md
+    └── SAFE_MESSAGE_ASSESSMENT.md
+
+Local raw data, prepared messages, model artifacts and evaluation outputs
+are stored below Git-ignored data/raw/ and data/private/.
 ```
 
 Folders for implementation will be added as their milestones begin.
@@ -251,3 +258,18 @@ The text-only \`POST /v1/messages/analyze\` endpoint now includes category-level
 The guidance catalogue paraphrases public information from RBI, NPCI, DoT / Chakshu and the National Cyber Crime Reporting Portal / I4C. Retrieval currently uses transparent keyword rules; it is **not yet full vector-search or LLM-based RAG**. The endpoint remains provisional, uses the historical Mendeley model artifact, and requires human review. The separate ScamShield three-class research model is not connected to the live endpoint.
 
 See [Safe Message Assessment](docs/SAFE_MESSAGE_ASSESSMENT.md) for the exact source list, limitations and demo steps. Local full-suite test verification after this increment is pending.
+
+
+## Synthetic message-pipeline evaluation
+
+A fixed, version-controlled challenge set is available at [data/synthetic/message_evaluation_v1.csv](data/synthetic/message_evaluation_v1.csv). It contains 72 constructed cases: 22 per raw-model class (legitimate, spam and scam), six protective-warning hard negatives, and six Hindi/Hinglish language-guard cases. Benign KYC, payment, URL and promotional examples are included deliberately so that the presence of a keyword is not treated as proof of fraud.
+
+With the project virtual environment active, run from the repository root:
+
+```powershell
+python data\evaluate_message_benchmark.py
+```
+
+The evaluator reports raw-model classification separately from the final API label, status/abstention behaviour, text-indicator matching and context-flag matching. It writes an aggregate JSON report and a case-level CSV without message text under Git-ignored `data/private/evaluation/`. It does not train a model, read or alter the frozen Mendeley test partition, or change model artifacts.
+
+The benchmark is a constructed synthetic regression set. Expected labels and signal tags are scenario-defined annotations, not independently verified ground truth. Its metrics must not be presented as real-world detection accuracy or used alone to tune a model. Run the complete backend suite after pulling to verify the evaluator tests.
