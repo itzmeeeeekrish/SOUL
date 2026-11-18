@@ -13,6 +13,7 @@ import joblib
 
 from app.services.language_guard import inspect_language_support
 from app.services.message_signals import extract_message_indicators
+from app.services.risk_assessment import assess_message_risk
 from app.services.safety_guidance import retrieve_official_guidance
 
 LABEL_ORDER = ("legitimate", "scam", "spam")
@@ -95,7 +96,13 @@ def analyze_message(text, model=None):
     official_guidance = retrieve_official_guidance(
         signal_assessment["indicator_codes"]
     )
+    risk_assessment = assess_message_risk(
+        cleaned_text,
+        signal_assessment=signal_assessment,
+        language_supported=language_assessment["baseline_eligible"],
+    )
     advisory_context = {
+        "risk_assessment": risk_assessment,
         "risk_indicators": signal_assessment["indicators"],
         "context_flags": signal_assessment["context_flags"],
         "indicator_notice": signal_assessment["notice"],
