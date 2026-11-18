@@ -1,6 +1,6 @@
 # SOUL – Development Roadmap
 
-**Current stage:** Milestone 2 – Data and baseline communication detector, with the first local message-analysis API increment implemented. The prepared dataset, grouped split, fixed TF-IDF + Logistic Regression baseline, validation-only error analysis, source-label provenance, AI silver-label pilot and SOUL Master Dataset v1 are documented. The complete backend suite passed **93 tests in 4.95s** after the language-guard changes. The latest multilingual candidate-audit module adds 12 more tests which are not yet locally verified. The 31-message AI pilot produced 24 provisional labels and 7 abstentions. Manual annotation is not a routine project requirement; AI outputs remain silver labels, not independent ground truth. Source/privacy approval and campaign-independent external validation remain pending. The original baseline test split remains frozen. Milestones 0 and 1 are complete.
+**Current stage:** Milestone 2 – Data and baseline communication detector, with the local text-analysis API and safety-advisory layer implemented. The user reported **265 backend tests passed in 19.31s on 18 November 2026**, before the newly added 72-case synthetic benchmark evaluator and its tests. The evaluator's first local test-suite run and benchmark run are now the active acceptance checks. The live API still uses the historical Mendeley TF-IDF + Logistic Regression model; the multilingual and ScamShield experiments remain separate. Source/privacy approval, reliable multilingual coverage and independent campaign/source-held-out validation remain pending. The original Mendeley train/validation/test split and model artifact remain frozen. Milestones 0 and 1 are complete.
 **Working rule:** Build small, testable increments. Do not mark a feature complete until its acceptance criteria have been checked and the work is documented.
 
 ## Product objective
@@ -71,6 +71,22 @@ A single event can be an incident. Cross-channel correlation is optional context
 | 2026-11-12 | Compared the assistant's 31 text-only label suggestions with the uploaded source/model key | All 31 review IDs matched one-to-one. The 31 source-mapped labels were legitimate 7, scam 5, spam 19. Assistant suggestions: legitimate 6, spam 15, scam 3, needs_review 7. Of 24 definitive suggestions, 11 matched the source mapping and 13 differed; 7 were left unresolved. All five source-smishing/scam cases were suggested as spam. The key was opened only after the blind text-only suggestions had been produced. These are advisory suggestions, not human ground truth | Do not relabel automatically. Human adjudication or a second independent reviewer is required; preserve the source/model key and frozen baseline. Investigate the five smishing→spam suggestions and 14 spam→scam errors as separate cases |
 
 | 2026-11-12 | Built SOUL Master Dataset v1 from the uploaded prepared data, baseline splits, quarantines and review files | Master: 5,797 unique prepared records. 5,795 map to existing splits (expanded prepared-record counts: train 4,049; validation 872; test 874); 2 are in one post-redaction split quarantine. Original baseline split files (4,004/856/861 model rows) copied unchanged. Source quarantine: 34 groups / 68 occurrences. 31 validation review IDs joined to 33 prepared rows; uploaded review file marks 24 IDs reviewed and 7 needs_review. All 31 labels match assistant suggestions; 30/31 notes match, so independent human adjudication is not established. Package integrity checks passed; no message-level data committed to GitHub | Keep the package local/private; human-adjudicate assistant-suggestion-derived labels, verify source licence/privacy approval, and run the 12 new blinded-review tests locally before the next code milestone |
+
+## Milestone 2.1 – Message pipeline evaluation and reliability
+
+- [x] Add a version-controlled 72-case constructed synthetic challenge benchmark.
+- [x] Balance the raw-model-eligible cases across legitimate, spam and scam (22 per class).
+- [x] Include benign KYC, payment, OTP-expiry, URL and promotional-urgency hard negatives.
+- [x] Include six protective-credential-warning cases and six unsupported Hindi/Hinglish cases with expected abstention behaviour.
+- [x] Add an evaluator that reports raw model predictions separately from final API decisions.
+- [x] Report per-class precision, recall, F1, confusion matrices, false-positive rates, analysis-status matches, indicator precision/recall and guard behaviour.
+- [x] Keep outputs aggregate or case-ID-only under Git-ignored `data/private/evaluation/`; do not export message text.
+- [x] Ensure the evaluator does not train a model, modify artifacts or read the frozen Mendeley test partition.
+- [ ] Run the expanded backend test suite locally after pulling the evaluator tests.
+- [ ] Run `python data/evaluate_message_benchmark.py` with the user's existing trusted local model artifact and review the aggregate report.
+- [ ] Record model failures and rule false positives separately; do not tune the classifier against this fixed challenge set alone.
+
+**Acceptance boundary:** The benchmark is a constructed synthetic regression set with scenario-defined labels and signal annotations. It is not independently human-verified ground truth, a representative sample of real messages, or a real-world accuracy benchmark. Acceptance requires a successful local run and a report whose claims preserve those limitations.
 
 ## Milestone 3 – Supported evidence processing
 
@@ -391,3 +407,15 @@ Acceptance checks after pull:
 5. Inspect mixed warning + urgent KYC/link wording to ensure the protective-only rule does not suppress other configured risk indicators.
 
 The safeguard remains heuristic and requires evaluation on a broader hard-negative set before stronger claims are made.
+
+
+## 18 November 2026 — Synthetic message challenge benchmark and evaluator added
+
+Added `data/synthetic/message_evaluation_v1.csv` with 72 constructed cases:
+- 22 raw-model-eligible cases per class (legitimate, spam, scam);
+- six standalone protective-credential warnings expected to become `needs_review`;
+- six Devanagari/Romanized-Hindi cases expected to abstain before model prediction.
+
+Added `data/evaluate_message_benchmark.py` to score raw `model_candidate_label`, final `candidate_label`, analysis statuses, language/protective abstentions, risk indicators and context flags separately. Reports are aggregate JSON and case-ID-only CSV under Git-ignored `data/private/evaluation/`. The evaluator does not train, edit model artifacts or read the original Mendeley test split. Eight new tests were added in `backend/tests/test_evaluate_message_benchmark.py`.
+
+The user-reported 265-test result predates these evaluator tests. The next acceptance step is a fresh local `python -m pytest -q` followed by `python data/evaluate_message_benchmark.py`. Expected labels are constructed scenario annotations, not independent ground truth; synthetic metrics must not be presented as production accuracy or used alone to tune a model.
