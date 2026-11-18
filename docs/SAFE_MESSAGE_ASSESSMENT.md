@@ -119,11 +119,11 @@ The response contains:
 The first rules look for:
 - a request to disclose a credential;
 - remote-access wording combined with financial context;
-- a payment request combined with authority, delivery or essential-service pressure;
+- a payment request combined with authority, delivery or essential-service pressure **and an additional escalation signal** (a URL in the message, explicit urgency language, or a serious legal/authority threat);
 - a new-number family identity claim combined with a transfer request and discouragement of independent contact;
 - an upfront fee linked to a job or promised benefit.
 
-An urgent KYC/account-update message with a URL is marked elevated, not automatically treated as a confirmed scam. A URL, payment word, KYC mention, UPI reference or urgency phrase alone can only produce a limited signal, not a high-concern result.
+A routine utility reminder that mentions a due date, late fee or possible service disconnection is not high concern by itself; the payment-pressure rule requires an additional escalation signal. An urgent KYC/account-update message with a URL is marked elevated, not automatically treated as a confirmed scam. A URL, payment word, KYC mention, UPI reference or urgency phrase alone can only produce a limited signal, not a high-concern result.
 
 Unsupported-language cases remain `needs_review`; English-oriented keyword rules are not treated as validated Hindi/Hinglish analysis. Protective-warning context also remains `needs_review`.
 
