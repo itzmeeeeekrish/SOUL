@@ -8,11 +8,11 @@ import re
 
 
 PROTECTIVE_CREDENTIAL_WARNING = re.compile(
-    r"\\b(?:never|do not|don't|dont|please do not|please don't|avoid)\\s+"
-    r"(?:ever\\s+)?(?:share|send|provide|enter|submit|reply with|tell|"
-    r"disclose|reveal)\\s+(?:your\\s+)?"
+    r"\b(?:never|do not|don't|dont|please do not|please don't|avoid)\s+"
+    r"(?:ever\s+)?(?:share|send|provide|enter|submit|reply with|tell|"
+    r"disclose|reveal)\s+(?:your\s+)?"
     r"(?:otp|one[ -]?time password|upi[ -]?pin|pin|cvv|password|passcode|"
-    r"banking credentials)\\b",
+    r"banking credentials)\b",
     re.IGNORECASE,
 )
 
