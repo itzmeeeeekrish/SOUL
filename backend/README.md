@@ -251,3 +251,30 @@ In Swagger at http://127.0.0.1:8000/docs, use \`POST /v1/messages/analyze\` with
 The response contains the existing model suggestion plus \`risk_indicators\`, \`official_guidance\`, and limitations. The current API still loads the historical Mendeley model. The ScamShield three-class model is a separate research artifact and is not integrated into this API.
 
 The guidance module is a curated keyword retriever, not full RAG: no embeddings, vector database or LLM synthesis. URL presence is detected but the URL is not opened or reputation-checked. All assessments remain provisional and require human review. Use synthetic demo text only.
+
+
+## 13. Synthetic message-pipeline evaluation
+
+The repository includes a fixed 72-case synthetic challenge benchmark at `data/synthetic/message_evaluation_v1.csv`. It balances the raw model's expected classes (22 legitimate, 22 spam and 22 scam), then separately includes six protective-warning hard negatives and six unsupported-language cases.
+
+Run from the repository root with the backend virtual environment active:
+
+```powershell
+python data\evaluate_message_benchmark.py
+```
+
+The evaluator compares:
+- **Raw model output:** `model_candidate_label`, before final safety-policy abstention.
+- **Final API decision:** `candidate_label`, including `needs_review`.
+- **Analysis status:** provisional classification vs protective-warning and unsupported-language abstention.
+- **Safety signals:** expected vs detected indicator codes and context flags.
+
+The aggregate report is written to `data/private/evaluation/message_evaluation_v1_report.json`; per-case results (case IDs and predictions only, no message text) are written to `data/private/evaluation/message_evaluation_v1_cases.csv`.
+
+This is a constructed synthetic regression benchmark, not a representative sample of real messages or independently verified ground truth. Do not call these metrics real-world accuracy. The script does not train a model, modify artifacts or read the frozen Mendeley test split.
+
+The evaluation harness has automated tests in `backend/tests/test_evaluate_message_benchmark.py`. Run the full suite from this `backend` directory:
+
+```powershell
+python -m pytest -q
+```
