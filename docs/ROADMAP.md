@@ -419,3 +419,16 @@ Added `data/synthetic/message_evaluation_v1.csv` with 72 constructed cases:
 Added `data/evaluate_message_benchmark.py` to score raw `model_candidate_label`, final `candidate_label`, analysis statuses, language/protective abstentions, risk indicators and context flags separately. Reports are aggregate JSON and case-ID-only CSV under Git-ignored `data/private/evaluation/`. The evaluator does not train, edit model artifacts or read the original Mendeley test split. Eight new tests were added in `backend/tests/test_evaluate_message_benchmark.py`.
 
 The user-reported 265-test result predates these evaluator tests. The next acceptance step is a fresh local `python -m pytest -q` followed by `python data/evaluate_message_benchmark.py`. Expected labels are constructed scenario annotations, not independent ground truth; synthetic metrics must not be presented as production accuracy or used alone to tune a model.
+
+
+## 18 November 2026 — Independent risk evidence layer committed; local verification pending
+
+Added `backend/app/services/risk_assessment.py` and integrated its result into the existing message-analysis response as a separate `risk_assessment` object. It does not override the ML label, raw model suggestion or model scores.
+
+The conservative English-oriented rules identify combinations such as credential disclosure requests, remote access in a financial context, payment under authority/delivery/service pressure, family impersonation with transfer pressure, and upfront fees tied to a promised job or benefit. Urgent KYC with a URL is elevated. A URL, payment term, UPI mention, KYC reference or urgency word alone cannot produce a high-concern result.
+
+The response uses non-probabilistic concern levels (`high`, `elevated`, `limited`, `no_strong_signal`, `needs_review`) with evidence codes and explanations. Unsupported-language and protective-warning cases remain `needs_review`. Absence of a rule match is explicitly not evidence of safety.
+
+Added `backend/tests/test_risk_assessment.py` for known scam-shaped synthetic cases, benign lookalikes, low-specificity signals, unsupported-language abstention and message/URL non-echo. Added detector integration coverage proving the ML prediction remains unchanged even when the separate evidence layer reports high concern.
+
+No model training, model artifact, Mendeley split, original test partition or benchmark-v1 labels were changed. The code and docs are committed, but no claim is made that the new tests have passed on the user's local machine. Next acceptance step: pull `main`, run the full backend suite, fix any failures, then inspect the new `risk_assessment` response using synthetic examples in Swagger.
