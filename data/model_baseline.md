@@ -280,3 +280,29 @@ These are lexical/script indicators only. They are not reliable language labels:
 
 
 The multilingual candidate importer/auditor is a separate data-research utility. It does not alter this baseline, its source labels, partitions, model artifact or metrics.
+
+
+## Synthetic challenge benchmark (added 18 November 2026)
+
+A separate 72-case constructed benchmark is version-controlled at `data/synthetic/message_evaluation_v1.csv`. It is intentionally not mixed into the training data or the original Mendeley train/validation/test partitions.
+
+The benchmark contains:
+- 22 constructed cases per raw classifier class: legitimate, spam and scam;
+- six legitimate protective-credential-warning hard negatives, for which the final API is expected to abstain with `needs_review`;
+- six Devanagari / Romanized-Hindi cases, for which the current language guard is expected to abstain.
+
+Benign KYC reminders, UPI/payment receipts, OTP expiry wording, promotional urgency and URLs in marketing messages are deliberate hard negatives for over-broad rules. Scam scenarios cover KYC phishing, UPI collect/PIN requests, fake courier/job/prize fees, family impersonation, remote access and related pressure tactics.
+
+Run the separate evaluator from the repository root:
+
+```powershell
+python data\evaluate_message_benchmark.py
+```
+
+It produces two distinct classification views:
+1. **Raw model metrics:** uses `model_candidate_label` for cases where the baseline is expected to run. This exposes model errors even when a later safety rule abstains.
+2. **Final pipeline metrics:** uses `candidate_label`, so `needs_review` is scored as a separate expected outcome for protective-warning and unsupported-language cases.
+
+It also reports analysis-status matches, language/protective abstention compliance, multi-label indicator precision/recall and context-flag precision/recall. The report is aggregate JSON; a case-level CSV contains IDs and outcomes but no input text. Both outputs stay below Git-ignored `data/private/evaluation/`.
+
+**Interpretation boundary:** These 72 examples are constructed synthetic cases with scenario-defined expected labels and signal annotations. They are not independently human-verified ground truth, not representative of incoming-message prevalence, and not a real-world accuracy benchmark. Do not tune the classifier solely against this challenge set. The evaluator does not train a model, access the frozen Mendeley test split or modify model artifacts. Local evaluation results are pending the first run after pulling this change.
