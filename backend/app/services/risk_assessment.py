@@ -39,6 +39,11 @@ PATTERNS = {
         r"service.{0,35}(?:stopped|disconnected|terminated))\b",
         re.IGNORECASE,
     ),
+    "serious_authority_threat": re.compile(
+        r"\b(?:avoid arrest|arrest warrant|police case|police complaint|"
+        r"legal action|court case|court summons|criminal case)\b",
+        re.IGNORECASE,
+    ),
     "family_identity": re.compile(
         r"\b(?:nephew|niece|son|daughter|brother|sister|cousin|"
         r"mother|father|uncle|aunt|relative)\b",
@@ -175,11 +180,17 @@ def assess_message_risk(text, signal_assessment=None, language_supported=True):
     ):
         evidence_codes.add("remote_access_with_financial_context")
 
-    if payment_request and pressure and (
-        authority_context
-        or delivery_context
-        or service_context
-        or (authority_context and has_url)
+    # A routine service consequence (for example, a late fee or a future
+    # disconnection) is not enough to make an ordinary bill reminder high risk.
+    # Require an additional escalation signal: a URL in the message, explicit
+    # urgency language, or a serious legal/authority threat.
+    payment_escalation = (
+        has_url
+        or "urgency_or_threat" in indicator_codes
+        or _has("serious_authority_threat", cleaned)
+    )
+    if payment_request and pressure and payment_escalation and (
+        authority_context or delivery_context or service_context
     ):
         evidence_codes.add("payment_under_threat_or_authority_pressure")
 
