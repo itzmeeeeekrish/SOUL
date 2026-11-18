@@ -377,3 +377,17 @@ Next acceptance checks:
 3. Test safe wording (“Never share your OTP”), suspicious synthetic KYC wording, URL presence and unsupported Devanagari/Hinglish abstention.
 4. Confirm guidance cards show issuer, source URL, retrieval method and conditional 1930 text.
 5. Do not present the keyword indicators as proof or the guidance catalogue as full RAG.
+
+
+## 18 November 2026 — Standalone protective-warning abstention
+
+A synthetic hard-negative demo showed that the live historical model could label “Never share your OTP” as `scam` even though the keyword negation rule correctly found no credential-request indicator. Added a narrow context safeguard: when a standalone protective credential warning is detected and no other configured risk indicator matched, the API returns `needs_review` rather than a user-facing model class. The raw model candidate remains visible in a debug field; it is not a calibrated probability. Mixed messages with additional configured risk indicators still follow the normal provisional path. This is a rule-based abstention, not a retrained classifier or proof of safety.
+
+Acceptance checks after pull:
+1. Run the complete backend test suite.
+2. Confirm the protective-warning example returns `abstained_protective_warning_context`, `candidate_label=needs_review`, and a `protective_credential_warning` context flag.
+3. Confirm suspicious KYC wording still returns provisional analysis with indicators and source-backed guidance.
+4. Confirm unsupported Devanagari text still abstains through the language guard.
+5. Inspect mixed warning + urgent KYC/link wording to ensure the protective-only rule does not suppress other configured risk indicators.
+
+The safeguard remains heuristic and requires evaluation on a broader hard-negative set before stronger claims are made.
