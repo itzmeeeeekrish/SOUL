@@ -168,3 +168,37 @@ def test_unsupported_script_still_returns_keyword_indicators_and_guidance():
         for item in result["risk_indicators"]
     )
     assert result["official_guidance"]
+
+
+
+def test_standalone_protective_warning_abstains_from_final_model_label():
+    result = analyze_message(
+        "Never share your OTP or PIN with anyone. Use your bank's official app.",
+        FakePipeline(),
+    )
+
+    assert result["analysis_status"] == "abstained_protective_warning_context"
+    assert result["candidate_label"] == "needs_review"
+    assert result["model_candidate_label"] == "scam"
+    assert result["model_scores"]["scam"] == pytest.approx(0.80)
+    assert result["context_flags"][0]["code"] == "protective_credential_warning"
+    assert result["review_required"] is True
+    assert "withholds its final label" in result["abstention_reason"]
+
+
+def test_protective_warning_does_not_override_other_risk_indicators():
+    class ScamPipeline(FakePipeline):
+        def predict(self, texts):
+            return ["scam"]
+
+    result = analyze_message(
+        "Never share your OTP. URGENT: Update KYC at https://example.invalid",
+        ScamPipeline(),
+    )
+
+    assert result["analysis_status"] == "provisional_model_suggestion"
+    assert result["candidate_label"] == "scam"
+    assert result["context_flags"] == []
+    assert {"urgency_or_threat", "kyc_or_account_update", "url_present"} <= {
+        item["code"] for item in result["risk_indicators"]
+    }
