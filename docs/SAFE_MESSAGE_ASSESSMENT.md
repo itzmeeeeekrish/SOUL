@@ -141,3 +141,8 @@ Unsupported-language cases remain `needs_review`; English-oriented keyword rules
 `backend/tests/test_risk_assessment.py` covers the known synthetic scam patterns from benchmark v1 and benign lookalikes, including routine KYC, payment receipts, salary notifications, promotions, URL-only messages and protective warnings. The fixed `data/synthetic/message_evaluation_v1.csv`, its expected labels, the trained model and the original Mendeley test partition are unchanged.
 
 After pulling, run `python -m pytest -q` from `backend/`. Inspect `risk_assessment` in the existing Swagger endpoint at `POST /v1/messages/analyze`. Local verification has not yet been reported.
+
+
+### User-facing guidance precedence
+
+The ML `candidate_label` and scores remain unchanged, but the top-level `guidance` now follows the independent evidence layer when it reports `high` or `elevated` concern. This prevents a contradictory benign-sounding message when the classifier predicts `legitimate` but the separate rule engine has found a stronger warning combination. Low-specificity or no-signal cases continue to use the model-category guidance; unsupported-language and protective-warning branches retain their dedicated review guidance. The risk message remains precautionary, not a fraud verdict.
