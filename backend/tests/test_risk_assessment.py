@@ -74,6 +74,11 @@ def test_flags_high_concern_action_and_context_combinations(text, expected_code)
     [
         ("Your annual KYC review is due. Visit your bank branch for instructions.", "limited"),
         ("Your electricity bill payment has been received.", "no_strong_signal"),
+        (
+            "Your electricity bill is due tomorrow. Please pay through the official "
+            "electricity board app to avoid a late fee or service disconnection.",
+            "limited",
+        ),
         ("Your salary for November has been credited. Check your payslip.", "no_strong_signal"),
         ("Weekend offer: selected kitchen products are available at reduced prices.", "no_strong_signal"),
         ("Review this link: https://shop.example/sale", "limited"),
@@ -128,3 +133,26 @@ def test_evidence_output_does_not_echo_message_or_url():
     serialized = str(result)
     assert secret_url not in serialized
     assert "not-for-output" not in serialized
+
+
+def test_routine_electricity_reminder_does_not_create_high_concern_evidence():
+    result = assess_message_risk(
+        "Your electricity bill is due tomorrow. Please pay through the official "
+        "electricity board app to avoid a late fee or service disconnection."
+    )
+
+    assert result["concern_level"] == "limited"
+    assert result["evidence"] == []
+    assert result["matched_indicator_codes"] == ["payment_request"]
+
+
+def test_serious_legal_threat_can_still_escalate_without_a_url():
+    result = assess_message_risk(
+        "A police case is pending against your identity. Pay the penalty "
+        "immediately to avoid arrest."
+    )
+
+    assert result["concern_level"] == "high"
+    assert "payment_under_threat_or_authority_pressure" in {
+        item["code"] for item in result["evidence"]
+    }
