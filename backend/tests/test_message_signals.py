@@ -66,3 +66,24 @@ def test_empty_text_returns_no_indicators():
 
     assert result["indicators"] == []
     assert result["indicator_codes"] == []
+
+
+
+def test_detects_standalone_protective_credential_warning_as_context():
+    result = extract_message_indicators(
+        "Never share your OTP or PIN with anyone. Use your bank's official app."
+    )
+
+    assert result["indicator_codes"] == []
+    assert result["context_flags"][0]["code"] == "protective_credential_warning"
+
+
+def test_does_not_treat_mixed_warning_and_urgent_link_as_warning_only():
+    result = extract_message_indicators(
+        "Never share your OTP. URGENT: Update KYC at https://example.invalid"
+    )
+
+    assert result["context_flags"] == []
+    assert {"urgency_or_threat", "kyc_or_account_update", "url_present"} <= set(
+        result["indicator_codes"]
+    )
