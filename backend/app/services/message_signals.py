@@ -58,8 +58,13 @@ PATTERNS = {
         re.IGNORECASE,
     ),
     "payment_request": re.compile(
-        r"\b(?:pay|payment|transfer|send money|processing fee|"
-        r"refund fee|collect request|deposit|upi transfer)\b",
+        r"\b(?:pay|send money|transfer money|transfer funds|"
+        r"make (?:a )?payment|approve (?:the )?(?:upi )?collect request|"
+        r"collect request|upi transfer|processing fee|refund fee)\b|"
+        r"\b(?:payment|fee|amount|dues?|deposit)\\s+(?:is\\s+)?"
+        r"(?:due|pending|required|outstanding|payable)\\b|"
+        r"\\b(?:payment|fee|amount|dues?)\\s+"
+        r"(?:must be|needs to be|has to be)\\s+paid\\b",
         re.IGNORECASE,
     ),
 }
@@ -115,10 +120,11 @@ INDICATOR_DETAILS = {
         "severity_hint": "review",
     },
     "payment_request": {
-        "title": "Payment-related wording",
+        "title": "Payment request or due-payment wording",
         "explanation": (
-            "The message contains payment or transfer wording. A payment mention "
-            "alone is not proof of fraud; verify the request independently."
+            "The message contains wording that appears to request a payment or "
+            "describe an amount as due. A payment confirmation or receipt alone "
+            "does not trigger this indicator; verify unexpected requests independently."
         ),
         "severity_hint": "review",
     },
