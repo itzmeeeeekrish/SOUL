@@ -214,7 +214,7 @@ def test_routine_electricity_reminder_gets_balanced_model_disagreement_guidance(
     assert result["candidate_label"] == "scam"
     assert result["risk_assessment"]["concern_level"] == "limited"
     assert result["risk_assessment"]["evidence"] == []
-    assert "only low-specificity signals" in result["risk_assessment"]["summary"]
+    assert "only low-specificity text indicators were found" in result["risk_assessment"]["summary"].lower()
     assert "does not prove fraud" in result["guidance"]
     assert "higher-concern warning signs" not in result["guidance"]
 
