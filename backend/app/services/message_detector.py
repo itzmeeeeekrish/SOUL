@@ -130,12 +130,8 @@ def analyze_message(text, model=None):
         user_guidance = HIGH_RISK_GUIDANCE
     elif risk_assessment["concern_level"] == "elevated":
         user_guidance = ELEVATED_RISK_GUIDANCE
-    elif (
-        predicted == "scam"
-        and risk_assessment["concern_level"] in {"limited", "no_strong_signal"}
-    ):
-        user_guidance = MODEL_SCAM_WITHOUT_STRONG_RULE_EVIDENCE_GUIDANCE
     else:
+        # Model-dependent guidance is selected only after prediction is available.
         user_guidance = None
 
     advisory_context = {
@@ -202,6 +198,16 @@ def analyze_message(text, model=None):
     top_score = ranked_scores[0]
     second_score = ranked_scores[1]
     score_margin = top_score - second_score
+
+    # The classifier output exists now. If it says scam but the independent
+    # evidence rules found only weak/no patterns, explain the disagreement
+    # rather than showing a definitive-sounding scam warning.
+    if (
+        user_guidance is None
+        and predicted == "scam"
+        and risk_assessment["concern_level"] in {"limited", "no_strong_signal"}
+    ):
+        user_guidance = MODEL_SCAM_WITHOUT_STRONG_RULE_EVIDENCE_GUIDANCE
 
     if signal_assessment["context_flags"]:
         return {
