@@ -61,6 +61,23 @@ def test_detects_remote_access_and_payment_wording():
     assert "payment_request" in found
 
 
+def test_payment_confirmation_receipt_does_not_trigger_payment_request():
+    result = extract_message_indicators(
+        "Your electricity bill payment has been received. "
+        "The receipt is available in your customer account."
+    )
+
+    assert "payment_request" not in result["indicator_codes"]
+
+
+def test_explicit_payment_demand_still_triggers_payment_request():
+    result = extract_message_indicators(
+        "Your parcel fee is pending. Pay the amount now to release delivery."
+    )
+
+    assert "payment_request" in result["indicator_codes"]
+
+
 def test_empty_text_returns_no_indicators():
     result = extract_message_indicators("")
 
