@@ -176,9 +176,32 @@ def test_scam_model_with_only_limited_risk_evidence_gets_balanced_guidance():
 
     assert result["candidate_label"] == "scam"
     assert result["risk_assessment"]["concern_level"] == "limited"
-    assert "only low-specificity signals" in result["guidance"]
+    assert "did not find a strong risk pattern" in result["guidance"]
     assert "does not prove fraud" in result["guidance"]
     assert "deceptive request" not in result["guidance"]
+
+
+def test_payment_receipt_does_not_trigger_rule_signal_or_payment_guidance():
+    class ScamPipeline(FakePipeline):
+        def predict(self, texts):
+            return ["scam"]
+
+        def predict_proba(self, texts):
+            return [[0.28, 0.53, 0.19]]
+
+    result = analyze_message(
+        "Your electricity bill payment has been received. "
+        "The receipt is available in your customer account.",
+        ScamPipeline(),
+    )
+
+    assert result["candidate_label"] == "scam"
+    assert result["risk_assessment"]["concern_level"] == "no_strong_signal"
+    assert result["risk_assessment"]["matched_indicator_codes"] == []
+    assert result["risk_indicators"] == []
+    assert result["official_guidance"] == []
+    assert "did not find a strong risk pattern" in result["guidance"]
+    assert "does not prove fraud" in result["guidance"]
 
 
 def test_unsupported_script_still_returns_keyword_indicators_and_guidance():
