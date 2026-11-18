@@ -6,9 +6,16 @@
 #   .\backend\demo_safe_message_assessment.ps1
 #
 # This script sends only synthetic example text to localhost.
+# The file is intentionally ASCII-only for Windows PowerShell compatibility.
 
 $ErrorActionPreference = "Stop"
 $Endpoint = "http://127.0.0.1:8000/v1/messages/analyze"
+
+# Reconstruct the Hindi sample from UTF-8 bytes so this script remains ASCII-only.
+$HindiTextBase64 = "4KSG4KSq4KSV4KS+IOCkrOCliOCkguCklSBLWUMg4KSs4KSC4KSmIOCkueCliyDgpJzgpL7gpI/gpJfgpL7gpaQg4KSF4KSq4KSo4KS+IE9UUCBzaGFyZSDgpJXgpLDgpYfgpILgpaQ="
+$HindiText = [System.Text.Encoding]::UTF8.GetString(
+    [System.Convert]::FromBase64String($HindiTextBase64)
+)
 
 $Examples = @(
     @{
@@ -21,7 +28,7 @@ $Examples = @(
     },
     @{
         Title = "Devanagari language guard"
-        Text = "आपका बैंक KYC बंद हो जाएगा। अपना OTP share करें।"
+        Text = $HindiText
     }
 )
 
@@ -34,7 +41,7 @@ foreach ($Example in $Examples) {
     $Body = @{ text = $Example.Text } | ConvertTo-Json -Depth 5
 
     try {
-        $Result = Invoke-RestMethod -Uri $Endpoint -Method Post -ContentType "application/json" -Body $Body
+        $Result = Invoke-RestMethod -Uri $Endpoint -Method Post -ContentType "application/json; charset=utf-8" -Body $Body
 
         Write-Host "Status: $($Result.analysis_status)"
         Write-Host "Candidate label: $($Result.candidate_label)"
@@ -53,7 +60,7 @@ foreach ($Example in $Examples) {
         }
 
         Write-Host "Text indicators:"
-        if ($Result.risk_indicators.Count -gt 0) {
+        if ($Result.risk_indicators -and $Result.risk_indicators.Count -gt 0) {
             foreach ($Indicator in $Result.risk_indicators) {
                 Write-Host ("  - {0}: {1}" -f $Indicator.code, $Indicator.title)
             }
@@ -63,9 +70,9 @@ foreach ($Example in $Examples) {
         }
 
         Write-Host "Official guidance cards:"
-        if ($Result.official_guidance.Count -gt 0) {
+        if ($Result.official_guidance -and $Result.official_guidance.Count -gt 0) {
             foreach ($Card in $Result.official_guidance) {
-                Write-Host ("  - {0} — {1}" -f $Card.issuer, $Card.title)
+                Write-Host ("  - {0} - {1}" -f $Card.issuer, $Card.title)
                 Write-Host ("    Source: {0}" -f $Card.source_url)
                 Write-Host ("    Condition: {0}" -f $Card.condition)
             }
