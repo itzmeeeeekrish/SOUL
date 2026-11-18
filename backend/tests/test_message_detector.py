@@ -128,7 +128,8 @@ def test_analysis_includes_text_indicators_and_source_backed_guidance():
             "kyc_or_account_update", "url_present"} <= codes
     assert "rbi_kyc_fraud_2026" in guidance_ids
     assert "dot_chakshu" in guidance_ids
-    assert "curated keyword rules" in result["guidance_retrieval_note"]
+    assert "transparent keyword rules" in result["guidance_retrieval_note"]
+    assert "not full vector-search or LLM-based RAG" in result["guidance_retrieval_note"]
     assert result["candidate_label"] == "scam"
     assert result["review_required"] is True
 
