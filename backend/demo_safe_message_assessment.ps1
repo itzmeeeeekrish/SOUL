@@ -45,7 +45,13 @@ foreach ($Example in $Examples) {
 
         Write-Host "Status: $($Result.analysis_status)"
         Write-Host "Candidate label: $($Result.candidate_label)"
+        if ($Result.model_candidate_label) {
+            Write-Host "Raw model candidate (debug only): $($Result.model_candidate_label)"
+        }
         Write-Host "Review required: $($Result.review_required)"
+        if ($Result.abstention_reason) {
+            Write-Host "Abstention reason: $($Result.abstention_reason)"
+        }
 
         if ($Result.model_scores) {
             Write-Host "Uncalibrated model scores:"
@@ -67,6 +73,16 @@ foreach ($Example in $Examples) {
         }
         else {
             Write-Host "  No configured indicator patterns matched."
+        }
+
+        Write-Host "Context flags:"
+        if ($Result.context_flags -and $Result.context_flags.Count -gt 0) {
+            foreach ($Flag in $Result.context_flags) {
+                Write-Host ("  - {0}: {1}" -f $Flag.code, $Flag.title)
+            }
+        }
+        else {
+            Write-Host "  No protective-context flag matched."
         }
 
         Write-Host "Official guidance cards:"
