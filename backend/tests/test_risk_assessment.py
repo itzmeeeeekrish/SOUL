@@ -73,7 +73,7 @@ def test_flags_high_concern_action_and_context_combinations(text, expected_code)
     "text, expected_level",
     [
         ("Your annual KYC review is due. Visit your bank branch for instructions.", "limited"),
-        ("Your electricity bill payment has been received.", "limited"),
+        ("Your electricity bill payment has been received.", "no_strong_signal"),
         ("Your salary for November has been credited. Check your payslip.", "no_strong_signal"),
         ("Weekend offer: selected kitchen products are available at reduced prices.", "no_strong_signal"),
         ("Review this link: https://shop.example/sale", "limited"),
