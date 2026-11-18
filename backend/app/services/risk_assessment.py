@@ -12,57 +12,57 @@ from app.services.message_signals import extract_message_indicators
 
 PATTERNS = {
     "financial_context": re.compile(
-        r"\\b(?:bank|banking|account|upi|refund|card|transaction|wallet|"
-        r"kyc|loan|insurance|payment)\\b",
+        r"\b(?:bank|banking|account|upi|refund|card|transaction|wallet|"
+        r"kyc|loan|insurance|payment)\b",
         re.IGNORECASE,
     ),
     "authority_context": re.compile(
-        r"\\b(?:bank support|bank representative|bank agent|customer support|"
+        r"\b(?:bank support|bank representative|bank agent|customer support|"
         r"police|officer|law enforcement|customs|courier|delivery agent|"
         r"electricity board|government|income tax|tax department|"
-        r"insurance company)\\b",
+        r"insurance company)\b",
         re.IGNORECASE,
     ),
     "delivery_context": re.compile(
-        r"\\b(?:parcel|courier|delivery|customs)\\b",
+        r"\b(?:parcel|courier|delivery|customs)\b",
         re.IGNORECASE,
     ),
     "essential_service_context": re.compile(
-        r"\\b(?:electricity|power supply|water supply|broadband|mobile service)\\b",
+        r"\b(?:electricity|power supply|water supply|broadband|mobile service)\b",
         re.IGNORECASE,
     ),
     "pressure_or_consequence": re.compile(
-        r"\\b(?:avoid arrest|arrest|legal action|police case|penalty|"
+        r"\b(?:avoid arrest|arrest|legal action|police case|penalty|"
         r"parcel (?:will be )?returned|returned to sender|"
         r"will be disconnected|disconnection|disconnect(?:ed|ion)?|"
         r"account.{0,35}(?:blocked|suspended|closed|deactivated)|"
-        r"service.{0,35}(?:stopped|disconnected|terminated))\\b",
+        r"service.{0,35}(?:stopped|disconnected|terminated))\b",
         re.IGNORECASE,
     ),
     "family_identity": re.compile(
-        r"\\b(?:nephew|niece|son|daughter|brother|sister|cousin|"
-        r"mother|father|uncle|aunt|relative)\\b",
+        r"\b(?:nephew|niece|son|daughter|brother|sister|cousin|"
+        r"mother|father|uncle|aunt|relative)\b",
         re.IGNORECASE,
     ),
     "new_contact_claim": re.compile(
-        r"\\b(?:new number|new phone|different number|changed number)\\b",
+        r"\b(?:new number|new phone|different number|changed number)\b",
         re.IGNORECASE,
     ),
     "discourage_independent_contact": re.compile(
-        r"\\b(?:do not|don't|dont|avoid)\\s+(?:call|contact|verify)\\b"
-        r".{0,45}\\b(?:family|bank|office|official|anyone)\\b|"
-        r"\\bdo not call (?:your )?(?:family|bank|them)\\b",
+        r"\b(?:do not|don't|dont|avoid)\s+(?:call|contact|verify)\b"
+        r".{0,45}\b(?:family|bank|office|official|anyone)\b|"
+        r"\bdo not call (?:your )?(?:family|bank|them)\b",
         re.IGNORECASE,
     ),
     "upfront_fee_context": re.compile(
-        r"\\b(?:registration|processing|security|refundable|advance|"
-        r"verification|refund|joining|activation)\\s+(?:fee|deposit|charge)\\b|"
-        r"\\b(?:fee|deposit|charge)\\s+(?:first|upfront)\\b",
+        r"\b(?:registration|processing|security|refundable|advance|"
+        r"verification|refund|joining|activation)\s+(?:fee|deposit|charge)\b|"
+        r"\b(?:fee|deposit|charge)\s+(?:first|upfront)\b",
         re.IGNORECASE,
     ),
     "job_or_benefit_context": re.compile(
-        r"\\b(?:job|employment|recruitment|joining|salary|job offer|"
-        r"loan|prize|reward|refund|insurance claim|grant|subsidy)\\b",
+        r"\b(?:job|employment|recruitment|joining|salary|job offer|"
+        r"loan|prize|reward|refund|insurance claim|grant|subsidy)\b",
         re.IGNORECASE,
     ),
 }
