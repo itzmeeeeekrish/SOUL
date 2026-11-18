@@ -69,6 +69,14 @@ ELEVATED_RISK_GUIDANCE = (
     "This assessment does not prove fraud."
 )
 
+MODEL_SCAM_WITHOUT_STRONG_RULE_EVIDENCE_GUIDANCE = (
+    "The text-only model suggests this message may be scam-like, but the "
+    "independent rules found only low-specificity signals. This disagreement "
+    "does not prove fraud. Do not share OTPs, PINs or passwords or act on an "
+    "unexpected request. Verify it through the organisation's official app, "
+    "branch or a contact number you already trust. Model scores are uncalibrated."
+)
+
 
 @lru_cache(maxsize=1)
 def load_model():
@@ -122,6 +130,11 @@ def analyze_message(text, model=None):
         user_guidance = HIGH_RISK_GUIDANCE
     elif risk_assessment["concern_level"] == "elevated":
         user_guidance = ELEVATED_RISK_GUIDANCE
+    elif (
+        predicted == "scam"
+        and risk_assessment["concern_level"] in {"limited", "no_strong_signal"}
+    ):
+        user_guidance = MODEL_SCAM_WITHOUT_STRONG_RULE_EVIDENCE_GUIDANCE
     else:
         user_guidance = None
 
