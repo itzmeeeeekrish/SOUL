@@ -62,9 +62,9 @@ PATTERNS = {
         r"make (?:a )?payment|approve (?:the )?(?:upi )?collect request|"
         r"collect request|upi transfer|processing fee|refund fee)\b|"
         r"\b(?:payment|fee|amount|dues?|deposit)\s+(?:is\s+)?"
-        r"(?:due|pending|required|outstanding|payable)\\b|"
+        r"(?:due|pending|required|outstanding|payable)\b|"
         r"\b(?:payment|fee|amount|dues?)\s+"
-        r"(?:must be|needs to be|has to be)\s+paid\\b",
+        r"(?:must be|needs to be|has to be)\s+paid\b",
         re.IGNORECASE,
     ),
 }
