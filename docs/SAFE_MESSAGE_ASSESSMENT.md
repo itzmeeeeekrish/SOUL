@@ -25,9 +25,9 @@ Current categories:
 - \`remote_access_request\`
 - \`payment_request\`
 
-A simple negation guard is included for common safety-warning phrasing such as “Never share your OTP”. These rules are not a complete natural-language understanding system. They may miss paraphrases, other languages and context, or flag harmless messages that contain the same terms.
+A simple negation guard is included for common safety-warning phrasing such as “Never share your OTP”. A separate narrow protective-warning pattern identifies a standalone warning not to disclose credentials. It is emitted as a context flag only when no other configured risk indicator matched. In that case, the API withholds its final model candidate and returns `needs_review`; the underlying model candidate and scores are retained only as debug fields. If other indicators are present, normal provisional model behaviour continues. This guard is not a complete natural-language understanding system and could miss paraphrases or misread mixed/contradictory context.
 
-Indicators do not alter or override the machine-learning class. A model prediction and a keyword indicator can disagree; the response exposes both for human review.
+Indicators do not normally change the machine-learning class. The protective-warning abstention is a distinct, deliberately conservative exception: it does not label the message legitimate, and it still requires human review.
 
 ## Curated official guidance catalogue
 
@@ -64,6 +64,8 @@ These are future milestones. The current result returns pre-reviewed source card
 - No automatic blocking, deletion, account freezing or payment action exists.
 - URL presence is detected, but the URL is not opened, resolved, reputation-checked or verified.
 - A keyword match does not establish malicious intent.
+- The protective-warning rule is narrow, heuristic and only triggers when no other configured risk indicators matched. It is not proof of legitimacy; it only changes the final API output to `needs_review`.
+- The raw model candidate and scores may still be wrong and remain uncalibrated; they are exposed for debugging, not as a fraud probability.
 - The 1930 guidance is conditional: it applies when financial cyber fraud or an unauthorised debit has actually occurred, not merely because a suspicious SMS was received.
 - Devanagari and recognised Romanized-Hindi signals still cause the existing baseline language guard to abstain. Keyword indicators may still be returned, but they are not validated Hindi/Hinglish detection.
 
@@ -90,9 +92,9 @@ Open http://127.0.0.1:8000/docs and execute \`POST /v1/messages/analyze\` with a
 \`\`\`
 
 Demonstrate:
-1. The model's provisional candidate label and uncalibrated scores.
-2. The separate keyword indicators and their explanations.
-3. Official guidance cards with issuer and clickable source URL.
-4. The explicit notice that indicators are not proof, the URL was not checked, and human review is required.
+1. The suspicious KYC example's provisional candidate label, uncalibrated scores, text indicators and official guidance.
+2. The “Never share your OTP” hard negative: SOUL should return `needs_review`, show a protective context flag, and retain the raw model candidate only for debugging.
+3. The Devanagari example's unsupported-language abstention.
+4. The explicit notice that indicators are not proof, the URL was not checked, scores are not fraud probabilities, and human review is required.
 
 Use only synthetic demonstration text. A repeatable three-case runner is available at `backend/demo_safe_message_assessment.ps1`. Do not send real OTPs, phone numbers, account identifiers or private messages to a public demo.
