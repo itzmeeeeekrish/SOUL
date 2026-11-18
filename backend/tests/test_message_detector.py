@@ -153,6 +153,10 @@ def test_indicator_rules_do_not_override_model_prediction():
         for item in result["risk_indicators"]
     )
     assert result["review_required"] is True
+    assert result["risk_assessment"]["concern_level"] == "high"
+    assert "credential_disclosure_request" in {
+        item["code"] for item in result["risk_assessment"]["evidence"]
+    }
 
 
 def test_unsupported_script_still_returns_keyword_indicators_and_guidance():
