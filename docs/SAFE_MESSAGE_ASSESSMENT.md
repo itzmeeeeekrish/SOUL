@@ -146,3 +146,8 @@ After pulling, run `python -m pytest -q` from `backend/`. Inspect `risk_assessme
 ### User-facing guidance precedence
 
 The ML `candidate_label` and scores remain unchanged, but the top-level `guidance` now follows the independent evidence layer when it reports `high` or `elevated` concern. This prevents a contradictory benign-sounding message when the classifier predicts `legitimate` but the separate rule engine has found a stronger warning combination. Low-specificity or no-signal cases continue to use the model-category guidance; unsupported-language and protective-warning branches retain their dedicated review guidance. The risk message remains precautionary, not a fraud verdict.
+
+
+### Model/evidence disagreement on benign-looking messages
+
+A routine KYC reminder can still receive an ML `scam` suggestion because the historical text classifier has false positives. When the ML suggests `scam` but the independent rules find only `limited` or `no_strong_signal` evidence, the top-level guidance now explicitly describes the disagreement. It keeps the ML suggestion visible, says that the disagreement does not prove fraud, and recommends independent verification rather than presenting a definitive deceptive-request warning. This is a user-guidance safeguard, not a model correction or a new accuracy result.
