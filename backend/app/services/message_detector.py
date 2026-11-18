@@ -97,6 +97,7 @@ def analyze_message(text, model=None):
     )
     advisory_context = {
         "risk_indicators": signal_assessment["indicators"],
+        "context_flags": signal_assessment["context_flags"],
         "indicator_notice": signal_assessment["notice"],
         "official_guidance": official_guidance,
         "guidance_retrieval_note": (
@@ -158,10 +159,41 @@ def analyze_message(text, model=None):
     second_score = ranked_scores[1]
     score_margin = top_score - second_score
 
+    if signal_assessment["context_flags"]:
+        return {
+            "analysis_status": "abstained_protective_warning_context",
+            "model": MODEL_NAME,
+            "candidate_label": "needs_review",
+            "model_candidate_label": predicted,
+            "model_scores": scores,
+            "top_model_score": top_score,
+            "top_two_score_margin": score_margin,
+            "low_score_separation": score_margin < 0.10,
+            "review_required": True,
+            "abstention_reason": (
+                "The message appears to be a standalone warning not to share "
+                "credentials. The experimental model can confuse credential "
+                "keywords with a credential request, so SOUL withholds its final "
+                "label. The raw model suggestion is retained for debugging only."
+            ),
+            "language_assessment": language_assessment,
+            **advisory_context,
+            "guidance": (
+                "This text appears to warn people not to share sensitive credentials. "
+                "That does not establish the sender's identity or prove the message "
+                "is safe. Review the full context and verify independently."
+            ),
+            "limitations": LIMITATIONS + [
+                "Protective-warning detection is a narrow heuristic; it is not a "
+                "complete understanding of message intent."
+            ],
+        }
+
     return {
         "analysis_status": "provisional_model_suggestion",
         "model": MODEL_NAME,
         "candidate_label": predicted,
+        "model_candidate_label": predicted,
         "model_scores": scores,
         "top_model_score": top_score,
         "top_two_score_margin": score_margin,
