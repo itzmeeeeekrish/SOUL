@@ -2,7 +2,7 @@
 
 Ye file tumhari revision notebook hai. Har naye module ke baad isme concept, code ka flow, testing aur viva questions add karenge.
 
-> **Current status (12 November 2026):** Repository/backend foundation complete; Mendeley 2022 candidate ka local audit, privacy screening, deduplication, redaction and grouped 70/15/15 split complete. First text-only TF-IDF + Logistic Regression baseline trained. Latest full backend test suite before the multilingual candidate-audit module: **93 passed in 4.95s**. The latest module adds 12 tests pending a fresh run. Validation macro-F1: 0.8682; initial test macro-F1: 0.8915. Language audit: 5,797 rows mein 5,785 Latin/no selected Hinglish markers, 11 Romanized-Hindi signal, 1 mixed-script and 0 non-Latin-only rows. Ye heuristic counts hain, language ground truth nahi. AI suggestions silver labels hain; original baseline/test split frozen hai. Dataset source/privacy approval and campaign-independent external validation are still pending.
+> **Current status (18 November 2026):** Backend/API aur text-only Mendeley baseline local machine par run ho rahe hain. User ne safety-advisory changes ke baad **265 tests passed in 19.31s** report kiye. Iske baad 72-case synthetic challenge benchmark aur evaluator ke 8 tests add hue; inka fresh local pytest run abhi pending hai. Live API abhi bhi old Mendeley model use karta hai; multilingual aur ScamShield models separate experiments hain. Benchmark synthetic hai, scenario-defined labels hain, real-world ground truth nahi. Source/privacy approval, multilingual validation aur independent source-held-out testing pending hain.
 
 ## 1. SOUL kya banane ki koshish kar raha hai?
 
@@ -1548,3 +1548,48 @@ Added a narrow protective-context safeguard:
 - The PowerShell demo now displays the raw model candidate, context flags and abstention reason.
 
 This does not retrain, calibrate or improve the underlying classifier. It does not label the message legitimate or establish sender trust. The safeguard is a narrow heuristic and remains subject to false positives/false negatives. New tests cover protective-context extraction, mixed-warning behaviour and API-level abstention. Local full-suite verification is pending after pulling the commits.
+
+
+## 19. Synthetic evaluation benchmark — simple Hinglish walkthrough (18 November 2026)
+
+### Humne kya add kiya?
+
+Ek fixed CSV benchmark banaya: `data/synthetic/message_evaluation_v1.csv`. Isme 72 artificial messages hain.
+
+- 22 expected legitimate, 22 spam aur 22 scam cases raw model ko test karne ke liye.
+- 6 protective warnings, jaise “Never share your OTP”, jahan final system ko `needs_review` bolna chahiye.
+- 6 Hindi/Hinglish examples jahan current model validated nahi hai, isliye language guard ko abstain karna chahiye.
+
+Har example ke saath expected class, expected final result, expected status, language aur expected signal codes diye gaye hain. Ye constructed scenario labels hain; real users ke verified messages nahi.
+
+### Raw model vs final API output
+
+Dono alag cheezein hain:
+
+- `model_candidate_label`: ML model ka raw guess.
+- `candidate_label`: safety aur language rules ke baad user ko diya gaya final candidate.
+
+Example: “Never share your OTP” par model raw `scam` bol sakta hai, lekin protective-warning safeguard final label `needs_review` kar sakta hai. Evaluator raw model ko galat count karega aur final safety behaviour ko separately check karega. Isse hum model ki weakness aur safety layer ka impact mix nahi karenge.
+
+### Evaluation kaise chalana hai?
+
+Repository root se active project virtual environment mein:
+
+    python data/evaluate_message_benchmark.py
+
+Output files:
+- `data/private/evaluation/message_evaluation_v1_report.json`: aggregate metrics.
+- `data/private/evaluation/message_evaluation_v1_cases.csv`: case ID aur expected/actual decisions; message text export nahi hota.
+
+### Metrics ko kaise samjhein?
+
+- **Precision:** model ne jitne messages kisi class ka bola, unmein kitne sahi the.
+- **Recall:** us class ke actual benchmark examples mein se kitne pakde.
+- **F1:** precision aur recall ka balance.
+- **False-positive rate:** doosri classes ko galti se target class bolne ka rate.
+- **Abstention:** system ne final class dene ke bajay `needs_review` kaha.
+- **Signal precision/recall:** regex indicators expected signal codes se kitne match hue.
+
+### Important limitation
+
+72 synthetic cases se production accuracy prove nahi hoti. Benchmark sirf repeatable regression check hai. Real-world reliability ke liye privacy-reviewed, independently sourced aur independently labelled messages chahiye. Existing Mendeley frozen test set ko evaluator read nahi karta, aur evaluator model ko train/tune nahi karta.
