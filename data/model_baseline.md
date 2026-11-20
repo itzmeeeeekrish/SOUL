@@ -337,3 +337,22 @@ This diagnostic is intended to distinguish two possibilities:
 It does not resolve ambiguous source labels. The documented validation review found that 19 of 31 errors crossed the spam/scam boundary, and the assistant-assisted silver-label pilot disagreed with several source-derived labels. Those are warning signs of source-label ambiguity, not proof that the source labels are wrong. Do not relabel data or train from the pilot as if it were independent ground truth.
 
 After running the report, use its aggregate coverage and error-pair summaries to decide whether the next experiment should focus on data coverage, taxonomy, or model features. Preserve the historical model, source labels and all original partitions until a separately versioned experiment is approved.
+
+
+## Redaction-marker distribution audit (added 20 November 2026)
+
+A focused, aggregate-only audit is available:
+
+\`\`\`powershell
+python data\audit_redaction_marker_distribution.py
+\`\`\`
+
+It reads only the frozen training and validation CSVs, verifies both against the split fingerprints stored with the baseline metrics, and counts how often each redaction placeholder appears in each class. It does not read \`test.csv\`, train a model, alter parameters, or export message text or record IDs.
+
+The Git-ignored output is:
+
+\`data/private/model_artifacts/redaction_marker_distribution.json\`
+
+This is relevant because the validation feature diagnostic found the fitted feature \`long_number\` among the leading terms favouring \`scam\` on several spam-to-scam errors. The placeholder is inserted by the privacy-masking step when a long numeric candidate is detected. If its prevalence differs substantially by source label, it may act as a dataset-specific shortcut. Prevalence alone does not establish that it caused the classifier errors or that the underlying numeric strings are malicious.
+
+Interpret this alongside the contrastive feature report, not in isolation. A later ablation must be a separately documented training-only experiment evaluated on validation and must not replace the frozen historical model or touch the initial test holdout.
