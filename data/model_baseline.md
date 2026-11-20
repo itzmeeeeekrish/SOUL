@@ -306,3 +306,34 @@ It produces two distinct classification views:
 It also reports analysis-status matches, language/protective abstention compliance, multi-label indicator precision/recall and context-flag precision/recall. The report is aggregate JSON; a case-level CSV contains IDs and outcomes but no input text. Both outputs stay below Git-ignored `data/private/evaluation/`.
 
 **Interpretation boundary:** These 72 examples are constructed synthetic cases with scenario-defined expected labels and signal annotations. They are not independently human-verified ground truth, not representative of incoming-message prevalence, and not a real-world accuracy benchmark. Do not tune the classifier solely against this challenge set. The evaluator does not train a model, access the frozen Mendeley test split or modify model artifacts. Local evaluation results are pending the first run after pulling this change.
+
+
+## Validation-only feature diagnostics (added 20 November 2026)
+
+A supplementary diagnostic is available:
+
+\`\`\`powershell
+python data\audit_baseline_error_features.py
+\`\`\`
+
+It reads only the original \`validation.csv\`, verifies its SHA-256 against the baseline metadata, and loads the locally generated baseline model. It does not train, tune, change thresholds, read \`test.csv\`, or change any model artifact.
+
+The Git-ignored output is:
+
+\`data/private/model_artifacts/validation_feature_error_report.json\`
+
+The report adds:
+- Average share of vectorizer tokens covered by the fitted vocabulary, separated for correct predictions and errors.
+- Validation error counts grouped by actual and predicted class.
+- Average model-score margin and top model score for each error pair, as uncalibrated diagnostics only.
+- The leading TF-IDF/logistic-regression feature terms whose fitted logit contributions favoured the predicted class over the actual class for each error pair.
+
+No complete message text, row IDs, raw URLs or sender fields are exported. Feature terms are still derived from the local message corpus and can contain sensitive fragments; keep the report local and inspect it before sharing. Feature contributions explain the fitted model's relative scoring on these examples, not the real-world cause of an error.
+
+This diagnostic is intended to distinguish two possibilities:
+1. **Vocabulary/domain coverage issue:** misclassified messages contain more tokens outside the vocabulary learned from the training split.
+2. **Learned-signal/taxonomy issue:** vocabulary coverage is reasonable, but particular terms push the score toward the wrong class.
+
+It does not resolve ambiguous source labels. The documented validation review found that 19 of 31 errors crossed the spam/scam boundary, and the assistant-assisted silver-label pilot disagreed with several source-derived labels. Those are warning signs of source-label ambiguity, not proof that the source labels are wrong. Do not relabel data or train from the pilot as if it were independent ground truth.
+
+After running the report, use its aggregate coverage and error-pair summaries to decide whether the next experiment should focus on data coverage, taxonomy, or model features. Preserve the historical model, source labels and all original partitions until a separately versioned experiment is approved.
